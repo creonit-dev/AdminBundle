@@ -1,0 +1,42 @@
+[modal-template] {
+   display none
+}
+.arcticmodal-overlay,
+.arcticmodal-container {
+   transform translateZ(0)
+   position fixed
+   left 0
+   top 0
+   right 0
+   bottom 0
+   z-index 1500
+}
+.arcticmodal-container {
+   overflow-y scroll
+   margin 0
+   padding 0
+   border 0
+   border-collapse collapse
+}
+*:first-child + html .arcticmodal-container {
+   height 100%
+}
+
+.arcticmodal-container_i {
+   height 100%
+   margin 0 auto
+}
+   /*
+.arcticmodal-container_i2 {
+   vertical-align middle !important
+   margin 0 !important
+   padding 10px !important
+   border 0 !important
+   background 0 !important
+   text-align center !important
+}
+*/
+.arcticmodal-overlay {
+   background-color rgba(black, .5) !important
+   opacity 1 !important
+}

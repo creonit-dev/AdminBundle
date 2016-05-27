@@ -1,0 +1,14 @@
+{
+  "name": "creonit/admin-bundle",
+  "keywords": [
+    "creonit",
+    "symfony",
+    "admin"
+  ],
+  "license": "GNU GPLv3",
+  "autoload": {
+    "psr-4": {
+      "Creonit\\AdminBundle\\": "src"
+    }
+  }
+}

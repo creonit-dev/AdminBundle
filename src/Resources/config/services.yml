@@ -1,0 +1,20 @@
+parameters:
+    creonit_admin.component.storage.propel: Creonit\Admin\Component\Storage\PropelStorage
+    creonit_admin.component.storage.doctrine: Creonit\Admin\Component\Storage\DoctrineStorage
+    creonit_admin.component.storage.default: '%creonit_admin.component.storage.propel%'
+
+services:
+    creonit_admin:
+        class: Creonit\AdminBundle\Manager
+        arguments:
+            - '@service_container'
+            - '@templating'
+
+    creonit_admin.component.storage.default:
+        class: '%creonit_admin.component.storage.default%'
+
+    creonit_admin.component.storage.propel:
+        class: '%creonit_admin.component.storage.propel%'
+
+    creonit_admin.component.storage.doctrine:
+        class: '%creonit_admin.component.storage.doctrine%'

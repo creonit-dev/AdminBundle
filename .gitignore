@@ -1,0 +1,7 @@
+/.idea/
+/*.sublime-project
+/*.sublime-workspace
+thumbs.db
+
+/node_modules/
+/bower_components/

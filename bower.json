@@ -1,0 +1,34 @@
+{
+  "name": "CreonitAdminBundle",
+  "version": "1.0.0",
+  "authors": [],
+  "license": "GNU GPLv3",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^2.2.3",
+    "arcticModal": "komunyako/arcticModal#dev",
+    "twig.js": "0.8.8",
+    "bootstrap": "^3.3.6",
+    "AdminLTE": "admin-lte#^2.3.3"
+  },
+  "overrides": {
+    "twig.js": {
+      "main": [
+        "twig.js"
+      ]
+    },
+    "bootstrap": {
+      "main": [
+        "dist/css/bootstrap.css",
+        "dist/js/bootstrap.js"
+      ]
+    }
+  }
+
+}
