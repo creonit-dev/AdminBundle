@@ -10,7 +10,7 @@ class EditorPattern extends Pattern
     public function getData(ComponentRequest $request)
     {
         $data = [];
-        $key = $request->parameters->get('key');
+        $key = $request->query->get('key');
         $storage = $this->getStorage();
         if($key){
             $entity = $storage->getEntity([
@@ -32,7 +32,7 @@ class EditorPattern extends Pattern
 
     public function setData(ComponentRequest $request)
     {
-        $key = $request->parameters->get('key');
+        $key = $request->query->get('key');
         $storage = $this->getStorage();
         if($key){
             $entity = $storage->getEntity([
@@ -53,7 +53,7 @@ class EditorPattern extends Pattern
 
         $storage->saveEntity($entity);
 
-        $request->parameters->set('key', $storage->getKey($entity));
+        $request->query->set('key', $storage->getKey($entity));
 
     }
 

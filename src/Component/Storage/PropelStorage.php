@@ -3,6 +3,7 @@
 namespace Creonit\AdminBundle\Component\Storage;
 
 use Creonit\AdminBundle\Component\Field\Field;
+use Creonit\AdminBundle\Component\Field\FileField;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\Map\TableMap;
 
@@ -51,8 +52,9 @@ class PropelStorage extends Storage
     }
 
     /**
-     * @param array $query
+     * @param array $settings
      * @return mixed
+     * @internal param array $query
      */
     public function getEntity($settings)
     {
@@ -77,8 +79,28 @@ class PropelStorage extends Storage
      */
     public function getData($entity, Field $field)
     {
+
         if($this->getTableMap($entity)->hasColumn($field->getName())){
-            return $entity->getByName($field->getName(), TableMap::TYPE_FIELDNAME);
+            $value = $entity->getByName($field->getName(), TableMap::TYPE_FIELDNAME);
+
+
+            switch(true){
+                case ($field instanceof FileField):
+
+                    $data = [
+                        'file' => 'hello',
+                        'asd' => 444
+                    ];
+
+
+                    break;
+
+                default:
+                    $data = $value;
+            }
+
+            return $data;
+
         }else{
             return null;
         }
@@ -93,9 +115,19 @@ class PropelStorage extends Storage
     public function setData($entity, Field $field, $data)
     {
         if($this->getTableMap($entity)->hasColumn($field->getName())){
-            return $entity->setByName($field->getName(), $data, TableMap::TYPE_FIELDNAME);
-        }else{
-            return null;
+
+            switch(true){
+                case ($field instanceof FileField):
+
+                    dump($data);
+
+
+                    break;
+
+                default:
+                    $entity->setByName($field->getName(), $data, TableMap::TYPE_FIELDNAME);
+            }
+
         }
     }
 

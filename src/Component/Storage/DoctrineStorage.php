@@ -50,4 +50,17 @@ class DoctrineStorage extends Storage
     {
     }
 
+    /**
+     * @param $query
+     * @return mixed
+     */
+    public function createEntity($query)
+    {
+        // TODO: Implement createEntity() method.
+    }
+
+    public function getKey($entity)
+    {
+        // TODO: Implement getKey() method.
+    }
 }

@@ -3,6 +3,7 @@
 namespace Creonit\AdminBundle\Component\Pattern;
 
 use Creonit\AdminBundle\Component\Component;
+use Creonit\AdminBundle\Component\Field\FileField;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Field\Field;
 use Creonit\AdminBundle\Manager;
@@ -59,6 +60,10 @@ abstract class Pattern
         return $this;
     }
 
+    public function hasField($fieldName)
+    {
+        return array_key_exists($fieldName, $this->fields);
+    }
 
     public function fillResponse($response)
     {
@@ -122,7 +127,19 @@ abstract class Pattern
                 $this->setStorage($annotation['value']);
                 break;
             case 'field':
-                $this->addField(new Field($annotation['value']));
+                if(preg_match('/([\w_]+)(?:\:([\w_]+))?/i', $annotation['value'], $match)){
+                    $type = isset($match[2]) ? $match[2] : 'default';
+                    $name = $match[1];
+
+                    switch ($type){
+                        case 'file':
+                            $this->addField(new FileField($name));
+                            break;
+                        default:
+                            $this->addField(new Field($name));
+                    }
+
+                }
                 break;
             case 'entity':
                 $this->setEntity($annotation['value']);
@@ -181,9 +198,11 @@ abstract class Pattern
     public function prepareTemplate()
     {
         $this->template = preg_replace_callback(
-            '/\{\{\s*([\w_]+)\s*\|\s*(textarea|text)(\(?\)?)(.*?\}\})/usi',
+            '/\{\{\s*([\w_]+)\s*\|\s*(textarea|text|file)(\(?\)?)(.*?\}\})/usi',
             function($match){
-                $this->addField(new Field($match[1]));
+                if(!$this->hasField($match[1])){
+                    $this->addField(new Field($match[1]));
+                }
                 return "{{ {$match[1]} | {$match[2]}" . (($match[3] && $match[3] != '()') ? "('{$match[1]}', " : "('{$match[1]}')") . $match[4];
             },
             $this->template
@@ -191,7 +210,9 @@ abstract class Pattern
 
         if(preg_match_all('/\{\{\s*([\w_]+)\s*(?:\||\}\})/usi', $this->template, $matches, PREG_SET_ORDER)){
             foreach($matches as $match){
-                $this->addField(new Field($match[1]));
+                if(!$this->hasField($match[1])){
+                    $this->addField(new Field($match[1]));
+                }
             }
         }
 

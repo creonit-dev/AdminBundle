@@ -1,0 +1,55 @@
+[modal-template] {
+  display: none;
+}
+.arcticmodal-overlay,
+.arcticmodal-container {
+  transform: translateZ(0);
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1500;
+}
+.arcticmodal-container {
+  overflow-y: scroll;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-collapse: collapse;
+}
+*:first-child + html .arcticmodal-container {
+  height: 100%;
+}
+.arcticmodal-container_i {
+  height: 100%;
+  margin: 0 auto;
+}
+.arcticmodal-overlay {
+  background-color: rgba(0,0,0,0.5) !important;
+  opacity: 1 !important;
+}
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  font-family: 'Open Sans';
+}
+.btn-group,
+.btn-group-vertical {
+  white-space: nowrap;
+}
+.btn-group > .btn,
+.btn-group-vertical > .btn {
+  float: none;
+  display: inline-block;
+}

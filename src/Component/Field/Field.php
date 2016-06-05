@@ -33,10 +33,6 @@ class Field
     }
 
 
-    public function getData(){
-        return $this->default ?: $this->name . '_ok';
-    }
-
     public function dump()
     {
         $field = [

@@ -2,7 +2,7 @@
 
 namespace Creonit\AdminBundle\Component;
 
-use Creonit\AdminBundle\Core\Component\Pattern\TablePattern;
+use Creonit\AdminBundle\Component\Pattern\TablePattern;
 
 abstract class TableComponent extends ListComponent
 {

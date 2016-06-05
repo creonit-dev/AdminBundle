@@ -2,10 +2,10 @@
 
 namespace Creonit\AdminBundle;
 
-use Creonit\Admin\Component\Request\ComponentRequest;
-use Creonit\Admin\Component\Response\ComponentResponse;
-use Creonit\Admin\Component\Storage\Storage;
-use Creonit\Admin\Exception\RequestException;
+use Creonit\AdminBundle\Component\Request\ComponentRequest;
+use Creonit\AdminBundle\Component\Response\ComponentResponse;
+use Creonit\AdminBundle\Component\Storage\Storage;
+use Creonit\AdminBundle\Exception\RequestException;
 use Symfony\Bundle\TwigBundle\TwigEngine;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;

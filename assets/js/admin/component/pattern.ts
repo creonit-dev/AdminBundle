@@ -17,7 +17,7 @@ module Creonit.Admin.Component {
         }
 
         protected openComponent(options:any){
-            this.component.openComponent(options);
+            this.component.action('openComponent', options);
         }
 
         public action(name, options){

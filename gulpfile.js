@@ -172,7 +172,7 @@ gulp.task('images', function(){
  */
 gulp.task('sync', function(){
     browserSync = require('browser-sync');
-    browserSync({proxy: path.basename(__dirname), open: false, notify: false, ghostMode: false});
+    browserSync({proxy: path.basename(__dirname.replace(/[\/\\]vendor[\/\\]creonit[\/\\]admin-bundle$/, '')), open: false, notify: false, ghostMode: false});
 });
 
 /**

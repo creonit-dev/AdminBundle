@@ -11,14 +11,14 @@ class ComponentRequest
     const TYPE_SEND_DATA = 'send_data';
 
     protected $type;
-    public $parameters;
+    public $query;
     public $data;
 
     public function __construct($request)
     {
         $this->type = $request['type'];
         $this->data = new ParameterBag(isset($request['data']) && is_array($request['data']) ? $request['data'] : []);
-        $this->parameters = new ParameterBag(isset($request['parameters']) && is_array($request['parameters']) ? $request['parameters'] : []);
+        $this->query = new ParameterBag(isset($request['query']) && is_array($request['query']) ? $request['query'] : []);
     }
 
     public function getType(){

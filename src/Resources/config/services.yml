@@ -1,6 +1,6 @@
 parameters:
-    creonit_admin.component.storage.propel: Creonit\Admin\Component\Storage\PropelStorage
-    creonit_admin.component.storage.doctrine: Creonit\Admin\Component\Storage\DoctrineStorage
+    creonit_admin.component.storage.propel: Creonit\AdminBundle\Component\Storage\PropelStorage
+    creonit_admin.component.storage.doctrine: Creonit\AdminBundle\Component\Storage\DoctrineStorage
     creonit_admin.component.storage.default: '%creonit_admin.component.storage.propel%'
 
 services:

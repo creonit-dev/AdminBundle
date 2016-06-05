@@ -2,8 +2,8 @@
 
 namespace Creonit\AdminBundle;
 
-use Creonit\Admin\Component\Component;
-use Creonit\Admin\Exception\ConfigurationException;
+use Creonit\AdminBundle\Component\Component;
+use Creonit\AdminBundle\Exception\ConfigurationException;
 
 abstract class Module
 {

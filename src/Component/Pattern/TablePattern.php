@@ -1,8 +1,6 @@
 <?php
 
-namespace Creonit\AdminBundle\Core\Component\Pattern;
-
-use Creonit\AdminBundle\Component\Pattern\ListPattern;
+namespace Creonit\AdminBundle\Component\Pattern;
 
 class TablePattern extends ListPattern
 {

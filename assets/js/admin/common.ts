@@ -13,5 +13,5 @@ $.fn.serializeObject = function(){
 };
 
 $(function(){
-    Creonit.Admin.Component.find();
+    Creonit.Admin.Component.Utils.initializeComponents();
 });

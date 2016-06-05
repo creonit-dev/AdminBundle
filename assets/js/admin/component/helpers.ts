@@ -2,14 +2,14 @@ module Creonit.Admin.Component.Helpers {
 
     var increment = 0;
 
-    function cleanParameters(parameters:any){
+    function cleanOptions(options:any){
         var result = {};
-        $.each(parameters, function(key, value){
+        $.each(options, function(key, value){
             if(key == '_keys'){
                 return;
             }
             if($.isPlainObject(value)){
-                result[key] = cleanParameters(value);
+                result[key] = cleanOptions(value);
             }else{
                 result[key] = value;
             }
@@ -57,9 +57,10 @@ module Creonit.Admin.Component.Helpers {
         return `<button class="btn btn-danger btn-xs" type="submit"><i class="fa fa-remove"></i></button>`;
     }
 
-    export function component(name:string, parameters:any){
-        parameters = JSON.stringify(cleanParameters(parameters));
-        return `<div js-component='${name} ${parameters}'></div>`;
+    export function component(name:string, query:any, options:any){
+        query = JSON.stringify(cleanOptions(query));
+        options = JSON.stringify(cleanOptions(options));
+        return `<div js-component='${name} ${query} ${options}'></div>`;
 
     }
 
@@ -78,7 +79,8 @@ module Creonit.Admin.Component.Helpers {
             return '';
         }
 
-        options = JSON.stringify(cleanParameters(options));
+        options = JSON.stringify(cleanOptions(options));
+
         let injection = `js-component-action data-name="${name}" data-options='${options}'`;
 
         if(typeof value == 'object' && value.twig_function){
@@ -92,8 +94,8 @@ module Creonit.Admin.Component.Helpers {
         return `<a href="#" ${injection}>${value}</a>`;
     }
 
-    export function open(value:any, [name, parameters = {}]){
-        return action(value, ['openComponent', {name: name, parameters: parameters}]);
+    export function open(value:any, [name, query = {}, options = {}]){
+        return action(value, ['openComponent', {name: name, query: query, options: options}]);
     }
 
 
@@ -104,6 +106,15 @@ module Creonit.Admin.Component.Helpers {
         value = value ? Utils.escape(value.toString()) : '';
 
         return `<input type="text" class="form-control" name="${name}" value="${value}">`;
+    }
+
+    export function file(value:any, options?:any){
+        var name = options && options[0] ? options[0] : '';
+
+        return `
+            <input type="file" name="${name}">
+            ${value.file}
+        `;
     }
 
     export function textarea(value:string, options?:any){
@@ -161,6 +172,7 @@ module Creonit.Admin.Component.Helpers {
         [
             'text',
             'textarea',
+            'file',
             'buttons',
             'image',
             'row',

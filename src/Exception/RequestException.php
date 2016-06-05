@@ -1,6 +1,6 @@
 <?php
 
-namespace Creonit\Admin\Exception;
+namespace Creonit\AdminBundle\Exception;
 
 class RequestException extends \Exception
 {
