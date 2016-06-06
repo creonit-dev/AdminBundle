@@ -5,6 +5,7 @@ namespace Creonit\AdminBundle\Component;
 use Creonit\AdminBundle\Component\Pattern\Pattern;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Response\ComponentResponse;
+use Creonit\AdminBundle\Component\Response\PatternResponse;
 use Creonit\AdminBundle\Exception\ConfigurationException;
 use Creonit\AdminBundle\Module;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -85,15 +86,12 @@ abstract class Component
             $response->setSchema($this->dump());
         }
 
-        if($request->getType() == ComponentRequest::TYPE_SEND_DATA){
-            foreach($this->patterns as $pattern){
-                $pattern->setData($request);
-                $response->sendSuccess();
-            }
-        }
-
         foreach($this->patterns as $pattern){
-            $response->data->set($pattern->getName(), $pattern->getData($request));
+            if($request->getType() == ComponentRequest::TYPE_SEND_DATA) {
+                $pattern->setData($request, $response);
+            }
+
+            $pattern->getData($request, $response);
         }
 
         return $response;

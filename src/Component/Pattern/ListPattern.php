@@ -4,6 +4,7 @@ namespace Creonit\AdminBundle\Component\Pattern;
 
 use Creonit\AdminBundle\Component\ListComponent;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
+use Creonit\AdminBundle\Component\Response\ComponentResponse;
 
 class ListPattern extends Pattern
 {
@@ -13,11 +14,8 @@ class ListPattern extends Pattern
     protected $decorator;
     
 
-    public function getData(ComponentRequest $request){
-        $data = [
-            'entities' => $this->loadData()
-        ];
-        return $data;
+    public function getData(ComponentRequest $request, ComponentResponse $response){
+        $response->data->set('entities', $this->loadData());
     }
 
     protected function loadData($id = null){
@@ -29,8 +27,6 @@ class ListPattern extends Pattern
         $data = [];
         foreach ($entities as $entity){
             $entityData = [];
-
-            dump($this->fields);
             foreach ($this->fields as $field){
                 $entityData[$field->getName()] = $storage->getData($entity, $field) ?: '';
             }

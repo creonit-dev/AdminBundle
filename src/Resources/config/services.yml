@@ -9,6 +9,8 @@ parameters:
 
     creonit_admin.component.field.default: Creonit\AdminBundle\Component\Field\Field
     creonit_admin.component.field.file: Creonit\AdminBundle\Component\Field\FileField
+    creonit_admin.component.field.image: Creonit\AdminBundle\Component\Field\ImageField
+    creonit_admin.component.field.select: Creonit\AdminBundle\Component\Field\SelectField
 
 services:
     creonit_admin:
@@ -68,5 +70,15 @@ services:
 
     creonit_admin.component.field.file:
         class: '%creonit_admin.component.field.file%'
+        parent: creonit_admin.component.pattern
+        shared: false
+
+    creonit_admin.component.field.image:
+        class: '%creonit_admin.component.field.image%'
+        parent: creonit_admin.component.pattern
+        shared: false
+
+    creonit_admin.component.field.select:
+        class: '%creonit_admin.component.field.select%'
         parent: creonit_admin.component.pattern
         shared: false

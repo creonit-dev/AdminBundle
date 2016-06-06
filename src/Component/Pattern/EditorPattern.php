@@ -2,14 +2,18 @@
 
 namespace Creonit\AdminBundle\Component\Pattern;
 
+use Creonit\AdminBundle\Component\EditorComponent;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
+use Creonit\AdminBundle\Component\Response\ComponentResponse;
 
 class EditorPattern extends Pattern
 {
 
-    public function getData(ComponentRequest $request)
+    /** @var  EditorComponent */
+    protected $component;
+
+    public function getData(ComponentRequest $request, ComponentResponse $response)
     {
-        $data = [];
         $key = $request->query->get('key');
         $storage = $this->getStorage();
         if($key){
@@ -24,13 +28,13 @@ class EditorPattern extends Pattern
         }
 
         foreach ($this->fields as $field){
-            $data[$field->getName()] = $storage->getData($entity, $field);
+            $field->load($storage, $entity);
+            $response->data->set($field->getName(), $field->getData());
         }
 
-        return $data;
     }
 
-    public function setData(ComponentRequest $request)
+    public function setData(ComponentRequest $request, ComponentResponse $response)
     {
         $key = $request->query->get('key');
         $storage = $this->getStorage();
@@ -46,12 +50,24 @@ class EditorPattern extends Pattern
         }
 
         foreach ($this->fields as $field){
-            if($data = $request->data->get($field->getName())){
-                $storage->setData($entity, $field, $data);
-            }
+            $field->extract($request);
+            $field->validate();
         }
+        
+        $this->component->validate($request, $response);
+        
+        foreach ($this->fields as $field){
+            $field->save($storage, $entity);
+        }
+        
+        $this->component->preSave($request, $response, $entity);
 
         $storage->saveEntity($entity);
+
+        $this->component->postSave($request, $response, $entity);
+
+
+        $response->sendSuccess();
 
         $request->query->set('key', $storage->getKey($entity));
 

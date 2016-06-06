@@ -48,7 +48,7 @@ abstract class Storage
      * @param $data
      * @return mixed
      */
-    abstract public function setData($entity, Field $field, $data);
+    abstract public function setData($entity, Field $field);
 
 
     /**

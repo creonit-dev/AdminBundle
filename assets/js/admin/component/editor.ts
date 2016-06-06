@@ -6,7 +6,7 @@ module Creonit.Admin.Component{
         render(){
             this.node.empty();
             this.patterns.forEach((pattern:Pattern) => {
-                this.node.append(pattern.template.render($.extend({}, this.data[pattern.name], {parameters: this.query})));
+                this.node.append(pattern.template.render($.extend({}, this.data, {parameters: this.query})));
             });
 
             var formId = `form${++Editor.increment}`,
@@ -22,7 +22,10 @@ module Creonit.Admin.Component{
                 var data = $form.serializeObject();
 
                 this.node.find(`input[type="file"][form="${formId}"]`).each(function(){
-                    data[$(this).attr('name')] = $(this)[0].files[0];
+                    var value = $(this)[0].files[0];
+                    if(value){
+                        data[$(this).attr('name')] = $(this)[0].files[0];
+                    }
                 });
 
 

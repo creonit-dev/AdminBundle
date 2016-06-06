@@ -5,7 +5,7 @@ namespace Creonit\AdminBundle\Component\Field;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-class FileField extends Field
+class ImageField extends Field
 {
     public function extract(ComponentRequest $request)
     {
@@ -47,6 +47,7 @@ class FileField extends Field
     {
         if(is_array($data)){
             $data['size'] = $this->container->get('creonit_utils.file_manager')->formatSize($data['size']);
+            $data['preview'] = $this->container->get('image.handling')->open("{$data['path']}/{$data['name']}")->cropResize(300, 300)->html();
         }
         return $data;
     }

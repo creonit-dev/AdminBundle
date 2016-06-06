@@ -14,9 +14,8 @@ module Creonit.Admin.Component{
 
 
             this.patterns.forEach((pattern:Pattern) => {
-                this.data[pattern.name].entities.forEach((entity:any) => {
+                this.data.entities.forEach((entity:any) => {
                     let $entity = $('<tr>' + pattern.template.render(entity) + '</tr>');
-
 
                     $entity.find('[js-component-action]').on('click', function(e){
                         e.preventDefault();

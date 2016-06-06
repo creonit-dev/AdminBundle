@@ -109,12 +109,53 @@ module Creonit.Admin.Component.Helpers {
     }
 
     export function file(value:any, options?:any){
-        var name = options && options[0] ? options[0] : '';
+        var name = options && options[0] ? options[0] : '',
+            output = `<input type="file" name="${name}">`;
 
-        return `
-            <input type="file" name="${name}">
-            ${value.file}
-        `;
+        if(value){
+            output += `
+                <p class="help-block">
+                    <a href="${value.path}/${value.name}" target="_blank">${value.original_name}</a> (${value.size})
+                    <span class="checkbox">
+                        <label>
+                            <input type="checkbox" name="${name}__delete"> Удалить файл
+                        </label>
+                    </span>
+                </p>
+            `;
+        }
+
+        return output;
+    }
+
+    export function image(value:any, options?:any){
+        var name = options && options[0] ? options[0] : '',
+            output = `<input type="file" name="${name}">`;
+
+        if(value){
+            output += `
+                <p class="help-block">
+                    <a href="${value.path}/${value.name}" target="_blank">${value.preview}</a>
+                    <span class="checkbox">
+                        <label>
+                            <input type="checkbox" name="${name}__delete"> Удалить изображение
+                        </label>
+                    </span>
+                </p>
+            `;
+        }
+
+        return output;
+    }
+
+    
+    export function select(value:any, options?:any){
+        var name = options && options[0] ? options[0] : '',
+            options = value.options.map((option) => {
+                return `<option value="${option.value}" ${value.value == option.value ? 'selected' : ''}>${option.title}</option>`;
+            }).join('');
+
+        return `<select name="${name}" class="form-control">${options}</select>`;
     }
 
     export function textarea(value:string, options?:any){
@@ -173,6 +214,8 @@ module Creonit.Admin.Component.Helpers {
             'text',
             'textarea',
             'file',
+            'image',
+            'select',
             'buttons',
             'image',
             'row',

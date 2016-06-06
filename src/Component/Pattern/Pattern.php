@@ -5,8 +5,10 @@ namespace Creonit\AdminBundle\Component\Pattern;
 use Creonit\AdminBundle\Component\Component;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Field\Field;
+use Creonit\AdminBundle\Component\Response\ComponentResponse;
 use Creonit\AdminBundle\Component\Storage\Storage;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 abstract class Pattern
 {
@@ -83,6 +85,10 @@ abstract class Pattern
         return $this->fields;
     }
 
+    public function getField($name){
+        return $this->fields[$name];
+    }
+
 
     public function dump(){
         $pattern = [
@@ -112,10 +118,17 @@ abstract class Pattern
                 $this->setStorage($annotation['value']);
                 break;
             case 'field':
-                if(preg_match('/([\w_]+)(?:\:([\w_]+))?/i', $annotation['value'], $match)){
+                if(preg_match('/^([\w_]+)(?:\:([\w_]+))?(?: *(\{.*\}))?$/usi', $annotation['value'], $match)){
                     $type = isset($match[2]) ? $match[2] : 'default';
                     $name = $match[1];
-                    $this->addField($this->createField($name, [], $type));
+                    if(isset($match[3])){
+                        $language = new ExpressionLanguage();
+                        $options = $language->evaluate($match[3]);
+                    }else{
+                        $options = [];
+                    }
+                    dump($options);
+                    $this->addField($this->createField($name, $options, $type));
                 }
                 break;
             case 'entity':
@@ -128,10 +141,10 @@ abstract class Pattern
         return $this;
     }
 
-    abstract public function getData(ComponentRequest $request);
+    abstract public function getData(ComponentRequest $request, ComponentResponse $response);
 
 
-    public function setData(ComponentRequest $request){}
+    public function setData(ComponentRequest $request, ComponentResponse $response){}
 
     /**
      * @param Component $component
@@ -164,7 +177,7 @@ abstract class Pattern
     public function prepareTemplate()
     {
         $this->template = preg_replace_callback(
-            '/\{\{\s*([\w_]+)\s*\|\s*(textarea|text|file)(\(?\)?)(.*?\}\})/usi',
+            '/\{\{\s*([\w_]+)\s*\|\s*(textarea|text|file|select)(\(?\)?)(.*?\}\})/usi',
             function($match){
                 if(!$this->hasField($match[1])){
                     $this->addField($this->createField($match[1]));
@@ -206,14 +219,15 @@ abstract class Pattern
 
     /**
      * @param $name
-     * @param array $options
+     * @param array $parameters
      * @param $type
      * @return Field
      */
-    public function createField($name, $options = [], $type = 'default'){
+    public function createField($name, $parameters = [], $type = 'default'){
+        /** @var Field $field */
         $field = $this->container->get('creonit_admin.component.field.' . $type);
         $field->setName($name);
-        $field->setOptions($options);
+        $field->parameters->add($parameters);
         return $field;
     }
 }

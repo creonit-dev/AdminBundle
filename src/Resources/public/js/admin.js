@@ -137,7 +137,7 @@ var Creonit;
                     var _this = this;
                     this.node.empty();
                     this.patterns.forEach(function (pattern) {
-                        _this.node.append(pattern.template.render($.extend({}, _this.data[pattern.name], { parameters: _this.query })));
+                        _this.node.append(pattern.template.render($.extend({}, _this.data, { parameters: _this.query })));
                     });
                     var formId = "form" + ++Editor.increment, $form = $("<form id=\"" + formId + "\"></form>");
                     this.node.append($form);
@@ -147,7 +147,10 @@ var Creonit;
                         var $form = $(e.currentTarget);
                         var data = $form.serializeObject();
                         _this.node.find("input[type=\"file\"][form=\"" + formId + "\"]").each(function () {
-                            data[$(this).attr('name')] = $(this)[0].files[0];
+                            var value = $(this)[0].files[0];
+                            if (value) {
+                                data[$(this).attr('name')] = $(this)[0].files[0];
+                            }
                         });
                         _this.sendData(data);
                     });
@@ -254,10 +257,28 @@ var Creonit;
                 }
                 Helpers.text = text;
                 function file(value, options) {
-                    var name = options && options[0] ? options[0] : '';
-                    return "\n            <input type=\"file\" name=\"" + name + "\">\n            " + value.file + "\n        ";
+                    var name = options && options[0] ? options[0] : '', output = "<input type=\"file\" name=\"" + name + "\">";
+                    if (value) {
+                        output += "\n                <p class=\"help-block\">\n                    <a href=\"" + value.path + "/" + value.name + "\" target=\"_blank\">" + value.original_name + "</a> (" + value.size + ")\n                    <span class=\"checkbox\">\n                        <label>\n                            <input type=\"checkbox\" name=\"" + name + "__delete\"> \u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0444\u0430\u0439\u043B\n                        </label>\n                    </span>\n                </p>\n            ";
+                    }
+                    return output;
                 }
                 Helpers.file = file;
+                function image(value, options) {
+                    var name = options && options[0] ? options[0] : '', output = "<input type=\"file\" name=\"" + name + "\">";
+                    if (value) {
+                        output += "\n                <p class=\"help-block\">\n                    <a href=\"" + value.path + "/" + value.name + "\" target=\"_blank\">" + value.preview + "</a>\n                    <span class=\"checkbox\">\n                        <label>\n                            <input type=\"checkbox\" name=\"" + name + "__delete\"> \u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435\n                        </label>\n                    </span>\n                </p>\n            ";
+                    }
+                    return output;
+                }
+                Helpers.image = image;
+                function select(value, options) {
+                    var name = options && options[0] ? options[0] : '', options = value.options.map(function (option) {
+                        return "<option value=\"" + option.value + "\" " + (value.value == option.value ? 'selected' : '') + ">" + option.title + "</option>";
+                    }).join('');
+                    return "<select name=\"" + name + "\" class=\"form-control\">" + options + "</select>";
+                }
+                Helpers.select = select;
                 function textarea(value, options) {
                     var name = options && options[0] ? options[0] : '';
                     var options = options && options[1] ? options[1] : {};
@@ -306,6 +327,8 @@ var Creonit;
                         'text',
                         'textarea',
                         'file',
+                        'image',
+                        'select',
                         'buttons',
                         'image',
                         'row',
@@ -587,7 +610,7 @@ var Creonit;
                         _this.action($action.data('name'), $action.data('options'));
                     });
                     this.patterns.forEach(function (pattern) {
-                        _this.data[pattern.name].entities.forEach(function (entity) {
+                        _this.data.entities.forEach(function (entity) {
                             var $entity = $('<tr>' + pattern.template.render(entity) + '</tr>');
                             $entity.find('[js-component-action]').on('click', function (e) {
                                 e.preventDefault();

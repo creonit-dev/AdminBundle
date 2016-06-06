@@ -3,14 +3,11 @@
 namespace Creonit\AdminBundle\Component;
 
 use Creonit\AdminBundle\Component\Pattern\EditorPattern;
-use Creonit\AdminBundle\Component\Pattern\Pattern;
+use Creonit\AdminBundle\Component\Request\ComponentRequest;
+use Creonit\AdminBundle\Component\Response\ComponentResponse;
 
 abstract class EditorComponent extends Component
 {
-    protected function prepareSchema()
-    {
-       
-    }
 
     public function applySchemaAnnotation($annotation)
     {
@@ -33,5 +30,19 @@ abstract class EditorComponent extends Component
         return $pattern;
     }
 
+    public function validate(ComponentRequest $request, ComponentResponse $patternResponse){
+        return true;
+    }
+
+    public function preSave(ComponentRequest $request, ComponentResponse $patternResponse, $entity){}
+
+    public function postSave(ComponentRequest $request, ComponentResponse $patternResponse, $entity){}
+
+    /**
+     * @return Storage\Storage
+     */
+    public function getStorage(){
+        return $this->patterns[0]->getStorage();
+    }
 
 }

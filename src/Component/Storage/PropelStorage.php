@@ -2,10 +2,13 @@
 
 namespace Creonit\AdminBundle\Component\Storage;
 
-use AppBundle\Model\Base\FileQuery;
+use AppBundle\Model\FileQuery;
 use AppBundle\Model\File;
+use AppBundle\Model\Image;
+use AppBundle\Model\ImageQuery;
 use Creonit\AdminBundle\Component\Field\Field;
 use Creonit\AdminBundle\Component\Field\FileField;
+use Creonit\AdminBundle\Component\Field\ImageField;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\Map\TableMap;
 
@@ -77,6 +80,84 @@ class PropelStorage extends Storage
     /**
      * @param $entity
      * @param Field $field
+     * @param $data
+     * @return mixed
+     */
+    public function setData($entity, Field $field)
+    {
+        $data = $field->getData();
+
+        if($this->getTableMap($entity)->hasColumn($field->getName())){
+
+            switch(true){
+                case ($field instanceof FileField):
+
+                    if($field->attributes->has('delete')){
+                        $fileId = $entity->getByName($field->getName(), TableMap::TYPE_FIELDNAME);
+
+                        $entity->setByName($field->getName(), null, TableMap::TYPE_FIELDNAME);
+
+                        if($file = FileQuery::create()->findPk($fileId)){
+                            $file->delete();
+                        }
+
+
+                    }else if(is_array($data)){
+
+                        $file = new File();
+                        $file->setPath($data['path']);
+                        $file->setName($data['name']);
+                        $file->setOriginalName($data['original_name']);
+                        $file->setExtension($data['extension']);
+                        $file->setMime($data['mime']);
+                        $file->setSize($data['size']);
+                        $file->save();
+
+                        $entity->setByName($field->getName(), $file->getId(), TableMap::TYPE_FIELDNAME);
+                    }
+
+                    break;
+
+                case ($field instanceof ImageField):
+
+                    if($field->attributes->has('delete')){
+                        $fileId = $entity->getByName($field->getName(), TableMap::TYPE_FIELDNAME);
+
+                        $entity->setByName($field->getName(), null, TableMap::TYPE_FIELDNAME);
+
+                        if($image = ImageQuery::create()->findPk($fileId)){
+                            $image->delete();
+                        }
+
+                    }else if(is_array($data)){
+
+                        $file = new File();
+                        $file->setPath($data['path']);
+                        $file->setName($data['name']);
+                        $file->setOriginalName($data['original_name']);
+                        $file->setExtension($data['extension']);
+                        $file->setMime($data['mime']);
+                        $file->setSize($data['size']);
+
+                        $image = new Image();
+                        $image->setFile($file);
+                        $image->save();
+
+                        $entity->setByName($field->getName(), $image->getId(), TableMap::TYPE_FIELDNAME);
+                    }
+
+                    break;
+
+                default:
+                    $entity->setByName($field->getName(), $data, TableMap::TYPE_FIELDNAME);
+            }
+
+        }
+    }
+
+    /**
+     * @param $entity
+     * @param Field $field
      * @return mixed
      */
     public function getData($entity, Field $field)
@@ -92,67 +173,48 @@ class PropelStorage extends Storage
                     if($value){
 
                         $file = FileQuery::create()->findPk($value);
-                        $data = [
+                        return [
                             'mime' => $file->getMime(),
-                            'size' => $this->container->get('creonit_utils.file_manager')->formatSize($file->getSize()),
+                            'size' => $file->getSize(),
                             'extension' => $file->getExtension(),
                             'path' => $file->getPath(),
                             'name' => $file->getName(),
                             'original_name' => $file->getOriginalName(),
                         ];
 
-                    }else{
+                    }
 
-                        $data = [];
+                    break;
+
+               case ($field instanceof ImageField):
+
+                    if($value){
+
+                        $image = ImageQuery::create()->findPk($value);
+                        $file = $image->getFile();
+                        
+                        return [
+                            'mime' => $file->getMime(),
+                            'size' => $file->getSize(),
+                            'extension' => $file->getExtension(),
+                            'path' => $file->getPath(),
+                            'name' => $file->getName(),
+                            'original_name' => $file->getOriginalName(),
+                        ];
 
                     }
 
                     break;
 
                 default:
-                    $data = $value;
+                    return $value;
             }
 
-            return $field->decorateData($data);
 
-        }else{
-            return null;
-        }
-    }
-
-    /**
-     * @param $entity
-     * @param Field $field
-     * @param $data
-     * @return mixed
-     */
-    public function setData($entity, Field $field, $data)
-    {
-        if($this->getTableMap($entity)->hasColumn($field->getName())){
-            $processedData = $field->processData($data);
-
-
-            switch(true){
-                case ($field instanceof FileField):
-
-                    $file  = new File();
-                    $file->setPath($processedData['path']);
-                    $file->setName($processedData['name']);
-                    $file->setOriginalName($processedData['original_name']);
-                    $file->setExtension($processedData['extension']);
-                    $file->setMime($processedData['mime']);
-                    $file->setSize($processedData['size']);
-                    $file->save();
-
-                    $entity->setByName($field->getName(), $file->getId(), TableMap::TYPE_FIELDNAME);
-
-                    break;
-
-                default:
-                    $entity->setByName($field->getName(), $processedData, TableMap::TYPE_FIELDNAME);
-            }
 
         }
+
+        return null;
     }
 
     /**
