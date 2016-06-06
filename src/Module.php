@@ -4,6 +4,7 @@ namespace Creonit\AdminBundle;
 
 use Creonit\AdminBundle\Component\Component;
 use Creonit\AdminBundle\Exception\ConfigurationException;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 abstract class Module
 {
@@ -15,6 +16,9 @@ abstract class Module
     protected $manager;
 
     protected $active;
+
+    /** @var  ContainerInterface */
+    protected $container;
 
     abstract public function initialize();
 
@@ -40,7 +44,7 @@ abstract class Module
     }
 
     public function addComponent(Component $component){
-        $this->components[$component->getName()] = $component->setModule($this)->setManager($this->manager);
+        $this->components[$component->getName()] = $component->setModule($this)->setContainer($this->container);
         return $this;
     }
     
@@ -50,10 +54,6 @@ abstract class Module
     
     public function hasComponent($name){
         return isset($this->components[$name]);
-    }
-
-    public function includeSchema(){
-        return '';
     }
 
     public function getTemplate(){}
@@ -68,13 +68,29 @@ abstract class Module
         return $this;
     }
 
+    /**
+     * @param ContainerInterface $container
+     * @return $this
+     */
+    public function setContainer(ContainerInterface $container)
+    {
+        $this->container = $container;
+        return $this;
+    }
+
+    /**
+     * @param bool $value
+     * @return $this
+     */
     public function setActive($value = true)
     {
         $this->active = $value;
+        return $this;
     }
 
     public function isActive(){
         return true === $this->active;
     }
+
 
 }

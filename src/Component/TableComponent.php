@@ -35,7 +35,7 @@ abstract class TableComponent extends ListComponent
 
     protected function prepareSchema()
     {
-        $this->setTemplate($this->manager->getTemplating()->render('CreonitAdminBundle:Components:table.html.twig', ['component' => $this]));
+        $this->setTemplate($this->container->get('templating')->render('CreonitAdminBundle:Components:table.html.twig', ['component' => $this]));
     }
 
     /**
@@ -44,7 +44,9 @@ abstract class TableComponent extends ListComponent
      */
     public function createPattern($name)
     {
-        return new TablePattern($name);
+        $pattern = $this->container->get('creonit_admin.component.pattern.table');
+        $pattern->setName($name);
+        return $pattern;
     }
 
     public function applySchemaAnnotation($annotation)

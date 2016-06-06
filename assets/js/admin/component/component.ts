@@ -71,6 +71,7 @@ module Creonit.Admin.Component {
         }
 
         applyResponse(response:Response) {
+            console.log(response);
             if (response.error) {
                 this.node.html(response.error);
             } else {

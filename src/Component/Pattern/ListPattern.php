@@ -29,6 +29,8 @@ class ListPattern extends Pattern
         $data = [];
         foreach ($entities as $entity){
             $entityData = [];
+
+            dump($this->fields);
             foreach ($this->fields as $field){
                 $entityData[$field->getName()] = $storage->getData($entity, $field) ?: '';
             }

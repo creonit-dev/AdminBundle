@@ -2,16 +2,24 @@
 
 namespace Creonit\AdminBundle\Component\Field;
 
+use Creonit\AdminBundle\Component\Pattern\Pattern;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
 class Field
 {
 
     protected $name;
     protected $default;
 
-    public function __construct($name, $default = null)
-    {
-        $this->name = $name;
-        $this->default = $default;
+    /** @var  Pattern */
+    protected $pattern;
+
+
+    /** @var ContainerInterface */
+    protected $container;
+
+    public function __construct(ContainerInterface $container){
+        $this->container = $container;
     }
 
     /**
@@ -41,5 +49,26 @@ class Field
         return $field;
     }
 
+    public function processData($data){
+        return $data;
+    }
+
+    public function decorateData($data){
+        return $data;
+    }
+
+    public function setPattern(Pattern $pattern)
+    {
+        $this->pattern = $pattern;
+        return $this;
+    }
+
+    /**
+     * @param array $options
+     * @return $this
+     */
+    public function setOptions(array $options){
+        return $this;
+    }
 
 }

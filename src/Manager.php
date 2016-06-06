@@ -42,6 +42,7 @@ class Manager {
     public function addModule(Module $module){
         $this->modules[$module->getName()] = $module;
         $module->setManager($this);
+        $module->setContainer($this->container);
     }
 
     /**
@@ -108,20 +109,6 @@ class Manager {
 
     }
 
-    /**
-     * @return TwigEngine
-     */
-    public function getTemplating()
-    {
-        return $this->templating;
-    }
 
-    /**
-     * @param string $storage
-     * @return Storage
-     */
-    public function getStorage($storage = 'default'){
-        return $this->container->get('creonit_admin.component.storage.' . $storage);
-    }
 
 } 

@@ -1,7 +1,14 @@
 parameters:
+    creonit_admin.component.storage.default: '%creonit_admin.component.storage.propel%'
     creonit_admin.component.storage.propel: Creonit\AdminBundle\Component\Storage\PropelStorage
     creonit_admin.component.storage.doctrine: Creonit\AdminBundle\Component\Storage\DoctrineStorage
-    creonit_admin.component.storage.default: '%creonit_admin.component.storage.propel%'
+
+    creonit_admin.component.pattern.editor: Creonit\AdminBundle\Component\Pattern\EditorPattern
+    creonit_admin.component.pattern.list: Creonit\AdminBundle\Component\Pattern\ListPattern
+    creonit_admin.component.pattern.table: Creonit\AdminBundle\Component\Pattern\TablePattern
+
+    creonit_admin.component.field.default: Creonit\AdminBundle\Component\Field\Field
+    creonit_admin.component.field.file: Creonit\AdminBundle\Component\Field\FileField
 
 services:
     creonit_admin:
@@ -9,6 +16,9 @@ services:
         arguments:
             - '@service_container'
             - '@templating'
+
+    creonit_admin.module:
+        abstract: true
 
     creonit_admin.component.storage.default:
         class: '%creonit_admin.component.storage.default%'
@@ -18,3 +28,40 @@ services:
 
     creonit_admin.component.storage.doctrine:
         class: '%creonit_admin.component.storage.doctrine%'
+
+
+
+    creonit_admin.component.pattern:
+        abstract: true
+        arguments: ['@service_container']
+
+    creonit_admin.component.pattern.editor:
+        class: '%creonit_admin.component.pattern.editor%'
+        parent: creonit_admin.component.pattern
+        shared: false
+
+    creonit_admin.component.pattern.list:
+        class: '%creonit_admin.component.pattern.list%'
+        parent: creonit_admin.component.pattern
+        shared: false
+
+    creonit_admin.component.pattern.table:
+        class: '%creonit_admin.component.pattern.table%'
+        parent: creonit_admin.component.pattern
+        shared: false
+
+
+
+    creonit_admin.component.field:
+        abstract: true
+        arguments: ['@service_container']
+
+    creonit_admin.component.field.default:
+        class: '%creonit_admin.component.field.default%'
+        parent: creonit_admin.component.pattern
+        shared: false
+
+    creonit_admin.component.field.file:
+        class: '%creonit_admin.component.field.file%'
+        parent: creonit_admin.component.pattern
+        shared: false

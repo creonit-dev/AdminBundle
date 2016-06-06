@@ -72,6 +72,7 @@ var Creonit;
                     this.request(Component_1.Request.TYPE_SEND_DATA, data);
                 };
                 Component.prototype.applyResponse = function (response) {
+                    console.log(response);
                     if (response.error) {
                         this.node.html(response.error);
                     }

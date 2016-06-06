@@ -2,6 +2,7 @@
 
 namespace Creonit\AdminBundle\Component\Storage;
 
+use AppBundle\Model\File;
 use Creonit\AdminBundle\Component\Field\Field;
 use Creonit\AdminBundle\Component\Field\FileField;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -99,7 +100,7 @@ class PropelStorage extends Storage
                     $data = $value;
             }
 
-            return $data;
+            return $field->decorateData($data);
 
         }else{
             return null;
@@ -115,17 +116,27 @@ class PropelStorage extends Storage
     public function setData($entity, Field $field, $data)
     {
         if($this->getTableMap($entity)->hasColumn($field->getName())){
+            $processedData = $field->processData($data);
+
 
             switch(true){
                 case ($field instanceof FileField):
 
-                    dump($data);
+                    $file  = new File();
+                    $file->setPath($processedData['path']);
+                    $file->setName($processedData['name']);
+                    $file->setOriginalName($processedData['original_name']);
+                    $file->setExtenstion($processedData['extension']);
+                    $file->setMime($processedData['mime']);
+                    $file->setSize($processedData['size']);
+                    $file->save();
 
+                    $entity->setByName($field->getName(), $file->getId(), TableMap::TYPE_FIELDNAME);
 
                     break;
 
                 default:
-                    $entity->setByName($field->getName(), $data, TableMap::TYPE_FIELDNAME);
+                    $entity->setByName($field->getName(), $processedData, TableMap::TYPE_FIELDNAME);
             }
 
         }

@@ -6,30 +6,24 @@ use Creonit\AdminBundle\Component\Pattern\Pattern;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Response\ComponentResponse;
 use Creonit\AdminBundle\Exception\ConfigurationException;
-use Creonit\AdminBundle\Manager;
 use Creonit\AdminBundle\Module;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 abstract class Component
 {
+    /** @var  ContainerInterface */
+    protected $container;
 
-    /** @var Manager */
-    protected $manager;
-    
     /** @var  Module */
     protected $module;
-    
+
     protected $initialized = false;
 
     /** @var Pattern[] */
     protected $patterns = [];
 
     protected $template = '';
-
     protected $title = '';
-
-    public function __construct()
-    {
-    }
 
     public function getName(){
         if(preg_match('/\\\\(\w+)$/', get_class($this), $keyMatch)){
@@ -45,7 +39,7 @@ abstract class Component
     }
 
     public function addPattern(Pattern $pattern){
-        $this->patterns[$pattern->getName()] = $pattern->setComponent($this)->setManager($this->manager);
+        $this->patterns[$pattern->getName()] = $pattern->setComponent($this);
         return $this;
     }
 
@@ -211,13 +205,14 @@ abstract class Component
         return $this->template;
     }
 
+
     /**
-     * @param Manager $manager
-     * @return Component
+     * @param ContainerInterface $container
+     * @return $this
      */
-    public function setManager($manager)
+    public function setContainer(ContainerInterface $container)
     {
-        $this->manager = $manager;
+        $this->container = $container;
         return $this;
     }
 
@@ -248,6 +243,7 @@ abstract class Component
     {
         return $this->title;
     }
+
 
 
 }

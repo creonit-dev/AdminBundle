@@ -50,7 +50,9 @@ EOD
 
 
     public function createPattern($name){
-        return new ListPattern($name);
+        $pattern = $this->container->get('creonit_admin.component.pattern.list');
+        $pattern->setName($name);
+        return $pattern;
     }
 
 

@@ -3,10 +3,10 @@
 namespace Creonit\AdminBundle\Component\Pattern;
 
 use Creonit\AdminBundle\Component\Component;
-use Creonit\AdminBundle\Component\Field\FileField;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Field\Field;
-use Creonit\AdminBundle\Manager;
+use Creonit\AdminBundle\Component\Storage\Storage;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 abstract class Pattern
 {
@@ -18,8 +18,8 @@ abstract class Pattern
 
     protected $template = '';
     
-    /** @var Manager */
-    protected $manager;
+    /** @var ContainerInterface */
+    protected $container;
     
     /** @var Component */
     protected $component;
@@ -31,13 +31,8 @@ abstract class Pattern
     protected $fields = [];
 
 
-    /**
-     * ComponentPattern constructor.
-     * @param $name
-     */
-    public function __construct($name)
-    {
-        $this->name = $name;
+    public function __construct(ContainerInterface $container){
+        $this->container = $container;
     }
 
     /**
@@ -56,23 +51,13 @@ abstract class Pattern
     }
 
     public function addField(Field $field){
-        $this->fields[$field->getName()] = $field;
+        $this->fields[$field->getName()] = $field->setPattern($this);
         return $this;
     }
 
     public function hasField($fieldName)
     {
         return array_key_exists($fieldName, $this->fields);
-    }
-
-    public function fillResponse($response)
-    {
-        if($this->storage){
-            foreach($this->getFields() as $field){
-                $response->data->set($field->getName(), $field->getData());
-            }
-        }
-        return $this;
     }
 
     public function getTemplate()
@@ -130,15 +115,7 @@ abstract class Pattern
                 if(preg_match('/([\w_]+)(?:\:([\w_]+))?/i', $annotation['value'], $match)){
                     $type = isset($match[2]) ? $match[2] : 'default';
                     $name = $match[1];
-
-                    switch ($type){
-                        case 'file':
-                            $this->addField(new FileField($name));
-                            break;
-                        default:
-                            $this->addField(new Field($name));
-                    }
-
+                    $this->addField($this->createField($name, [], $type));
                 }
                 break;
             case 'entity':
@@ -154,8 +131,7 @@ abstract class Pattern
     abstract public function getData(ComponentRequest $request);
 
 
-    public function setData(ComponentRequest $request){
-    }
+    public function setData(ComponentRequest $request){}
 
     /**
      * @param Component $component
@@ -164,16 +140,6 @@ abstract class Pattern
     public function setComponent($component)
     {
         $this->component = $component;
-        return $this;
-    }
-
-    /**
-     * @param Manager $manager
-     * @return Pattern
-     */
-    public function setManager($manager)
-    {
-        $this->manager = $manager;
         return $this;
     }
 
@@ -201,7 +167,7 @@ abstract class Pattern
             '/\{\{\s*([\w_]+)\s*\|\s*(textarea|text|file)(\(?\)?)(.*?\}\})/usi',
             function($match){
                 if(!$this->hasField($match[1])){
-                    $this->addField(new Field($match[1]));
+                    $this->addField($this->createField($match[1]));
                 }
                 return "{{ {$match[1]} | {$match[2]}" . (($match[3] && $match[3] != '()') ? "('{$match[1]}', " : "('{$match[1]}')") . $match[4];
             },
@@ -211,7 +177,7 @@ abstract class Pattern
         if(preg_match_all('/\{\{\s*([\w_]+)\s*(?:\||\}\})/usi', $this->template, $matches, PREG_SET_ORDER)){
             foreach($matches as $match){
                 if(!$this->hasField($match[1])){
-                    $this->addField(new Field($match[1]));
+                    $this->addField($this->createField($match[1]));
                 }
             }
         }
@@ -220,9 +186,12 @@ abstract class Pattern
     }
 
 
-    protected function getStorage()
-    {
-        return $this->storage ? $this->storage : $this->manager->getStorage();
+    /**
+     * @param string $storage
+     * @return Storage
+     */
+    public function getStorage(){
+        return $this->container->get('creonit_admin.component.storage.' . ($this->storage ?: 'default'));
     }
 
     /**
@@ -235,4 +204,16 @@ abstract class Pattern
         return $this;
     }
 
+    /**
+     * @param $name
+     * @param array $options
+     * @param $type
+     * @return Field
+     */
+    public function createField($name, $options = [], $type = 'default'){
+        $field = $this->container->get('creonit_admin.component.field.' . $type);
+        $field->setName($name);
+        $field->setOptions($options);
+        return $field;
+    }
 }

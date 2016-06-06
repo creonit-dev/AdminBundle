@@ -28,7 +28,9 @@ abstract class EditorComponent extends Component
      */
     public function createPattern($name)
     {
-        return new EditorPattern($name);
+        $pattern = $this->container->get('creonit_admin.component.pattern.editor');
+        $pattern->setName($name);
+        return $pattern;
     }
 
 
