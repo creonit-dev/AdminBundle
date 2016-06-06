@@ -17,17 +17,22 @@ services:
             - '@service_container'
             - '@templating'
 
-    creonit_admin.module:
+
+    creonit_admin.component.storage:
         abstract: true
+        arguments: ['@service_container']
 
     creonit_admin.component.storage.default:
         class: '%creonit_admin.component.storage.default%'
+        parent: creonit_admin.component.storage
 
     creonit_admin.component.storage.propel:
         class: '%creonit_admin.component.storage.propel%'
+        parent: creonit_admin.component.storage
 
     creonit_admin.component.storage.doctrine:
         class: '%creonit_admin.component.storage.doctrine%'
+        parent: creonit_admin.component.storage
 
 
 

@@ -2,6 +2,7 @@
 
 namespace Creonit\AdminBundle\Component\Storage;
 
+use AppBundle\Model\Base\FileQuery;
 use AppBundle\Model\File;
 use Creonit\AdminBundle\Component\Field\Field;
 use Creonit\AdminBundle\Component\Field\FileField;
@@ -88,11 +89,23 @@ class PropelStorage extends Storage
             switch(true){
                 case ($field instanceof FileField):
 
-                    $data = [
-                        'file' => 'hello',
-                        'asd' => 444
-                    ];
+                    if($value){
 
+                        $file = FileQuery::create()->findPk($value);
+                        $data = [
+                            'mime' => $file->getMime(),
+                            'size' => $this->container->get('creonit_utils.file_manager')->formatSize($file->getSize()),
+                            'extension' => $file->getExtension(),
+                            'path' => $file->getPath(),
+                            'name' => $file->getName(),
+                            'original_name' => $file->getOriginalName(),
+                        ];
+
+                    }else{
+
+                        $data = [];
+
+                    }
 
                     break;
 
@@ -126,7 +139,7 @@ class PropelStorage extends Storage
                     $file->setPath($processedData['path']);
                     $file->setName($processedData['name']);
                     $file->setOriginalName($processedData['original_name']);
-                    $file->setExtenstion($processedData['extension']);
+                    $file->setExtension($processedData['extension']);
                     $file->setMime($processedData['mime']);
                     $file->setSize($processedData['size']);
                     $file->save();

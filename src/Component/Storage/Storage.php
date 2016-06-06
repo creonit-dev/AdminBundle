@@ -3,9 +3,18 @@
 namespace Creonit\AdminBundle\Component\Storage;
 
 use Creonit\AdminBundle\Component\Field\Field;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 abstract class Storage
 {
+
+    /** @var ContainerInterface */
+    protected $container;
+
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
 
     /**
      * @param $query
