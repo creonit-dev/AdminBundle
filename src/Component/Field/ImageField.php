@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ImageField extends Field
 {
+
     public function extract(ComponentRequest $request)
     {
         parent::extract($request);
@@ -31,7 +32,7 @@ class ImageField extends Field
         $name = md5(uniqid()) . '.' . $extension;
         $originalName = $data->getClientOriginalName();
 
-        $data->move($this->container->getParameter('kernel.root_dir') . '/../web' . $path, $name);
+        $data->move($this->getWebDir() . $path, $name);
 
         return [
             'extension' => $extension,
@@ -47,9 +48,13 @@ class ImageField extends Field
     {
         if(is_array($data)){
             $data['size'] = $this->container->get('creonit_utils.file_manager')->formatSize($data['size']);
-            $data['preview'] = $this->container->get('image.handling')->open("{$data['path']}/{$data['name']}")->cropResize(300, 300)->html();
+            $data['preview'] = $this->container->get('image.handling')->open("{$this->getWebDir()}/{$data['path']}/{$data['name']}")->cropResize(100, 100)->html();
         }
         return $data;
+    }
+
+    private function getWebDir(){
+        return $this->container->getParameter('kernel.root_dir') . '/../web';
     }
 
 

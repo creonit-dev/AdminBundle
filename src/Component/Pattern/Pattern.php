@@ -177,7 +177,7 @@ abstract class Pattern
     public function prepareTemplate()
     {
         $this->template = preg_replace_callback(
-            '/\{\{\s*([\w_]+)\s*\|\s*(textarea|text|file|select)(\(?\)?)(.*?\}\})/usi',
+            '/\{\{\s*([\w_]+)\s*\|\s*(textarea|text|file|image|select)(\(?\)?)(.*?\}\})/usi',
             function($match){
                 if(!$this->hasField($match[1])){
                     $this->addField($this->createField($match[1]));
