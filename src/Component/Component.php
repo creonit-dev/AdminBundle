@@ -5,7 +5,6 @@ namespace Creonit\AdminBundle\Component;
 use Creonit\AdminBundle\Component\Pattern\Pattern;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Response\ComponentResponse;
-use Creonit\AdminBundle\Component\Response\PatternResponse;
 use Creonit\AdminBundle\Exception\ConfigurationException;
 use Creonit\AdminBundle\Module;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -167,6 +166,7 @@ abstract class Component
     public function dump(){
         $schema = [
             'template' => $this->template,
+            'title' => $this->getTitle(),
             'patterns' => []
         ];
         

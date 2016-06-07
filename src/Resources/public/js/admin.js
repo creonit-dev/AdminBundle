@@ -70,18 +70,38 @@ var Creonit;
                 };
                 Component.prototype.sendData = function (data) {
                     this.request(Component_1.Request.TYPE_SEND_DATA, data);
+                    this.node.find('.error-message').each(function () {
+                        var $message = $(this), $group = $message.closest('.form-group');
+                        $message.remove();
+                        $group.removeClass('has-error');
+                    });
                 };
                 Component.prototype.applyResponse = function (response) {
+                    var _this = this;
                     console.log(response);
                     if (response.error) {
-                        this.node.html(response.error);
+                        //this.node.html(response.error);
+                        if (response.error['_']) {
+                            alert(response.error['_'].join("\n"));
+                        }
+                        else {
+                            alert('При сохранении возникли ошибки');
+                        }
+                        $.each(response.error, function (scope, messages) {
+                            if ('_' == scope)
+                                return;
+                            _this.node.find("input[name=" + scope + "], select[name=" + scope + "], textarea[name=" + scope + "]").each(function () {
+                                var $control = $(this), $group = $control.closest('.form-group');
+                                $group.addClass('has-error');
+                                $control.after("<span class=\"help-block error-message\">" + messages.join('<br>') + "</span>");
+                            });
+                        });
                     }
                     else {
                         if (response.schema) {
                             this.applySchema(response.schema);
                         }
                         if (response.success && this.options.modal) {
-                            this.node.arcticmodal('close');
                         }
                         if (response.success && this.parent) {
                             this.parent.loadData();
@@ -92,6 +112,7 @@ var Creonit;
                 };
                 Component.prototype.applySchema = function (schema) {
                     var _this = this;
+                    this.schema = schema;
                     this.template = twig({ autoescape: true, data: schema.template });
                     if (schema.patterns) {
                         schema.patterns.forEach(function (pattern) {
@@ -136,9 +157,21 @@ var Creonit;
                 Editor.prototype.render = function () {
                     var _this = this;
                     this.node.empty();
+                    var node = this.node;
+                    if (this.options.modal) {
+                        this.node.append(node = $("\n                    <div class=\"modal-content\"> \n                        <div class=\"modal-header\"> \n                            <button type=\"button\" class=\"close\"><span>\u00D7</span></button> \n                            <h4 class=\"modal-title\">" + this.schema.title + "</h4> \n                        </div> \n                        \n                        <div class=\"modal-body\">\n                        </div>\n                   </div>    \n                "));
+                        node = node.find('.modal-body');
+                        this.node.find('.modal-content').append("<div class=\"modal-footer\">" + Component.Helpers.submit('Сохранить и закрыть') + " " + Component.Helpers.submit('Сохранить') + " " + Component.Helpers.button('Закрыть') + "</div>");
+                        this.node.find('.modal-footer button[type=button], .modal-header .close').on('click', function () {
+                            _this.node.arcticmodal('close');
+                        });
+                    }
                     this.patterns.forEach(function (pattern) {
-                        _this.node.append(pattern.template.render($.extend({}, _this.data, { parameters: _this.query })));
+                        node.append(pattern.template.render($.extend({}, _this.data, { parameters: _this.query })));
                     });
+                    if (!this.options.modal) {
+                        this.node.append(Component.Helpers.submit('Сохранить'));
+                    }
                     var formId = "form" + ++Editor.increment, $form = $("<form id=\"" + formId + "\"></form>");
                     this.node.append($form);
                     this.node.find('input, textarea, select, button').attr('form', formId);
@@ -195,12 +228,12 @@ var Creonit;
                 }
                 // Twig Functions
                 function button(caption, _a) {
-                    var _b = _a === void 0 ? {} : _a, _c = _b.size, size = _c === void 0 ? 'sm' : _c, _d = _b.type, type = _d === void 0 ? 'default' : _d, _e = _b.icon, icon = _e === void 0 ? '' : _e;
-                    return ("\n            <button \n                class=\"btn btn-" + type + " btn-" + size + "\" \n                type=\"button\" \n            >\n                ") + (icon ? "<i class=\"" + resolveIconClass(icon) + "\"></i>" + (caption ? ' ' : '') : '') + (caption + "\n            </button>\n        ");
+                    var _b = _a === void 0 ? {} : _a, _c = _b.size, size = _c === void 0 ? '' : _c, _d = _b.type, type = _d === void 0 ? 'default' : _d, _e = _b.icon, icon = _e === void 0 ? '' : _e, _f = _b.className, className = _f === void 0 ? '' : _f;
+                    return ("\n            <button \n                class=\"btn btn-" + type + " " + (size ? "btn-" + size : '') + " " + className + "\" \n                type=\"button\" \n            >\n                ") + (icon ? "<i class=\"" + resolveIconClass(icon) + "\"></i>" + (caption ? ' ' : '') : '') + (caption + "\n            </button>\n        ");
                 }
                 Helpers.button = button;
                 function submit(caption, _a) {
-                    var _b = _a === void 0 ? {} : _a, _c = _b.size, size = _c === void 0 ? '' : _c, _d = _b.type, type = _d === void 0 ? 'primary' : _d, _e = _b.icon, icon = _e === void 0 ? '' : _e;
+                    var _b = _a === void 0 ? {} : _a, _c = _b.size, size = _c === void 0 ? '' : _c, _d = _b.type, type = _d === void 0 ? 'primary' : _d, _e = _b.icon, icon = _e === void 0 ? '' : _e, _f = _b.className, className = _f === void 0 ? '' : _f;
                     return ("\n            <button \n                class=\"btn btn-" + type + " " + (size ? "btn-" + size : '') + "\" \n                type=\"submit\" \n            >\n                ") + (icon ? "<i class=\"" + resolveIconClass(icon) + "\"></i>" + (caption ? ' ' : '') : '') + (caption + "\n            </button>\n        ");
                 }
                 Helpers.submit = submit;
@@ -257,19 +290,19 @@ var Creonit;
                 }
                 Helpers.text = text;
                 function file(value, options) {
-                    var name = options && options[0] ? options[0] : '', output = "<input type=\"file\" name=\"" + name + "\">";
+                    var name = options && options[0] ? options[0] : '', output = 'Файл не загружен';
                     if (value) {
-                        output += "\n                <p class=\"help-block\">\n                    <a href=\"" + value.path + "/" + value.name + "\" target=\"_blank\">" + value.original_name + "</a> (" + value.size + ")\n                    <span class=\"checkbox\">\n                        <label>\n                            <input type=\"checkbox\" name=\"" + name + "__delete\"> \u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0444\u0430\u0439\u043B\n                        </label>\n                    </span>\n                </p>\n            ";
+                        output = "\n                <a href=\"" + value.path + "/" + value.name + "\" target=\"_blank\">" + value.original_name + "</a> (" + value.size + ")\n                <div class=\"checkbox\">\n                    <label class=\"small\">\n                        <input type=\"checkbox\" name=\"" + name + "__delete\"> \u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0444\u0430\u0439\u043B\n                    </label>\n                </div>\n            ";
                     }
-                    return output;
+                    return "\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\"><input type=\"file\" name=\"" + name + "\"></div>\n                <div class=\"panel-body\">" + output + "</div>\n            </div>\n        ";
                 }
                 Helpers.file = file;
                 function image(value, options) {
-                    var name = options && options[0] ? options[0] : '', output = "<input type=\"file\" name=\"" + name + "\">";
+                    var name = options && options[0] ? options[0] : '', output = 'Изображение не загружено';
                     if (value) {
-                        output += "\n                <p class=\"help-block\">\n                    <a href=\"" + value.path + "/" + value.name + "\" target=\"_blank\">" + value.preview + "</a>\n                    <span class=\"checkbox\">\n                        <label>\n                            <input type=\"checkbox\" name=\"" + name + "__delete\"> \u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435\n                        </label>\n                    </span>\n                </p>\n            ";
+                        output = "\n                <a href=\"" + value.path + "/" + value.name + "\" target=\"_blank\">" + value.preview + "</a>\n                <div class=\"checkbox\">\n                    <label class=\"small\">\n                        <input type=\"checkbox\" name=\"" + name + "__delete\"> \u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435\n                    </label>\n                </div>\n            ";
                     }
-                    return output;
+                    return "\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\"><input type=\"file\" name=\"" + name + "\"></div>\n                <div class=\"panel-body\">" + output + "</div>\n            </div>\n        ";
                 }
                 Helpers.image = image;
                 function select(value, options) {
@@ -290,7 +323,7 @@ var Creonit;
                     var id = 'widget_' + (++increment);
                     body = body.replace(/<(input|textarea)/i, '<$1 id="' + id + '"');
                     if (label) {
-                        return "\n            <div class=\"form-group\">\n                <label for=\"" + id + "\">" + label + "</label>\n                " + body + "\n            </div>\n        ";
+                        return "\n            <div class=\"form-group\">\n                <label for=\"" + id + "\" class=\"control-label\">" + label + "</label>\n                " + body + "\n            </div>\n        ";
                     }
                     else {
                         return "\n            <div class=\"form-group\">\n                " + body + "\n            </div>\n        ";
@@ -547,7 +580,6 @@ var Creonit;
                     this.type = type;
                     this.data = data;
                     this.query = $.extend({}, component.getQuery());
-                    this.options = $.extend({}, component.getOptions());
                 }
                 Request.prototype.getId = function () {
                     return this.id;
@@ -557,7 +589,6 @@ var Creonit;
                         name: this.name,
                         type: this.type,
                         query: this.query,
-                        options: this.options,
                         data: this.data
                     };
                 };
@@ -603,7 +634,16 @@ var Creonit;
                 }
                 Table.prototype.render = function () {
                     var _this = this;
-                    this.node.html(this.template.render($.extend({}, this.data, { parameters: this.query })));
+                    this.node.empty();
+                    var node = this.node;
+                    if (this.options.modal) {
+                        this.node.append(node = $("\n                    <div class=\"modal-content\"> \n                        <div class=\"modal-header\"> \n                            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">\u00D7</span></button> \n                            <h4 class=\"modal-title\">" + this.schema.title + "</h4> \n                        </div> \n                        \n                        <div class=\"modal-body\">\n                        </div>\n                   </div>    \n                "));
+                        node = node.find('.modal-body');
+                        this.node.find('.modal-header .close').on('click', function () {
+                            _this.node.arcticmodal('close');
+                        });
+                    }
+                    node.html(this.template.render($.extend({}, this.data, { parameters: this.query })));
                     this.node.find('[js-component-action]').on('click', function (e) {
                         e.preventDefault();
                         var $action = $(e.currentTarget);

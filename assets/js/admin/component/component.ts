@@ -7,6 +7,8 @@ module Creonit.Admin.Component {
         protected patterns:Pattern[] = [];
         protected parent:Component;
 
+        protected schema:any;
+
         protected query:any = {};
         protected options:any = {};
         protected data:any = {};
@@ -68,12 +70,41 @@ module Creonit.Admin.Component {
 
         sendData(data:Object) {
             this.request(Request.TYPE_SEND_DATA, data);
+
+            this.node.find('.error-message').each(function(){
+                var $message = $(this),
+                    $group = $message.closest('.form-group');
+
+                $message.remove();
+                $group.removeClass('has-error');
+            });
         }
 
         applyResponse(response:Response) {
             console.log(response);
             if (response.error) {
-                this.node.html(response.error);
+                //this.node.html(response.error);
+
+
+                if(response.error['_']){
+                    alert(response.error['_'].join("\n"));
+                }else{
+                    alert('При сохранении возникли ошибки');
+                }
+
+                $.each(response.error, (scope, messages) => {
+                    if('_' == scope) return;
+                    this.node.find(`input[name=${scope}], select[name=${scope}], textarea[name=${scope}]`).each(function(){
+                        var $control = $(this),
+                            $group = $control.closest('.form-group');
+
+                        $group.addClass('has-error');
+                        $control.after(`<span class="help-block error-message">${messages.join('<br>')}</span>`);
+                    });
+                });
+
+
+
             } else {
 
                 if (response.schema) {
@@ -81,7 +112,7 @@ module Creonit.Admin.Component {
                 }
 
                 if (response.success && this.options.modal) {
-                    this.node.arcticmodal('close');
+                    //this.node.arcticmodal('close');
                 }
 
                 if (response.success && this.parent) {
@@ -94,6 +125,8 @@ module Creonit.Admin.Component {
         }
 
         applySchema(schema:any) {
+            this.schema = schema;
+
             this.template = twig({autoescape: true, data: schema.template});
 
             if (schema.patterns) {

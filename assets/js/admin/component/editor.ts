@@ -5,15 +5,48 @@ module Creonit.Admin.Component{
 
         render(){
             this.node.empty();
+
+            var node = this.node;
+
+            if(this.options.modal){
+                this.node.append(node = $(`
+                    <div class="modal-content"> 
+                        <div class="modal-header"> 
+                            <button type="button" class="close"><span>×</span></button> 
+                            <h4 class="modal-title">${this.schema.title}</h4> 
+                        </div> 
+                        
+                        <div class="modal-body">
+                        </div>
+                   </div>    
+                `));
+                node = node.find('.modal-body');
+
+                this.node.find('.modal-content').append(`<div class="modal-footer">${Helpers.submit('Сохранить и закрыть')} ${Helpers.submit('Сохранить')} ${Helpers.button('Закрыть')}</div>`);
+
+                this.node.find('.modal-footer button[type=button], .modal-header .close').on('click', () => {
+                    this.node.arcticmodal('close');
+                });
+            }
+
+
+
             this.patterns.forEach((pattern:Pattern) => {
-                this.node.append(pattern.template.render($.extend({}, this.data, {parameters: this.query})));
+                node.append(pattern.template.render($.extend({}, this.data, {parameters: this.query})));
             });
+
+            if(!this.options.modal){
+                this.node.append(Helpers.submit('Сохранить'));
+            }
+
 
             var formId = `form${++Editor.increment}`,
                 $form = $(`<form id="${formId}"></form>`);
 
             this.node.append($form);
             this.node.find('input, textarea, select, button').attr('form', formId);
+
+
 
 
             $form.on('submit', (e) => {
@@ -30,8 +63,6 @@ module Creonit.Admin.Component{
 
 
                 this.sendData(data)
-
-
 
             });
 

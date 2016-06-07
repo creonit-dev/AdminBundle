@@ -4,7 +4,31 @@ module Creonit.Admin.Component{
 
         render(){
 
-            this.node.html(this.template.render($.extend({}, this.data, {parameters: this.query})));
+            this.node.empty();
+
+            var node = this.node;
+
+            if(this.options.modal){
+                this.node.append(node = $(`
+                    <div class="modal-content"> 
+                        <div class="modal-header"> 
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button> 
+                            <h4 class="modal-title">${this.schema.title}</h4> 
+                        </div> 
+                        
+                        <div class="modal-body">
+                        </div>
+                   </div>    
+                `));
+                node = node.find('.modal-body');
+
+                this.node.find('.modal-header .close').on('click', () => {
+                    this.node.arcticmodal('close');
+                });
+            }
+
+
+            node.html(this.template.render($.extend({}, this.data, {parameters: this.query})));
 
             this.node.find('[js-component-action]').on('click', (e) => {
                 e.preventDefault();

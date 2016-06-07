@@ -12,7 +12,6 @@ module Creonit.Admin.Component {
         type:string;
         data:any;
         query:any;
-        options:any;
 
         constructor(component:Component, type:string, data?:any){
             this.id = Request.increment++;
@@ -21,7 +20,6 @@ module Creonit.Admin.Component {
             this.type = type;
             this.data = data;
             this.query = $.extend({}, component.getQuery());
-            this.options = $.extend({}, component.getOptions());
         }
 
         getId(){
@@ -34,7 +32,6 @@ module Creonit.Admin.Component {
                 name: this.name,
                 type: this.type,
                 query: this.query,
-                options: this.options,
                 data: this.data
             };
         }

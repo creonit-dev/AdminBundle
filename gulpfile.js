@@ -1,5 +1,6 @@
 var gulp = require('gulp'),
     gulpif = require('gulp-if'),
+    less = require('gulp-less'),
     stylus = require('gulp-stylus'),
     uglify = require('gulp-uglify'),
     concat = require('gulp-concat'),
@@ -26,6 +27,26 @@ var outputDir = './src/Resources/public',
 gulp.task('css', function(callback){
     var stream = gulp.src('./assets/css/*.styl')
         .pipe(stylus({use: [nib()]}))
+        .on('error', function(error){
+            console.log(error.message);
+            callback();
+        })
+        .pipe(gulp.dest(outputDir + '/css'));
+
+    if(browserSync){
+        stream.pipe(browserSync.reload({stream: true}));
+    }
+
+    return stream;
+});
+
+/**
+ * @task css:bootstrap
+ * Generate /web/bootstrap.css
+ */
+gulp.task('css:bootstrap', function(callback){
+    var stream = gulp.src('./assets/css/bootstrap.less')
+        .pipe(less())
         .on('error', function(error){
             console.log(error.message);
             callback();
@@ -179,7 +200,8 @@ gulp.task('sync', function(){
  * @task watch
  */
 gulp.task('watch', ['sync'], function(){
-    gulp.watch('./assets/css/**/*.styl', ['css:main']);
+    gulp.watch('./assets/css/**/*.styl', ['css']);
+    gulp.watch('./assets/css/variables.less', ['css:bootstrap']);
     gulp.watch('./assets/css/vendor/*.css', ['css:vendor']);
     gulp.watch(['./assets/js/**/*.js', './assets/js/**/*.ts', '!./assets/js/vendor/**/*.js'], ['js']);
     gulp.watch('./assets/js/vendor/**/*.js', ['js:vendor']);
@@ -190,7 +212,7 @@ gulp.task('watch', ['sync'], function(){
 
 gulp.task('default', function(){
     runSequence(
-        ['css', 'css:vendor', 'js', 'js:vendor', 'fonts', 'images'],
+        ['css', 'css:bootstrap', 'css:vendor', 'js', 'js:vendor', 'fonts', 'images'],
         'watch'
     );
 });
@@ -198,7 +220,7 @@ gulp.task('default', function(){
 gulp.task('build', function(){
     optimize = true;
     runSequence(
-        ['css', 'css:vendor', 'js', 'js:vendor', 'fonts', 'images']
+        ['css', 'css:bootstrap', 'css:vendor', 'js', 'js:vendor', 'fonts', 'images']
     );
 });
 

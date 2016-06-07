@@ -7,6 +7,9 @@ use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Storage\Storage;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\ValidatorBuilder;
 
 class Field
 {
@@ -64,6 +67,14 @@ class Field
     }
 
     public function validate(){
+        return ($required = $this->parameters->get('required')) || $this->parameters->has('validation')
+            ? $this->container->get('validator')->validate(
+                $this->data,
+                $required
+                    ? array_merge($this->parameters->get('validation', []), [new NotBlank(true === $required ? [] : ['message' => $required])])
+                    : $this->parameters->get('validation'))
+            : [];
+
     }
 
     public function process($data){

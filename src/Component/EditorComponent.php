@@ -30,13 +30,16 @@ abstract class EditorComponent extends Component
         return $pattern;
     }
 
-    public function validate(ComponentRequest $request, ComponentResponse $patternResponse){
-        return true;
-    }
+    /**
+     * @param ComponentRequest $request
+     * @param ComponentResponse $response
+     * @param $entity
+     */
+    public function validate(ComponentRequest $request, ComponentResponse $response, $entity){}
 
-    public function preSave(ComponentRequest $request, ComponentResponse $patternResponse, $entity){}
+    public function preSave(ComponentRequest $request, ComponentResponse $response, $entity){}
 
-    public function postSave(ComponentRequest $request, ComponentResponse $patternResponse, $entity){}
+    public function postSave(ComponentRequest $request, ComponentResponse $response, $entity){}
 
     /**
      * @return Storage\Storage

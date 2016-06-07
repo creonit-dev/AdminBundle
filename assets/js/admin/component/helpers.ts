@@ -27,10 +27,10 @@ module Creonit.Admin.Component.Helpers {
 
     // Twig Functions
 
-    export function button(caption:string, {size = 'sm', type = 'default', icon = ''} = {}){
+    export function button(caption:string, {size = '', type = 'default', icon = '', className = ''} = {}){
         return `
             <button 
-                class="btn btn-${type} btn-${size}" 
+                class="btn btn-${type} ${size ? `btn-${size}` : ''} ${className}" 
                 type="button" 
             >
                 `+ (icon ? `<i class="${resolveIconClass(icon)}"></i>${caption ? ' ' : ''}` : '') +`${caption}
@@ -38,7 +38,7 @@ module Creonit.Admin.Component.Helpers {
         `;
     }
 
-    export function submit(caption:string, {size = '', type = 'primary', icon = ''} = {}){
+    export function submit(caption:string, {size = '', type = 'primary', icon = '', className = ''} = {}){
         return `
             <button 
                 class="btn btn-${type} ${size ? `btn-${size}` : ''}" 
@@ -110,42 +110,49 @@ module Creonit.Admin.Component.Helpers {
 
     export function file(value:any, options?:any){
         var name = options && options[0] ? options[0] : '',
-            output = `<input type="file" name="${name}">`;
+            output = 'Файл не загружен';
 
         if(value){
-            output += `
-                <p class="help-block">
-                    <a href="${value.path}/${value.name}" target="_blank">${value.original_name}</a> (${value.size})
-                    <span class="checkbox">
-                        <label>
-                            <input type="checkbox" name="${name}__delete"> Удалить файл
-                        </label>
-                    </span>
-                </p>
+            output = `
+                <a href="${value.path}/${value.name}" target="_blank">${value.original_name}</a> (${value.size})
+                <div class="checkbox">
+                    <label class="small">
+                        <input type="checkbox" name="${name}__delete"> Удалить файл
+                    </label>
+                </div>
             `;
         }
 
-        return output;
+
+        return `
+            <div class="panel panel-default">
+                <div class="panel-heading"><input type="file" name="${name}"></div>
+                <div class="panel-body">${output}</div>
+            </div>
+        `;
     }
 
     export function image(value:any, options?:any){
         var name = options && options[0] ? options[0] : '',
-            output = `<input type="file" name="${name}">`;
+            output = 'Изображение не загружено';
 
         if(value){
-            output += `
-                <p class="help-block">
-                    <a href="${value.path}/${value.name}" target="_blank">${value.preview}</a>
-                    <span class="checkbox">
-                        <label>
-                            <input type="checkbox" name="${name}__delete"> Удалить изображение
-                        </label>
-                    </span>
-                </p>
+            output = `
+                <a href="${value.path}/${value.name}" target="_blank">${value.preview}</a>
+                <div class="checkbox">
+                    <label class="small">
+                        <input type="checkbox" name="${name}__delete"> Удалить изображение
+                    </label>
+                </div>
             `;
         }
 
-        return output;
+        return `
+            <div class="panel panel-default">
+                <div class="panel-heading"><input type="file" name="${name}"></div>
+                <div class="panel-body">${output}</div>
+            </div>
+        `;
     }
 
     
@@ -173,7 +180,7 @@ module Creonit.Admin.Component.Helpers {
         if(label){
             return `
             <div class="form-group">
-                <label for="${id}">${label}</label>
+                <label for="${id}" class="control-label">${label}</label>
                 ${body}
             </div>
         `;

@@ -9,6 +9,10 @@ use Creonit\AdminBundle\Component\Response\ComponentResponse;
 use Creonit\AdminBundle\Component\Storage\Storage;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Validator\Constraints\Image;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 abstract class Pattern
 {
@@ -123,11 +127,18 @@ abstract class Pattern
                     $name = $match[1];
                     if(isset($match[3])){
                         $language = new ExpressionLanguage();
+                        $language->register('NotBlank', function(){}, function ($options) {return new NotBlank($options);});
+                        $language->register('Email', function(){}, function ($options) {return new Email($options);});
+                        $language->register('Image', function(){}, function ($arguments, $options = []) {dump($options);return new Image($options);});
+                        $language->register('File', function(){}, function ($options) {return new File($options);});
+
+
+
+
                         $options = $language->evaluate($match[3]);
                     }else{
                         $options = [];
                     }
-                    dump($options);
                     $this->addField($this->createField($name, $options, $type));
                 }
                 break;
@@ -223,9 +234,9 @@ abstract class Pattern
      * @param $type
      * @return Field
      */
-    public function createField($name, $parameters = [], $type = 'default'){
+    public function createField($name, $parameters = [], $type = null){
         /** @var Field $field */
-        $field = $this->container->get('creonit_admin.component.field.' . $type);
+        $field = $this->container->get('creonit_admin.component.field.' . ($type ?: 'default'));
         $field->setName($name);
         $field->parameters->add($parameters);
         return $field;

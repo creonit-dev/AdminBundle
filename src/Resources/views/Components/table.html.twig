@@ -1,23 +1,22 @@
-<div class="box">
+<div class="panel panel-default">
     {% if component.header %}
-        <div class="box-header">
+        <div class="panel-heading">
             {{ component.header | raw }}
         </div>
     {% endif %}
-    <div class="box-body table-responsive no-padding">
-        <table class="table table-hover table-bordered table-striped">
-            <thead>
-                <tr>
-                    {% for column in component.columns %}
-                        {% if column == '.' %}
-                            <th style="width:1%"></th>
-                        {% else %}
-                            <th>{{ column }}</th>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+
+    <table class="table table-bordered table-striped table-hover">
+        <thead>
+        <tr>
+            {% for column in component.columns %}
+                {% if column == '.' %}
+                    <th style="width:1%"></th>
+                {% else %}
+                    <th>{{ column }}</th>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 </div>

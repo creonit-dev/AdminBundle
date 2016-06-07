@@ -14,8 +14,7 @@
     "jquery": "^2.2.3",
     "arcticModal": "komunyako/arcticModal#dev",
     "twig.js": "0.8.8",
-    "bootstrap": "^3.3.6",
-    "AdminLTE": "admin-lte#^2.3.3"
+    "bootstrap": "^3.3.6"
   },
   "overrides": {
     "twig.js": {
@@ -25,8 +24,11 @@
     },
     "bootstrap": {
       "main": [
-        "dist/css/bootstrap.css",
-        "dist/js/bootstrap.js"
+        "dist/js/bootstrap.js",
+        "dist/fonts/glyphicons-halflings-regular.eot",
+        "dist/fonts/glyphicons-halflings-regular.svg",
+        "dist/fonts/glyphicons-halflings-regular.ttf",
+        "dist/fonts/glyphicons-halflings-regular.woff"
       ]
     }
   }

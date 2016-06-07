@@ -15,18 +15,32 @@ class ComponentResponse
     public function __construct()
     {
         $this->data = new ParameterBag();
+        $this->error = new ParameterBag();
     }
 
-    public function error($message)
+    public function error($message, $scope = '_')
     {
-        $this->error = $message;
+        $error = $this->error->get($scope);
+
+        if(null === $error){
+            $error = [];
+        }
+
+        $error[] = $message;
+
+        $this->error->set($scope, $error);
+
         return $this;
+    }
+
+    public function hasError(){
+        return !!$this->error->count();
     }
 
     public function dump()
     {
-        if($this->error){
-            return ['error' => $this->error];
+        if($this->error->count()){
+            return ['error' => $this->error->all()];
         }else{
             $response = [];
             if($this->data->count()){

@@ -49,13 +49,25 @@ class EditorPattern extends Pattern
             ]);
         }
 
+
         foreach ($this->fields as $field){
             $field->extract($request);
-            $field->validate();
+            foreach($field->validate() as $error){
+                $response->error($error->getMessage(), $field->getName());
+            }
         }
         
-        $this->component->validate($request, $response);
+        if($response->hasError()){
+            return;
+        }
         
+        $this->component->validate($request, $response, $entity);
+
+        if($response->hasError()){
+            return;
+        }
+
+
         foreach ($this->fields as $field){
             $field->save($storage, $entity);
         }
