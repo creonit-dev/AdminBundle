@@ -85,7 +85,6 @@ var Creonit;
                             alert(response.error['_'].join("\n"));
                         }
                         else {
-                            alert('При сохранении возникли ошибки');
                         }
                         $.each(response.error, function (scope, messages) {
                             if ('_' == scope)

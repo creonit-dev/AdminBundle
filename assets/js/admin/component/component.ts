@@ -89,7 +89,7 @@ module Creonit.Admin.Component {
                 if(response.error['_']){
                     alert(response.error['_'].join("\n"));
                 }else{
-                    alert('При сохранении возникли ошибки');
+                    //alert('При сохранении возникли ошибки');
                 }
 
                 $.each(response.error, (scope, messages) => {
