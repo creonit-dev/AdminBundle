@@ -14,12 +14,18 @@
     "jquery": "^2.2.3",
     "arcticModal": "komunyako/arcticModal#dev",
     "twig.js": "0.8.8",
-    "bootstrap": "^3.3.6"
+    "bootstrap": "^3.3.6",
+    "tinymce": "^4.3.13"
   },
   "overrides": {
     "twig.js": {
       "main": [
         "twig.js"
+      ]
+    },
+    "tinymce": {
+      "main": [
+        "tinymce.js"
       ]
     },
     "bootstrap": {
@@ -32,5 +38,4 @@
       ]
     }
   }
-
 }

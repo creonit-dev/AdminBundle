@@ -71,8 +71,8 @@ class Field
             ? $this->container->get('validator')->validate(
                 $this->data,
                 $required
-                    ? array_merge($this->parameters->get('validation', []), [new NotBlank(true === $required ? [] : ['message' => $required])])
-                    : $this->parameters->get('validation'))
+                    ? array_merge($this->parameters->get('constraints', []), [new NotBlank(true === $required ? [] : ['message' => $required])])
+                    : $this->parameters->get('constraints'))
             : [];
 
     }

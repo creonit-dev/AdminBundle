@@ -201,7 +201,7 @@ gulp.task('sync', function(){
  */
 gulp.task('watch', ['sync'], function(){
     gulp.watch('./assets/css/**/*.styl', ['css']);
-    gulp.watch('./assets/css/variables.less', ['css:bootstrap']);
+    gulp.watch(['./assets/css/variables.less', './assets/css/bootstrap.less'], ['css:bootstrap']);
     gulp.watch('./assets/css/vendor/*.css', ['css:vendor']);
     gulp.watch(['./assets/js/**/*.js', './assets/js/**/*.ts', '!./assets/js/vendor/**/*.js'], ['js']);
     gulp.watch('./assets/js/vendor/**/*.js', ['js:vendor']);

@@ -51,6 +51,11 @@ module Creonit.Admin.Component{
             });
 
 
+            if(!this.node.find('tbody').children().length){
+                this.node.find('tbody').html('<tr><td colspan="'+(this.node.find('thead td').length)+'">Элементы не найдены</td></tr>');
+            }
+
+
             Utils.initializeComponents(this.node, this);
         }
 

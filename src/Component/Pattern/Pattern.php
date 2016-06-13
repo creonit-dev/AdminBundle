@@ -187,13 +187,43 @@ abstract class Pattern
 
     public function prepareTemplate()
     {
-        $this->template = preg_replace_callback(
-            '/\{\{\s*([\w_]+)\s*\|\s*(textarea|text|file|image|select)(\(?\)?)(.*?\}\})/usi',
-            function($match){
-                if(!$this->hasField($match[1])){
-                    $this->addField($this->createField($match[1]));
+        $createField = function ($match){
+            if(!$this->hasField($match[1])){
+                switch($match[2]){
+                    case 'file':
+                        $type = 'file';
+                        break;
+                    case 'image':
+                        $type = 'image';
+                        break;
+                    case 'select':
+                    case 'radio':
+                        $type = 'select';
+                        break;
+                    case 'checkbox':
+                        $type = 'checkbox';
+                        break;
+                    default:
+                        $type = 'default';
                 }
+                $this->addField($this->createField($match[1], [], $type));
+            }
+        };
+
+        $this->template = preg_replace_callback(
+            '/\{\{\s*([\w_]+)\s*\|\s*(textarea|textedit|text|file|image|select|checkbox|radio)(\(?\)?)(.*?\}\})/usi',
+            function($match) use ($createField){
+                $createField($match);
                 return "{{ {$match[1]} | {$match[2]}" . (($match[3] && $match[3] != '()') ? "('{$match[1]}', " : "('{$match[1]}')") . $match[4];
+            },
+            $this->template
+        );
+
+        $this->template = preg_replace_callback(
+            '/\(\s*([\w_]+)\s*\|\s*(textarea|textedit|text|file|image|select|checkbox|radio)(\(?\)?)(.*?\))/usi',
+            function($match) use ($createField){
+                $createField($match);
+                return "( {$match[1]} | {$match[2]}" . (($match[3] && $match[3] != '()') ? "('{$match[1]}', " : "('{$match[1]}')") . $match[4];
             },
             $this->template
         );

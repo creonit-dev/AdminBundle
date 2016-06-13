@@ -14,11 +14,16 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
+        $admin = $this->get('creonit_admin');
+
         if($request->request->has('request')){
-            return $this->get('creonit_admin')->handleRequest($request);
+            return $admin->handleRequest($request);
         }
 
-        return $this->redirect($this->generateUrl('creonit_admin_module', ['module' => 'page']));
+        $modules = $admin->getModules();
+        $module = array_shift($modules);
+
+        return $this->redirect($this->generateUrl('creonit_admin_module', ['module' => $module->getName()]));
     }
 
     /**

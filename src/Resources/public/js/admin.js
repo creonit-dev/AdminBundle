@@ -174,6 +174,8 @@ var Creonit;
                     var formId = "form" + ++Editor.increment, $form = $("<form id=\"" + formId + "\"></form>");
                     this.node.append($form);
                     this.node.find('input, textarea, select, button').attr('form', formId);
+                    this.node.find('.text-editor').wysiwyg();
+                    console.log(this.node.find('.text-editor'));
                     $form.on('submit', function (e) {
                         e.preventDefault();
                         var $form = $(e.currentTarget);
@@ -281,13 +283,6 @@ var Creonit;
                     return action(value, ['openComponent', { name: name, query: query, options: options }]);
                 }
                 Helpers.open = open;
-                function text(value, options) {
-                    var name = options && options[0] ? options[0] : '';
-                    var options = options && options[1] ? options[1] : {};
-                    value = value ? Component.Utils.escape(value.toString()) : '';
-                    return "<input type=\"text\" class=\"form-control\" name=\"" + name + "\" value=\"" + value + "\">";
-                }
-                Helpers.text = text;
                 function file(value, options) {
                     var name = options && options[0] ? options[0] : '', output = 'Файл не загружен';
                     if (value) {
@@ -311,6 +306,23 @@ var Creonit;
                     return "<select name=\"" + name + "\" class=\"form-control\">" + options + "</select>";
                 }
                 Helpers.select = select;
+                function radio(value) {
+                    return value;
+                }
+                Helpers.radio = radio;
+                function checkbox(value, _a) {
+                    var _b = _a === void 0 ? [] : _a, _c = _b[0], name = _c === void 0 ? '' : _c, _d = _b[1], caption = _d === void 0 ? '' : _d;
+                    value = value ? Component.Utils.escape(value.toString()) : '';
+                    return "<div class=\"checkbox\"><label><input type=\"checkbox\" name=\"" + name + "\" " + (value ? 'checked' : '') + "> " + caption + "</label></div>";
+                }
+                Helpers.checkbox = checkbox;
+                function text(value, _a) {
+                    var name = _a[0], options = _a[1];
+                    options = options || {};
+                    value = value ? Component.Utils.escape(value.toString()) : '';
+                    return "<input type=\"text\" class=\"form-control\" name=\"" + name + "\" value=\"" + value + "\" placeholder=\"" + (options.placeholder || '') + "\">";
+                }
+                Helpers.text = text;
                 function textarea(value, options) {
                     var name = options && options[0] ? options[0] : '';
                     var options = options && options[1] ? options[1] : {};
@@ -318,15 +330,38 @@ var Creonit;
                     return "<textarea class=\"form-control\" name=\"" + name + "\">" + value + "</textarea>";
                 }
                 Helpers.textarea = textarea;
-                function row(body, label) {
+                function textedit(value) {
+                    /*        var name = options && options[0] ? options[0] : '';
+                            var options = options && options[1] ? options[1] : {};
+                    
+                            value = value ? Utils.escape(value.toString()) : '';
+                    */
+                    return "<div class=\"text-editor\">" + value + "</div>";
+                }
+                Helpers.textedit = textedit;
+                function group(body, _a) {
+                    var _b = _a === void 0 ? ['', {}] : _a, _c = _b[0], label = _c === void 0 ? '' : _c, _d = _b[1], options = _d === void 0 ? {} : _d;
                     var id = 'widget_' + (++increment);
-                    body = body.replace(/<(input|textarea)/i, '<$1 id="' + id + '"');
+                    body = body.replace(/<(input|textarea|select)/i, '<$1 id="' + id + '"');
                     if (label) {
-                        return "\n            <div class=\"form-group\">\n                <label for=\"" + id + "\" class=\"control-label\">" + label + "</label>\n                " + body + "\n            </div>\n        ";
+                        return "\n            <div class=\"form-group\">\n                <label for=\"" + id + "\" class=\"control-label\">" + label + (options.notice ? "<span class=\"control-label-notice\">" + options.notice + "</span>" : '') + "</label>\n                " + body + "\n            </div>\n        ";
                     }
                     else {
                         return "\n            <div class=\"form-group\">\n                " + body + "\n            </div>\n        ";
                     }
+                }
+                Helpers.group = group;
+                function panel(body) {
+                    return "<div class=\"panel panel-default\"><div class=\"panel-body\">" + body + "</div></div>";
+                }
+                Helpers.panel = panel;
+                function col(body, _a) {
+                    var _b = (_a === void 0 ? [] : _a)[0], size = _b === void 0 ? 6 : _b;
+                    return "<div class=\"col-md-" + size + "\">" + body + "</div>";
+                }
+                Helpers.col = col;
+                function row(body) {
+                    return "<div class=\"row\">" + body + "</div>";
                 }
                 Helpers.row = row;
                 function buttons(value) {
@@ -339,7 +374,10 @@ var Creonit;
                         'submit',
                         'button_visible',
                         'button_delete',
-                        'component'
+                        'component',
+                        'panel',
+                        'group',
+                        'row'
                     ].forEach(function (name) {
                         Twig.extendFunction(name, function () {
                             var args = [];
@@ -356,17 +394,23 @@ var Creonit;
                 Helpers.registerTwigFunctions = registerTwigFunctions;
                 function registerTwigFilters() {
                     [
+                        'checkbox',
+                        'radio',
                         'text',
                         'textarea',
+                        'textedit',
                         'file',
                         'image',
                         'select',
                         'buttons',
                         'image',
-                        'row',
+                        'group',
                         'tooltip',
                         'action',
-                        'open'
+                        'open',
+                        'panel',
+                        'row',
+                        'col'
                     ].forEach(function (name) {
                         Twig.extendFilter(name, function () {
                             var args = [];
@@ -659,6 +703,9 @@ var Creonit;
                             _this.node.find('tbody').append($entity);
                         });
                     });
+                    if (!this.node.find('tbody').children().length) {
+                        this.node.find('tbody').html('<tr><td colspan="' + (this.node.find('thead td').length) + '">Элементы не найдены</td></tr>');
+                    }
                     Component.Utils.initializeComponents(this.node, this);
                 };
                 return Table;

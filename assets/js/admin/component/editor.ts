@@ -47,7 +47,10 @@ module Creonit.Admin.Component{
             this.node.find('input, textarea, select, button').attr('form', formId);
 
 
+            this.node.find('.text-editor').wysiwyg();
 
+
+            console.log(this.node.find('.text-editor'));
 
             $form.on('submit', (e) => {
                 e.preventDefault();

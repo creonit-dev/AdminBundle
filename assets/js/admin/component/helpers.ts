@@ -99,15 +99,6 @@ module Creonit.Admin.Component.Helpers {
     }
 
 
-    export function text(value:string, options?:any){
-        var name = options && options[0] ? options[0] : '';
-        var options = options && options[1] ? options[1] : {};
-
-        value = value ? Utils.escape(value.toString()) : '';
-
-        return `<input type="text" class="form-control" name="${name}" value="${value}">`;
-    }
-
     export function file(value:any, options?:any){
         var name = options && options[0] ? options[0] : '',
             output = 'Файл не загружен';
@@ -155,7 +146,6 @@ module Creonit.Admin.Component.Helpers {
         `;
     }
 
-    
     export function select(value:any, options?:any){
         var name = options && options[0] ? options[0] : '',
             options = value.options.map((option) => {
@@ -163,6 +153,25 @@ module Creonit.Admin.Component.Helpers {
             }).join('');
 
         return `<select name="${name}" class="form-control">${options}</select>`;
+    }
+
+
+    export function radio(value:string){
+        return value;
+    }
+
+    export function checkbox(value:string, [name = '', caption = ''] = []){
+        value = value ? Utils.escape(value.toString()) : '';
+
+        return `<div class="checkbox"><label><input type="checkbox" name="${name}" ${value ? 'checked' : ''}> ${caption}</label></div>`;
+    }
+
+    export function text(value:string, [name, options]){
+        options = options || {};
+
+        value = value ? Utils.escape(value.toString()) : '';
+
+        return `<input type="text" class="form-control" name="${name}" value="${value}" placeholder="${options.placeholder || ''}">`;
     }
 
     export function textarea(value:string, options?:any){
@@ -174,13 +183,23 @@ module Creonit.Admin.Component.Helpers {
         return `<textarea class="form-control" name="${name}">${value}</textarea>`;
     }
 
-    export function row(body:string, label:string) {
+    export function textedit(value:string){
+/*        var name = options && options[0] ? options[0] : '';
+        var options = options && options[1] ? options[1] : {};
+
+        value = value ? Utils.escape(value.toString()) : '';
+*/
+        return `<div class="text-editor">${value}</div>`;
+    }
+
+
+    export function group(body:string, [label = '', options = {}]:[string, any] = ['', {}]) {
         var id = 'widget_'+(++increment);
-        body = body.replace(/<(input|textarea)/i, '<$1 id="'+id+'"');
+        body = body.replace(/<(input|textarea|select)/i, '<$1 id="'+id+'"');
         if(label){
             return `
             <div class="form-group">
-                <label for="${id}" class="control-label">${label}</label>
+                <label for="${id}" class="control-label">${label}${options.notice ? `<span class="control-label-notice">${options.notice}</span>` : ''}</label>
                 ${body}
             </div>
         `;
@@ -194,6 +213,18 @@ module Creonit.Admin.Component.Helpers {
 
     }
 
+    export function panel(body:string) {
+        return `<div class="panel panel-default"><div class="panel-body">${body}</div></div>`;
+    }
+
+    export function col(body:string, [size = 6] = []) {
+        return `<div class="col-md-${size}">${body}</div>`;
+    }
+
+    export function row(body:string) {
+        return `<div class="row">${body}</div>`;
+    }
+
     export function buttons(value:string){
         return `<div class="btn-group">${value}</div>`;
     }
@@ -204,7 +235,10 @@ module Creonit.Admin.Component.Helpers {
             'submit',
             'button_visible',
             'button_delete',
-            'component'
+            'component',
+            'panel',
+            'group',
+            'row'
 
         ].forEach(function(name:string){
             Twig.extendFunction(name, function(...args){
@@ -218,17 +252,23 @@ module Creonit.Admin.Component.Helpers {
 
     export function registerTwigFilters(){
         [
+            'checkbox',
+            'radio',
             'text',
             'textarea',
+            'textedit',
             'file',
             'image',
             'select',
             'buttons',
             'image',
-            'row',
+            'group',
             'tooltip',
             'action',
-            'open'
+            'open',
+            'panel',
+            'row',
+            'col'
 
         ].forEach(function(name:string){
             Twig.extendFilter(name, function(...args){

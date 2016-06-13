@@ -1,16 +1,17 @@
 parameters:
-    creonit_admin.component.storage.default: '%creonit_admin.component.storage.propel%'
-    creonit_admin.component.storage.propel: Creonit\AdminBundle\Component\Storage\PropelStorage
-    creonit_admin.component.storage.doctrine: Creonit\AdminBundle\Component\Storage\DoctrineStorage
+    creonit_admin.component.storage.default.class: '%creonit_admin.component.storage.propel.class%'
+    creonit_admin.component.storage.propel.class: Creonit\AdminBundle\Component\Storage\PropelStorage
+    creonit_admin.component.storage.doctrine.class: Creonit\AdminBundle\Component\Storage\DoctrineStorage
 
-    creonit_admin.component.pattern.editor: Creonit\AdminBundle\Component\Pattern\EditorPattern
-    creonit_admin.component.pattern.list: Creonit\AdminBundle\Component\Pattern\ListPattern
-    creonit_admin.component.pattern.table: Creonit\AdminBundle\Component\Pattern\TablePattern
+    creonit_admin.component.pattern.editor.class: Creonit\AdminBundle\Component\Pattern\EditorPattern
+    creonit_admin.component.pattern.list.class: Creonit\AdminBundle\Component\Pattern\ListPattern
+    creonit_admin.component.pattern.table.class: Creonit\AdminBundle\Component\Pattern\TablePattern
 
-    creonit_admin.component.field.default: Creonit\AdminBundle\Component\Field\Field
-    creonit_admin.component.field.file: Creonit\AdminBundle\Component\Field\FileField
-    creonit_admin.component.field.image: Creonit\AdminBundle\Component\Field\ImageField
-    creonit_admin.component.field.select: Creonit\AdminBundle\Component\Field\SelectField
+    creonit_admin.component.field.default.class: Creonit\AdminBundle\Component\Field\Field
+    creonit_admin.component.field.file.class: Creonit\AdminBundle\Component\Field\FileField
+    creonit_admin.component.field.image.class: Creonit\AdminBundle\Component\Field\ImageField
+    creonit_admin.component.field.select.class: Creonit\AdminBundle\Component\Field\SelectField
+    creonit_admin.component.field.checkbox.class: Creonit\AdminBundle\Component\Field\CheckboxField
 
 services:
     creonit_admin:
@@ -25,15 +26,15 @@ services:
         arguments: ['@service_container']
 
     creonit_admin.component.storage.default:
-        class: '%creonit_admin.component.storage.default%'
+        class: '%creonit_admin.component.storage.default.class%'
         parent: creonit_admin.component.storage
 
     creonit_admin.component.storage.propel:
-        class: '%creonit_admin.component.storage.propel%'
+        class: '%creonit_admin.component.storage.propel.class%'
         parent: creonit_admin.component.storage
 
     creonit_admin.component.storage.doctrine:
-        class: '%creonit_admin.component.storage.doctrine%'
+        class: '%creonit_admin.component.storage.doctrine.class%'
         parent: creonit_admin.component.storage
 
 
@@ -43,17 +44,17 @@ services:
         arguments: ['@service_container']
 
     creonit_admin.component.pattern.editor:
-        class: '%creonit_admin.component.pattern.editor%'
+        class: '%creonit_admin.component.pattern.editor.class%'
         parent: creonit_admin.component.pattern
         shared: false
 
     creonit_admin.component.pattern.list:
-        class: '%creonit_admin.component.pattern.list%'
+        class: '%creonit_admin.component.pattern.list.class%'
         parent: creonit_admin.component.pattern
         shared: false
 
     creonit_admin.component.pattern.table:
-        class: '%creonit_admin.component.pattern.table%'
+        class: '%creonit_admin.component.pattern.table.class%'
         parent: creonit_admin.component.pattern
         shared: false
 
@@ -64,21 +65,26 @@ services:
         arguments: ['@service_container']
 
     creonit_admin.component.field.default:
-        class: '%creonit_admin.component.field.default%'
+        class: '%creonit_admin.component.field.default.class%'
         parent: creonit_admin.component.pattern
         shared: false
 
     creonit_admin.component.field.file:
-        class: '%creonit_admin.component.field.file%'
+        class: '%creonit_admin.component.field.file.class%'
         parent: creonit_admin.component.pattern
         shared: false
 
     creonit_admin.component.field.image:
-        class: '%creonit_admin.component.field.image%'
+        class: '%creonit_admin.component.field.image.class%'
         parent: creonit_admin.component.pattern
         shared: false
 
     creonit_admin.component.field.select:
-        class: '%creonit_admin.component.field.select%'
+        class: '%creonit_admin.component.field.select.class%'
+        parent: creonit_admin.component.pattern
+        shared: false
+
+    creonit_admin.component.field.checkbox:
+        class: '%creonit_admin.component.field.checkbox.class%'
         parent: creonit_admin.component.pattern
         shared: false
