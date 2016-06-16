@@ -318,6 +318,11 @@ var Creonit;
                     return "\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\"><input type=\"file\" name=\"" + name + "\"></div>\n                <div class=\"panel-body\">" + output + "</div>\n            </div>\n        ";
                 }
                 Helpers.image = image;
+                function gallery(value, options) {
+                    var name = options && options[0] ? options[0] : '', output = 'Изображение не загружено';
+                    return component('CreonitUtils.GalleryTable', { field_name: name }, {});
+                }
+                Helpers.gallery = gallery;
                 function select(value, options) {
                     var name = options && options[0] ? options[0] : '', options = value.options.map(function (option) {
                         return "<option value=\"" + option.value + "\" " + (value.value == option.value ? 'selected' : '') + ">" + option.title + "</option>";
@@ -421,9 +426,9 @@ var Creonit;
                         'textedit',
                         'file',
                         'image',
+                        'gallery',
                         'select',
                         'buttons',
-                        'image',
                         'group',
                         'tooltip',
                         'action',
@@ -605,12 +610,16 @@ var Creonit;
         (function (Component) {
             var Pattern = (function () {
                 function Pattern(component, options) {
+                    var _this = this;
                     $.extend(this, options);
                     this.component = component;
                     this.template = twig({ autoescape: true, data: this.template });
-                    this.actions = {
+                    $.each(this.actions, function (name, action) {
+                        _this.actions[name] = eval('(function(){return ' + action + '})()');
+                    });
+                    $.extend(this.actions, {
                         openComponent: this.openComponent
-                    };
+                    });
                 }
                 Pattern.prototype.openComponent = function (options) {
                     this.component.action('openComponent', options);
@@ -724,7 +733,7 @@ var Creonit;
                         });
                     });
                     if (!this.node.find('tbody').children().length) {
-                        this.node.find('tbody').html('<tr><td colspan="' + (this.node.find('thead td').length) + '">Элементы не найдены</td></tr>');
+                        this.node.find('tbody').html('<tr><td colspan="' + (this.node.find('thead td').length) + '">Список пуст</td></tr>');
                     }
                     Component.Utils.initializeComponents(this.node, this);
                 };

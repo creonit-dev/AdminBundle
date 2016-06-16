@@ -10,6 +10,7 @@ parameters:
     creonit_admin.component.field.default.class: Creonit\AdminBundle\Component\Field\Field
     creonit_admin.component.field.file.class: Creonit\AdminBundle\Component\Field\FileField
     creonit_admin.component.field.image.class: Creonit\AdminBundle\Component\Field\ImageField
+    creonit_admin.component.field.gallery.class: Creonit\AdminBundle\Component\Field\GalleryField
     creonit_admin.component.field.select.class: Creonit\AdminBundle\Component\Field\SelectField
     creonit_admin.component.field.checkbox.class: Creonit\AdminBundle\Component\Field\CheckboxField
 
@@ -19,6 +20,10 @@ services:
         arguments:
             - '@service_container'
             - '@templating'
+
+    creonit_admin.gallery_module:
+        class: Creonit\AdminBundle\UtilsModule\CreonitUtilsModule
+        tags: [{ name: creonit_admin.module }]
 
 
     creonit_admin.component.storage:
@@ -76,6 +81,11 @@ services:
 
     creonit_admin.component.field.image:
         class: '%creonit_admin.component.field.image.class%'
+        parent: creonit_admin.component.pattern
+        shared: false
+
+    creonit_admin.component.field.gallery:
+        class: '%creonit_admin.component.field.gallery.class%'
         parent: creonit_admin.component.pattern
         shared: false
 

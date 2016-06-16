@@ -11,9 +11,14 @@ module Creonit.Admin.Component {
             this.component = component;
             this.template = twig({autoescape: true, data: this.template});
 
-            this.actions = {
+            $.each(this.actions, (name, action) => {
+                this.actions[name] = eval('(function(){return ' + action + '})()');
+            });
+
+            $.extend(this.actions, {
                 openComponent: this.openComponent
-            }
+            });
+            
         }
 
         protected openComponent(options:any){

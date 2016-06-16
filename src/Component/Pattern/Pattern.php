@@ -36,6 +36,8 @@ abstract class Pattern
     /** @var Field[] */
     protected $fields = [];
 
+    protected $actions = [];
+
 
     public function __construct(ContainerInterface $container){
         $this->container = $container;
@@ -98,7 +100,8 @@ abstract class Pattern
         $pattern = [
             'name' => $this->name,
             'template' => $this->template,
-            'fields' => []
+            'fields' => [],
+            'actions' => $this->actions
         ];
 
         foreach ($this->fields as $field){
@@ -118,6 +121,11 @@ abstract class Pattern
 
     public function applySchemaAnnotation($annotation){
         switch($annotation['key']){
+            case 'action':
+                if(preg_match('/^([\w_-]+)\s*?(\(.*?\)\{.*\}\s*)$/usi', $annotation['value'], $match)){
+                    $this->setAction($match[1], 'function' . $match[2]);
+                }
+                break;
             case 'storage':
                 $this->setStorage($annotation['value']);
                 break;
@@ -127,13 +135,10 @@ abstract class Pattern
                     $name = $match[1];
                     if(isset($match[3])){
                         $language = new ExpressionLanguage();
-                        $language->register('NotBlank', function(){}, function ($options) {return new NotBlank($options);});
-                        $language->register('Email', function(){}, function ($options) {return new Email($options);});
-                        $language->register('Image', function(){}, function ($arguments, $options = []) {dump($options);return new Image($options);});
-                        $language->register('File', function(){}, function ($options) {return new File($options);});
-
-
-
+                        $language->register('NotBlank', function(){}, function ($arguments, $options) {return new NotBlank($options);});
+                        $language->register('Email', function(){}, function ($arguments, $options) {return new Email($options);});
+                        $language->register('Image', function(){}, function ($arguments, $options) {return new Image($options);});
+                        $language->register('File', function(){}, function ($arguments, $options) {return new File($options);});
 
                         $options = $language->evaluate($match[3]);
                     }else{
@@ -196,6 +201,10 @@ abstract class Pattern
                     case 'image':
                         $type = 'image';
                         break;
+                        break;
+                    case 'gallery':
+                        $type = 'gallery';
+                        break;
                     case 'select':
                     case 'radio':
                         $type = 'select';
@@ -211,7 +220,7 @@ abstract class Pattern
         };
 
         $this->template = preg_replace_callback(
-            '/\{\{\s*([\w_]+)\s*\|\s*(textarea|textedit|text|file|image|select|checkbox|radio)(\(?\)?)(.*?\}\})/usi',
+            '/\{\{\s*([\w_]+)\s*\|\s*(textarea|textedit|text|gallery|file|image|select|checkbox|radio)(\(?\)?)(.*?\}\})/usi',
             function($match) use ($createField){
                 $createField($match);
                 return "{{ {$match[1]} | {$match[2]}" . (($match[3] && $match[3] != '()') ? "('{$match[1]}', " : "('{$match[1]}')") . $match[4];
@@ -220,7 +229,7 @@ abstract class Pattern
         );
 
         $this->template = preg_replace_callback(
-            '/\(\s*([\w_]+)\s*\|\s*(textarea|textedit|text|file|image|select|checkbox|radio)(\(?\)?)(.*?\))/usi',
+            '/\(\s*([\w_]+)\s*\|\s*(textarea|textedit|text|gallery|file|image|select|checkbox|radio)(\(?\)?)(.*?\))/usi',
             function($match) use ($createField){
                 $createField($match);
                 return "( {$match[1]} | {$match[2]}" . (($match[3] && $match[3] != '()') ? "('{$match[1]}', " : "('{$match[1]}')") . $match[4];
@@ -270,5 +279,11 @@ abstract class Pattern
         $field->setName($name);
         $field->parameters->add($parameters);
         return $field;
+    }
+
+    public function setAction($name, $script)
+    {
+        $this->actions[$name] = $script;
+        return $this;
     }
 }

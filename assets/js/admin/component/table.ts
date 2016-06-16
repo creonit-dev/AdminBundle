@@ -52,7 +52,7 @@ module Creonit.Admin.Component{
 
 
             if(!this.node.find('tbody').children().length){
-                this.node.find('tbody').html('<tr><td colspan="'+(this.node.find('thead td').length)+'">Элементы не найдены</td></tr>');
+                this.node.find('tbody').html('<tr><td colspan="'+(this.node.find('thead td').length)+'">Список пуст</td></tr>');
             }
 
 

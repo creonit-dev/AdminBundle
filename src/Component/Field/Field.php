@@ -67,7 +67,7 @@ class Field
     }
 
     public function validate(){
-        return ($required = $this->parameters->get('required')) || $this->parameters->has('validation')
+        return ($required = $this->parameters->get('required')) || $this->parameters->has('constraints')
             ? $this->container->get('validator')->validate(
                 $this->data,
                 $required

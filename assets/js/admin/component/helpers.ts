@@ -146,6 +146,13 @@ module Creonit.Admin.Component.Helpers {
         `;
     }
 
+    export function gallery(value:any, options?:any){
+        var name = options && options[0] ? options[0] : '',
+            output = 'Изображение не загружено';
+
+        return component('CreonitUtils.GalleryTable', {field_name: name}, {});
+    }
+
     export function select(value:any, options?:any){
         var name = options && options[0] ? options[0] : '',
             options = value.options.map((option) => {
@@ -259,9 +266,9 @@ module Creonit.Admin.Component.Helpers {
             'textedit',
             'file',
             'image',
+            'gallery',
             'select',
             'buttons',
-            'image',
             'group',
             'tooltip',
             'action',
