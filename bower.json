@@ -15,7 +15,8 @@
     "arcticModal": "komunyako/arcticModal#dev",
     "twig.js": "0.8.8",
     "bootstrap": "^3.3.6",
-    "tinymce": "^4.3.13"
+    "tinymce": "^4.3.13",
+    "tinymce-i18n": "^4.0.0"
   },
   "overrides": {
     "twig.js": {
@@ -24,9 +25,7 @@
       ]
     },
     "tinymce": {
-      "main": [
-        "tinymce.js"
-      ]
+      "main": []
     },
     "bootstrap": {
       "main": [

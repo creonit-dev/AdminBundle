@@ -174,8 +174,27 @@ var Creonit;
                     var formId = "form" + ++Editor.increment, $form = $("<form id=\"" + formId + "\"></form>");
                     this.node.append($form);
                     this.node.find('input, textarea, select, button').attr('form', formId);
-                    this.node.find('.text-editor').wysiwyg();
                     console.log(this.node.find('.text-editor'));
+                    this.node.find('.text-editor').tinymce({
+                        doctype: 'html5',
+                        element_format: 'html',
+                        plugins: ['anchor autolink code image fullscreen hr link media paste nonbreaking visualblocks table'],
+                        resize: true,
+                        height: 150,
+                        visualblocks_default_state: true,
+                        relative_urls: false,
+                        paste_data_images: true,
+                        paste_as_text: true,
+                        keep_styles: false,
+                        language: 'ru',
+                        statusbar: false,
+                        //toolbar: 'undo redo | bold italic | styleselect | link image code fullscreen hr link media nonbreaking visualblocks table',
+                        toolbar: 'styleselect | bold italic removeformat | link unlink | bullist numlist | table | image media | code fullscreen',
+                        image_advtab: true,
+                        menubar: false,
+                        setup: function (editor) {
+                        }
+                    });
                     $form.on('submit', function (e) {
                         e.preventDefault();
                         var $form = $(e.currentTarget);
@@ -330,13 +349,14 @@ var Creonit;
                     return "<textarea class=\"form-control\" name=\"" + name + "\">" + value + "</textarea>";
                 }
                 Helpers.textarea = textarea;
-                function textedit(value) {
+                function textedit(value, _a) {
+                    var _b = _a === void 0 ? ['', {}] : _a, _c = _b[0], name = _c === void 0 ? '' : _c, _d = _b[1], options = _d === void 0 ? {} : _d;
                     /*        var name = options && options[0] ? options[0] : '';
                             var options = options && options[1] ? options[1] : {};
                     
                             value = value ? Utils.escape(value.toString()) : '';
                     */
-                    return "<div class=\"text-editor\">" + value + "</div>";
+                    return "<textarea class=\"text-editor\" name=\"" + name + "\">" + value + "</textarea>";
                 }
                 Helpers.textedit = textedit;
                 function group(body, _a) {

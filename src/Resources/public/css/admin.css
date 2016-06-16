@@ -55,6 +55,9 @@
   box-shadow: 0 -3px 1px rgba(0,0,0,0.02);
   position: relative;
 }
+.mce-panel {
+  border-color: #ccc !important;
+}
 .btn-group,
 .btn-group-vertical {
   white-space: nowrap;

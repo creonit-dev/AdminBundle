@@ -183,13 +183,13 @@ module Creonit.Admin.Component.Helpers {
         return `<textarea class="form-control" name="${name}">${value}</textarea>`;
     }
 
-    export function textedit(value:string){
+    export function textedit(value:string, [name = '', options = {}]:[string, any] = ['', {}]){
 /*        var name = options && options[0] ? options[0] : '';
         var options = options && options[1] ? options[1] : {};
 
         value = value ? Utils.escape(value.toString()) : '';
 */
-        return `<div class="text-editor">${value}</div>`;
+        return `<textarea class="text-editor" name="${name}">${value}</textarea>`;
     }
 
 

@@ -47,10 +47,34 @@ module Creonit.Admin.Component{
             this.node.find('input, textarea, select, button').attr('form', formId);
 
 
-            this.node.find('.text-editor').wysiwyg();
-
-
             console.log(this.node.find('.text-editor'));
+
+            this.node.find('.text-editor').tinymce({
+                doctype: 'html5',
+                element_format: 'html',
+                plugins: ['anchor autolink code image fullscreen hr link media paste nonbreaking visualblocks table'],
+
+                resize: true,
+                height: 150,
+
+
+                visualblocks_default_state: true,
+                relative_urls : false,
+                paste_data_images: true,
+
+                paste_as_text: true,
+                keep_styles: false,
+                language: 'ru',
+                statusbar: false,
+                //toolbar: 'undo redo | bold italic | styleselect | link image code fullscreen hr link media nonbreaking visualblocks table',
+                toolbar: 'styleselect | bold italic removeformat | link unlink | bullist numlist | table | image media | code fullscreen',
+                image_advtab: true,
+                menubar: false,
+                setup: function(editor) {
+
+                }
+            });
+
 
             $form.on('submit', (e) => {
                 e.preventDefault();

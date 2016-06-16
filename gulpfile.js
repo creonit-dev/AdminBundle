@@ -137,7 +137,7 @@ gulp.task('js', function(callback){
  * @task js:vendor
  * Generate /web/js/vendor.js
  */
-gulp.task('js:vendor', function(){
+gulp.task('js:vendor', ['js:tinymce'], function(){
     var stream = gulp.src('./assets/js/vendor/**/*.js');
 
     if(fs.existsSync('./bower.json')){
@@ -152,6 +152,49 @@ gulp.task('js:vendor', function(){
         .pipe(concat('vendor.js'))
         .pipe(gulpif(optimize, uglify()))
         .pipe(gulp.dest(outputDir + '/js'));
+
+    if(browserSync){
+        stream.pipe(browserSync.reload({stream: true}));
+    }
+
+    return stream;
+});
+
+/**
+ * @task js:tinymce
+ * Generate /web/js/tinymce/*
+ */
+gulp.task('js:tinymce', ['js:tinymce.ru'], function(){
+    var stream = gulp.src([
+        './bower_components/tinymce/tinymce.js',
+        './bower_components/tinymce/jquery.tinymce.js',
+        './bower_components/tinymce/plugins/**/*',
+        './bower_components/tinymce/skins/**/*',
+        './bower_components/tinymce/themes/**/*',
+        './bower_components/tinymce-i18n/langs/ru.js'
+    ], {base: './bower_components/tinymce'});
+
+    stream
+        .pipe(gulp.dest(outputDir + '/js/tinymce/'));
+
+    if(browserSync){
+        stream.pipe(browserSync.reload({stream: true}));
+    }
+
+    return stream;
+});
+
+/**
+ * @task js:tinymce.ru
+ * Generate /web/js/tinymce/langs/ru.js
+ */
+gulp.task('js:tinymce.ru', function(){
+    var stream = gulp.src([
+        './bower_components/tinymce-i18n/langs/ru.js'
+    ], {base: './bower_components/tinymce-i18n'});
+
+    stream
+        .pipe(gulp.dest(outputDir + '/js/tinymce/'));
 
     if(browserSync){
         stream.pipe(browserSync.reload({stream: true}));
