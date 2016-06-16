@@ -7,15 +7,14 @@ module Creonit.Admin.Component {
         protected patterns:Pattern[] = [];
         protected parent:Component;
 
-        protected schema:any;
-
         protected query:any = {};
         protected options:any = {};
         protected data:any = {};
         protected node:any;
 
+        protected schema:any;
         protected template:any;
-        protected actions:any;
+        protected actions:any = {};
 
         constructor(node:any, name:string, query:any = {}, options:any = {}, parent?:Component) {
             this.manager = Manager.getInstance();
@@ -26,18 +25,13 @@ module Creonit.Admin.Component {
             this.node = node;
             this.parent = parent;
             this.options = options;
-            this.actions = {
-                openComponent: function({name, query, options}){
-                    this.openComponent(name, query, options);
-                }
-            };
 
             this.loadSchema();
         }
 
         action(name, options) {
             if (this.actions[name]) {
-                return this.actions[name].call(this, options);
+                return this.actions[name].apply(this, options);
             } else {
                 throw new Error(`Undefined method ${name} in component ${this.name}`);
             }
@@ -48,92 +42,65 @@ module Creonit.Admin.Component {
         }
 
         getQuery() {
-            return this.query;
+            return $.extend({}, this.query);
         }
-
-        getOptions() {
-            return this.options;
-        }
-
 
         getPattern(name:string):Pattern {
             return this.patterns[name];
         }
 
         loadSchema() {
-            this.request(Request.TYPE_LOAD_SCHEMA);
+            this.request(Request.TYPE_LOAD_SCHEMA, this.getQuery(), null, (response) => {
+                this.checkResponse(response) && this.applyResponse(response);
+            });
         }
 
         loadData() {
-            this.request(Request.TYPE_LOAD_DATA);
+            this.request(Request.TYPE_LOAD_DATA, this.getQuery(), null, (response) => {
+                this.checkResponse(response) && this.applyResponse(response);
+            });
         }
 
-        sendData(data:Object) {
-            this.request(Request.TYPE_SEND_DATA, data);
-
-            this.node.find('.error-message').each(function(){
-                var $message = $(this),
-                    $group = $message.closest('.form-group');
-
-                $message.remove();
-                $group.removeClass('has-error');
-            });
+        checkResponse(response:any){
+            if (response.error) {
+                if(response.error['_']){
+                    alert(response.error['_'].join("\n"));
+                }
+                return false;
+            }else{
+                return true;
+            }
         }
 
         applyResponse(response:Response) {
             console.log(response);
-            if (response.error) {
-                //this.node.html(response.error);
 
-
-                if(response.error['_']){
-                    alert(response.error['_'].join("\n"));
-                }else{
-                    //alert('При сохранении возникли ошибки');
-                }
-
-                $.each(response.error, (scope, messages) => {
-                    if('_' == scope) return;
-                    this.node.find(`input[name=${scope}], select[name=${scope}], textarea[name=${scope}]`).each(function(){
-                        var $control = $(this),
-                            $group = $control.closest('.form-group');
-
-                        $group.addClass('has-error');
-                        $control.after(`<span class="help-block error-message">${messages.join('<br>')}</span>`);
-                    });
-                });
-
-
-
-            } else {
-
-                if (response.schema) {
-                    this.applySchema(response.schema);
-                }
-
-                if (response.success && this.options.modal) {
-                    //this.node.arcticmodal('close');
-                }
-
-                if (response.success && this.parent) {
-                    this.parent.loadData();
-                }
-
-                this.data = response.data || {};
-                this.render();
+            if (response.schema) {
+                this.applySchema(response.schema);
             }
+
+            this.data = response.data || {};
+            this.render();
         }
 
         applySchema(schema:any) {
             this.schema = schema;
-
             this.template = twig({autoescape: true, data: schema.template});
+
+            $.each(this.schema.actions, (name, action) => {
+                this.actions[name] = eval('(function(){return ' + action + '})()');
+            });
+
+            $.extend(this.actions, {
+                openComponent: this.openComponent
+            });
 
             if (schema.patterns) {
                 schema.patterns.forEach((pattern:any) => {
                     this.patterns.push(new Pattern(this, pattern));
                 });
             }
+
         }
 
         render() {
@@ -142,9 +109,8 @@ module Creonit.Admin.Component {
         }
 
 
-        protected request(type:string, data?:any) {
-
-            this.manager.request(new Request(this, type, data));
+        protected request(type:string, query:any = {}, data?:any, callback?:(response:any)=>void) {
+            this.manager.request(new Request(this, type, query, data, callback));
         }
 
         openComponent(name:string, query:any = {}, options:any = {}) {

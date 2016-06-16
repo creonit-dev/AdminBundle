@@ -101,7 +101,6 @@ abstract class Pattern
             'name' => $this->name,
             'template' => $this->template,
             'fields' => [],
-            'actions' => $this->actions
         ];
 
         foreach ($this->fields as $field){
@@ -121,11 +120,6 @@ abstract class Pattern
 
     public function applySchemaAnnotation($annotation){
         switch($annotation['key']){
-            case 'action':
-                if(preg_match('/^([\w_-]+)\s*?(\(.*?\)\{.*\}\s*)$/usi', $annotation['value'], $match)){
-                    $this->setAction($match[1], 'function' . $match[2]);
-                }
-                break;
             case 'storage':
                 $this->setStorage($annotation['value']);
                 break;
@@ -281,9 +275,4 @@ abstract class Pattern
         return $field;
     }
 
-    public function setAction($name, $script)
-    {
-        $this->actions[$name] = $script;
-        return $this;
-    }
 }

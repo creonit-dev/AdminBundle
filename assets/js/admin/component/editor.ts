@@ -47,8 +47,6 @@ module Creonit.Admin.Component{
             this.node.find('input, textarea, select, button').attr('form', formId);
 
 
-            console.log(this.node.find('.text-editor'));
-
             this.node.find('.text-editor').tinymce({
                 doctype: 'html5',
                 element_format: 'html',
@@ -89,7 +87,41 @@ module Creonit.Admin.Component{
                 });
 
 
-                this.sendData(data)
+
+                this.node.find('.error-message').each(function(){
+                    var $message = $(this),
+                        $group = $message.closest('.form-group');
+
+                    $message.remove();
+                    $group.removeClass('has-error');
+                });
+                
+                this.request('send_data', this.getQuery(), data, (response) => {
+                    if(this.checkResponse(response)){
+
+                        this.applyResponse(response);
+
+                        if (response.success && this.options.modal) {
+                            //this.node.arcticmodal('close');
+                        }
+
+                        if (response.success && this.parent) {
+                            this.parent.loadData();
+                        }
+                        
+                    }else{
+                        $.each(response.error, (scope, messages) => {
+                            if('_' == scope) return;
+                            this.node.find(`input[name=${scope}], select[name=${scope}], textarea[name=${scope}]`).each(function(){
+                                var $control = $(this),
+                                    $group = $control.closest('.form-group');
+
+                                $group.addClass('has-error');
+                                $control.after(`<span class="help-block error-message">${messages.join('<br>')}</span>`);
+                            });
+                        });
+                    }
+                });
 
             });
 

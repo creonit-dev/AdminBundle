@@ -6,6 +6,7 @@ use Creonit\AdminBundle\Component\Pattern\Pattern;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Response\ComponentResponse;
 use Creonit\AdminBundle\Exception\ConfigurationException;
+use Creonit\AdminBundle\Exception\HandleException;
 use Creonit\AdminBundle\Module;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -24,6 +25,11 @@ abstract class Component
 
     protected $template = '';
     protected $title = '';
+
+    protected $actions = [];
+
+    /** @var callable[] */
+    protected $handlers = [];
 
     public function getName(){
         if(preg_match('/\\\\(\w+)$/', get_class($this), $keyMatch)){
@@ -80,20 +86,44 @@ abstract class Component
      */
     public function handleRequest(ComponentRequest $request){
         $response = new ComponentResponse();
-        
-        if($request->getType() == ComponentRequest::TYPE_LOAD_SCHEMA){
-            $response->setSchema($this->dump());
-        }
 
-        foreach($this->patterns as $pattern){
-            if($request->getType() == ComponentRequest::TYPE_SEND_DATA) {
-                $pattern->setData($request, $response);
+        try{
+            if($request->getType() == ComponentRequest::TYPE_LOAD_SCHEMA) {
+                $response->setSchema($this->dump());
+
+                foreach ($this->patterns as $pattern) {
+                    $pattern->getData($request, $response);
+                }
+
+            }else if($request->getType() == ComponentRequest::TYPE_LOAD_DATA){
+
+                foreach ($this->patterns as $pattern) {
+                    $pattern->getData($request, $response);
+                }
+
+            }else{
+                $this->handle($request->getType(), $request, $response);
             }
 
-            $pattern->getData($request, $response);
+        } catch (HandleException $e){
+            
         }
 
         return $response;
+    }
+    
+    public function handle($handler, ComponentRequest $request, ComponentResponse $response){
+        if(!array_key_exists($handler, $this->handlers)){
+            $response->flushError(sprintf('Обработчик %s не найден', $handler));
+        }
+
+        $handler = $this->handlers[$handler];
+        $handler($request, $response);
+    }
+
+    public function setHandler($handler, callable $callable){
+        $this->handlers[$handler] = $callable;
+        return $this;
     }
 
 
@@ -154,6 +184,11 @@ abstract class Component
 
     public function applySchemaAnnotation($annotation){
         switch($annotation['key']){
+            case 'action':
+                if(preg_match('/^([\w_-]+)\s*?(\(.*?\)\{.*\}\s*)$/usi', $annotation['value'], $match)){
+                    $this->setAction($match[1], 'function' . $match[2]);
+                }
+                break;
             case 'title':
                 $this->setTitle($annotation['value']);
                 break;
@@ -165,9 +200,10 @@ abstract class Component
 
     public function dump(){
         $schema = [
-            'template' => $this->template,
             'title' => $this->getTitle(),
-            'patterns' => []
+            'template' => $this->template,
+            'actions' => $this->actions,
+            'patterns' => [],
         ];
         
         foreach ($this->patterns as $pattern){
@@ -243,5 +279,10 @@ abstract class Component
     }
 
 
+    public function setAction($name, $script)
+    {
+        $this->actions[$name] = $script;
+        return $this;
+    }
 
 }

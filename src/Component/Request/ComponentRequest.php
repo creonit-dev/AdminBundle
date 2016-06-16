@@ -8,7 +8,6 @@ class ComponentRequest
 {
     const TYPE_LOAD_SCHEMA = 'load_schema';
     const TYPE_LOAD_DATA = 'load_data';
-    const TYPE_SEND_DATA = 'send_data';
 
     protected $type;
     public $query;

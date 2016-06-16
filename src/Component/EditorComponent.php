@@ -8,6 +8,16 @@ use Creonit\AdminBundle\Component\Response\ComponentResponse;
 
 abstract class EditorComponent extends Component
 {
+    protected function prepareSchema()
+    {
+        $this->setHandler('send_data', function (ComponentRequest $request, ComponentResponse $response){
+            foreach($this->patterns as $pattern){
+                $pattern->setData($request, $response);
+                $pattern->getData($request, $response);
+            }
+        });
+    }
+
 
     public function applySchemaAnnotation($annotation)
     {

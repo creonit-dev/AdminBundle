@@ -2,6 +2,7 @@
 
 namespace Creonit\AdminBundle\Component\Response;
 
+use Creonit\AdminBundle\Exception\HandleException;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 class ComponentResponse
@@ -31,6 +32,15 @@ class ComponentResponse
         $this->error->set($scope, $error);
 
         return $this;
+    }
+
+    public function flushError($message = null, $scope = '_'){
+        if(null !== $message){
+            $this->error($message, $scope);
+        }
+        if($this->hasError()){
+            throw new HandleException();
+        }
     }
 
     public function hasError(){

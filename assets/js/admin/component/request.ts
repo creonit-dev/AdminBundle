@@ -2,7 +2,6 @@ module Creonit.Admin.Component {
     export class Request{
         public static TYPE_LOAD_SCHEMA = 'load_schema';
         public static TYPE_LOAD_DATA = 'load_data';
-        public static TYPE_SEND_DATA = 'send_data';
 
         protected static increment = 1;
 
@@ -12,22 +11,25 @@ module Creonit.Admin.Component {
         type:string;
         data:any;
         query:any;
+        
+        protected callback;
 
-        constructor(component:Component, type:string, data?:any){
+        constructor(component:Component, type:string, query:any, data?:any, callback?: (response: any) => void){
             this.id = Request.increment++;
             this.component = component;
             this.name = component.getName();
             this.type = type;
+            this.query = query;
             this.data = data;
-            this.query = $.extend({}, component.getQuery());
+            this.callback = callback.bind(component);
         }
 
         getId(){
             return this.id;
         }
 
-
         getQuery(){
+            
             return {
                 name: this.name,
                 type: this.type,
@@ -37,7 +39,7 @@ module Creonit.Admin.Component {
         }
 
         passResponse(response:Response){
-            this.component.applyResponse(response);
+            this.callback(response);
         }
     }
 }

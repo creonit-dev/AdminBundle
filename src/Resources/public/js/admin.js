@@ -28,23 +28,18 @@ var Creonit;
                     this.query = {};
                     this.options = {};
                     this.data = {};
+                    this.actions = {};
                     this.manager = Component_1.Manager.getInstance();
                     this.name = name;
                     this.query = $.extend({}, query);
                     this.node = node;
                     this.parent = parent;
                     this.options = options;
-                    this.actions = {
-                        openComponent: function (_a) {
-                            var name = _a.name, query = _a.query, options = _a.options;
-                            this.openComponent(name, query, options);
-                        }
-                    };
                     this.loadSchema();
                 }
                 Component.prototype.action = function (name, options) {
                     if (this.actions[name]) {
-                        return this.actions[name].call(this, options);
+                        return this.actions[name].apply(this, options);
                     }
                     else {
                         throw new Error("Undefined method " + name + " in component " + this.name);
@@ -54,65 +49,52 @@ var Creonit;
                     return this.name;
                 };
                 Component.prototype.getQuery = function () {
-                    return this.query;
-                };
-                Component.prototype.getOptions = function () {
-                    return this.options;
+                    return $.extend({}, this.query);
                 };
                 Component.prototype.getPattern = function (name) {
                     return this.patterns[name];
                 };
                 Component.prototype.loadSchema = function () {
-                    this.request(Component_1.Request.TYPE_LOAD_SCHEMA);
-                };
-                Component.prototype.loadData = function () {
-                    this.request(Component_1.Request.TYPE_LOAD_DATA);
-                };
-                Component.prototype.sendData = function (data) {
-                    this.request(Component_1.Request.TYPE_SEND_DATA, data);
-                    this.node.find('.error-message').each(function () {
-                        var $message = $(this), $group = $message.closest('.form-group');
-                        $message.remove();
-                        $group.removeClass('has-error');
+                    var _this = this;
+                    this.request(Component_1.Request.TYPE_LOAD_SCHEMA, this.getQuery(), null, function (response) {
+                        _this.checkResponse(response) && _this.applyResponse(response);
                     });
                 };
-                Component.prototype.applyResponse = function (response) {
+                Component.prototype.loadData = function () {
                     var _this = this;
-                    console.log(response);
+                    this.request(Component_1.Request.TYPE_LOAD_DATA, this.getQuery(), null, function (response) {
+                        _this.checkResponse(response) && _this.applyResponse(response);
+                    });
+                };
+                Component.prototype.checkResponse = function (response) {
                     if (response.error) {
-                        //this.node.html(response.error);
                         if (response.error['_']) {
                             alert(response.error['_'].join("\n"));
                         }
-                        else {
-                        }
-                        $.each(response.error, function (scope, messages) {
-                            if ('_' == scope)
-                                return;
-                            _this.node.find("input[name=" + scope + "], select[name=" + scope + "], textarea[name=" + scope + "]").each(function () {
-                                var $control = $(this), $group = $control.closest('.form-group');
-                                $group.addClass('has-error');
-                                $control.after("<span class=\"help-block error-message\">" + messages.join('<br>') + "</span>");
-                            });
-                        });
+                        return false;
                     }
                     else {
-                        if (response.schema) {
-                            this.applySchema(response.schema);
-                        }
-                        if (response.success && this.options.modal) {
-                        }
-                        if (response.success && this.parent) {
-                            this.parent.loadData();
-                        }
-                        this.data = response.data || {};
-                        this.render();
+                        return true;
                     }
+                };
+                Component.prototype.applyResponse = function (response) {
+                    console.log(response);
+                    if (response.schema) {
+                        this.applySchema(response.schema);
+                    }
+                    this.data = response.data || {};
+                    this.render();
                 };
                 Component.prototype.applySchema = function (schema) {
                     var _this = this;
                     this.schema = schema;
                     this.template = twig({ autoescape: true, data: schema.template });
+                    $.each(this.schema.actions, function (name, action) {
+                        _this.actions[name] = eval('(function(){return ' + action + '})()');
+                    });
+                    $.extend(this.actions, {
+                        openComponent: this.openComponent
+                    });
                     if (schema.patterns) {
                         schema.patterns.forEach(function (pattern) {
                             _this.patterns.push(new Component_1.Pattern(_this, pattern));
@@ -121,8 +103,9 @@ var Creonit;
                 };
                 Component.prototype.render = function () {
                 };
-                Component.prototype.request = function (type, data) {
-                    this.manager.request(new Component_1.Request(this, type, data));
+                Component.prototype.request = function (type, query, data, callback) {
+                    if (query === void 0) { query = {}; }
+                    this.manager.request(new Component_1.Request(this, type, query, data, callback));
                 };
                 Component.prototype.openComponent = function (name, query, options) {
                     var _this = this;
@@ -174,7 +157,6 @@ var Creonit;
                     var formId = "form" + ++Editor.increment, $form = $("<form id=\"" + formId + "\"></form>");
                     this.node.append($form);
                     this.node.find('input, textarea, select, button').attr('form', formId);
-                    console.log(this.node.find('.text-editor'));
                     this.node.find('.text-editor').tinymce({
                         doctype: 'html5',
                         element_format: 'html',
@@ -205,7 +187,32 @@ var Creonit;
                                 data[$(this).attr('name')] = $(this)[0].files[0];
                             }
                         });
-                        _this.sendData(data);
+                        _this.node.find('.error-message').each(function () {
+                            var $message = $(this), $group = $message.closest('.form-group');
+                            $message.remove();
+                            $group.removeClass('has-error');
+                        });
+                        _this.request('send_data', _this.getQuery(), data, function (response) {
+                            if (_this.checkResponse(response)) {
+                                _this.applyResponse(response);
+                                if (response.success && _this.options.modal) {
+                                }
+                                if (response.success && _this.parent) {
+                                    _this.parent.loadData();
+                                }
+                            }
+                            else {
+                                $.each(response.error, function (scope, messages) {
+                                    if ('_' == scope)
+                                        return;
+                                    _this.node.find("input[name=" + scope + "], select[name=" + scope + "], textarea[name=" + scope + "]").each(function () {
+                                        var $control = $(this), $group = $control.closest('.form-group');
+                                        $group.addClass('has-error');
+                                        $control.after("<span class=\"help-block error-message\">" + messages.join('<br>') + "</span>");
+                                    });
+                                });
+                            }
+                        });
                     });
                     Component.Utils.initializeComponents(this.node, this);
                 };
@@ -226,7 +233,13 @@ var Creonit;
             (function (Helpers) {
                 var increment = 0;
                 function cleanOptions(options) {
-                    var result = {};
+                    var result;
+                    if ($.isArray(options)) {
+                        result = [];
+                    }
+                    else {
+                        result = {};
+                    }
                     $.each(options, function (key, value) {
                         if (key == '_keys') {
                             return;
@@ -282,12 +295,11 @@ var Creonit;
                 }
                 Helpers.tooltip = tooltip;
                 function action(value, _a) {
-                    var name = _a[0], _b = _a[1], options = _b === void 0 ? {} : _b;
+                    var name = _a[0], options = _a.slice(1);
                     if (!value) {
                         return '';
                     }
-                    options = JSON.stringify(cleanOptions(options));
-                    var injection = "js-component-action data-name=\"" + name + "\" data-options='" + options + "'";
+                    var injection = "js-component-action data-name=\"" + name + "\" data-options='" + JSON.stringify(cleanOptions(options)) + "'";
                     if (typeof value == 'object' && value.twig_function) {
                         return value.toString().replace(/<(div|button)/, "<$1 " + injection);
                     }
@@ -299,7 +311,7 @@ var Creonit;
                 Helpers.action = action;
                 function open(value, _a) {
                     var name = _a[0], _b = _a[1], query = _b === void 0 ? {} : _b, _c = _a[2], options = _c === void 0 ? {} : _c;
-                    return action(value, ['openComponent', { name: name, query: query, options: options }]);
+                    return action(value, ['openComponent', name, query, options]);
                 }
                 Helpers.open = open;
                 function file(value, options) {
@@ -610,28 +622,10 @@ var Creonit;
         (function (Component) {
             var Pattern = (function () {
                 function Pattern(component, options) {
-                    var _this = this;
                     $.extend(this, options);
                     this.component = component;
                     this.template = twig({ autoescape: true, data: this.template });
-                    $.each(this.actions, function (name, action) {
-                        _this.actions[name] = eval('(function(){return ' + action + '})()');
-                    });
-                    $.extend(this.actions, {
-                        openComponent: this.openComponent
-                    });
                 }
-                Pattern.prototype.openComponent = function (options) {
-                    this.component.action('openComponent', options);
-                };
-                Pattern.prototype.action = function (name, options) {
-                    if (this.actions[name]) {
-                        return this.actions[name].call(this, options);
-                    }
-                    else {
-                        throw new Error("Undefined method " + name + " in pattern " + this.name);
-                    }
-                };
                 return Pattern;
             }());
             Component.Pattern = Pattern;
@@ -645,13 +639,14 @@ var Creonit;
         var Component;
         (function (Component) {
             var Request = (function () {
-                function Request(component, type, data) {
+                function Request(component, type, query, data, callback) {
                     this.id = Request.increment++;
                     this.component = component;
                     this.name = component.getName();
                     this.type = type;
+                    this.query = query;
                     this.data = data;
-                    this.query = $.extend({}, component.getQuery());
+                    this.callback = callback.bind(component);
                 }
                 Request.prototype.getId = function () {
                     return this.id;
@@ -665,11 +660,10 @@ var Creonit;
                     };
                 };
                 Request.prototype.passResponse = function (response) {
-                    this.component.applyResponse(response);
+                    this.callback(response);
                 };
                 Request.TYPE_LOAD_SCHEMA = 'load_schema';
                 Request.TYPE_LOAD_DATA = 'load_data';
-                Request.TYPE_SEND_DATA = 'send_data';
                 Request.increment = 1;
                 return Request;
             }());
@@ -716,21 +710,16 @@ var Creonit;
                         });
                     }
                     node.html(this.template.render($.extend({}, this.data, { parameters: this.query })));
+                    this.patterns.forEach(function (pattern) {
+                        _this.data.entities.forEach(function (entity) {
+                            var $entity = $('<tr>' + pattern.template.render(entity) + '</tr>');
+                            _this.node.find('tbody').append($entity);
+                        });
+                    });
                     this.node.find('[js-component-action]').on('click', function (e) {
                         e.preventDefault();
                         var $action = $(e.currentTarget);
                         _this.action($action.data('name'), $action.data('options'));
-                    });
-                    this.patterns.forEach(function (pattern) {
-                        _this.data.entities.forEach(function (entity) {
-                            var $entity = $('<tr>' + pattern.template.render(entity) + '</tr>');
-                            $entity.find('[js-component-action]').on('click', function (e) {
-                                e.preventDefault();
-                                var $action = $(this);
-                                pattern.action($action.data('name'), $action.data('options'));
-                            });
-                            _this.node.find('tbody').append($entity);
-                        });
                     });
                     if (!this.node.find('tbody').children().length) {
                         this.node.find('tbody').html('<tr><td colspan="' + (this.node.find('thead td').length) + '">Список пуст</td></tr>');

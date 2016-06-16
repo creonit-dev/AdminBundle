@@ -3,7 +3,14 @@ module Creonit.Admin.Component.Helpers {
     var increment = 0;
 
     function cleanOptions(options:any){
-        var result = {};
+        var result;
+
+        if($.isArray(options)){
+            result = [];
+        }else{
+            result = {};
+        }
+
         $.each(options, function(key, value){
             if(key == '_keys'){
                 return;
@@ -74,14 +81,12 @@ module Creonit.Admin.Component.Helpers {
         return value.toString().replace(/<(a|div|button)/, `<$1 ${injection}`)
     }
 
-    export function action(value:any, [name, options = {}]){
+    export function action(value:any, [name, ...options] : [string, any]){
         if(!value){
             return '';
         }
 
-        options = JSON.stringify(cleanOptions(options));
-
-        let injection = `js-component-action data-name="${name}" data-options='${options}'`;
+        let injection = `js-component-action data-name="${name}" data-options='${JSON.stringify(cleanOptions(options))}'`;
 
         if(typeof value == 'object' && value.twig_function){
             return value.toString().replace(/<(div|button)/, `<$1 ${injection}`)
@@ -95,7 +100,7 @@ module Creonit.Admin.Component.Helpers {
     }
 
     export function open(value:any, [name, query = {}, options = {}]){
-        return action(value, ['openComponent', {name: name, query: query, options: options}]);
+        return action(value, ['openComponent', name, query, options]);
     }
 
 
