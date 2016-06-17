@@ -73,6 +73,9 @@
   color: #999;
   margin-left: 0.75em;
 }
+.table-row-visible:not(.mod-visible) {
+  opacity: 0.3;
+}
 body {
   padding-top: 50px;
 }

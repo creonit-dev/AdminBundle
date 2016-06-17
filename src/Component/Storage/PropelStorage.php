@@ -237,4 +237,9 @@ class PropelStorage extends Storage
     {
         return $entity->getPrimaryKey();
     }
+
+    public function deleteEntity($entity)
+    {
+        return $entity->delete();
+    }
 }

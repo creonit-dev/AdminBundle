@@ -44,6 +44,10 @@ abstract class Component
         return $this->patterns[$name];
     }
 
+    public function hasPattern($name){
+        return array_key_exists($name, $this->patterns);
+    }
+
     public function addPattern(Pattern $pattern){
         $this->patterns[$pattern->getName()] = $pattern->setComponent($this);
         return $this;

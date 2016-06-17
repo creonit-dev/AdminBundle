@@ -81,7 +81,8 @@ class EditorPattern extends Pattern
 
         $response->sendSuccess();
 
-        $request->query->set('key', $storage->getKey($entity));
+        $request->query->set('key', $key = $storage->getKey($entity));
+        $response->query->set('key', $key);
 
     }
 

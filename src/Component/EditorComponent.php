@@ -13,7 +13,9 @@ abstract class EditorComponent extends Component
         $this->setHandler('send_data', function (ComponentRequest $request, ComponentResponse $response){
             foreach($this->patterns as $pattern){
                 $pattern->setData($request, $response);
-                $pattern->getData($request, $response);
+                if(!$request->query->has('closeAfterSave')){
+                    $pattern->getData($request, $response);
+                }
             }
         });
     }
@@ -22,8 +24,6 @@ abstract class EditorComponent extends Component
     public function applySchemaAnnotation($annotation)
     {
         switch($annotation['key']){
-            case 'jopa':
-                break;
             default:
                 parent::applySchemaAnnotation($annotation);
         }

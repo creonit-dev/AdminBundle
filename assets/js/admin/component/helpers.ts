@@ -35,33 +35,23 @@ module Creonit.Admin.Component.Helpers {
     // Twig Functions
 
     export function button(caption:string, {size = '', type = 'default', icon = '', className = ''} = {}){
-        return `
-            <button 
+        return `<button 
                 class="btn btn-${type} ${size ? `btn-${size}` : ''} ${className}" 
                 type="button" 
             >
                 `+ (icon ? `<i class="${resolveIconClass(icon)}"></i>${caption ? ' ' : ''}` : '') +`${caption}
-            </button>
-        `;
+            </button>`;
     }
 
     export function submit(caption:string, {size = '', type = 'primary', icon = '', className = ''} = {}){
         return `
             <button 
-                class="btn btn-${type} ${size ? `btn-${size}` : ''}" 
+                class="btn btn-${type} ${size ? `btn-${size}` : ''} ${className}" 
                 type="submit" 
             >
                 `+ (icon ? `<i class="${resolveIconClass(icon)}"></i>${caption ? ' ' : ''}` : '') +`${caption}
             </button>
         `;
-    }
-
-    export function button_visible(){
-        return `<button class="btn btn-default btn-xs" type="submit"><i class="fa fa-eye"></i></button>`;
-    }
-
-    export function button_delete(){
-        return `<button class="btn btn-danger btn-xs" type="submit"><i class="fa fa-remove"></i></button>`;
     }
 
     export function component(name:string, query:any, options:any){
@@ -88,12 +78,12 @@ module Creonit.Admin.Component.Helpers {
 
         let injection = `js-component-action data-name="${name}" data-options='${JSON.stringify(cleanOptions(options))}'`;
 
-        if(typeof value == 'object' && value.twig_function){
-            return value.toString().replace(/<(div|button)/, `<$1 ${injection}`)
-        }
-
         if(typeof value != 'object' || !value.twig_markup){
             value = Utils.escape(value);
+        }
+
+        if(value.toString().match(/<(a|button)/)){
+            return value.toString().replace(/<(a|button)/, `<$1 ${injection}`)
         }
 
         return `<a href="#" ${injection}>${value}</a>`;
@@ -104,9 +94,8 @@ module Creonit.Admin.Component.Helpers {
     }
 
 
-    export function file(value:any, options?:any){
-        var name = options && options[0] ? options[0] : '',
-            output = 'Файл не загружен';
+    export function file(value:any, [name, options = {}]){
+        var output = 'Файл не загружен';
 
         if(value){
             output = `
@@ -128,19 +117,23 @@ module Creonit.Admin.Component.Helpers {
         `;
     }
 
-    export function image(value:any, options?:any){
-        var name = options && options[0] ? options[0] : '',
-            output = 'Изображение не загружено';
+    export function image(value:any, [name, options = {}]:[string, any] = ['', {}]){
+        options = $.extend({deletable: true}, options);
+
+        var output = 'Изображение не загружено';
 
         if(value){
-            output = `
-                <a href="${value.path}/${value.name}" target="_blank">${value.preview}</a>
-                <div class="checkbox">
-                    <label class="small">
-                        <input type="checkbox" name="${name}__delete"> Удалить изображение
-                    </label>
-                </div>
-            `;
+            output = `<a href="${value.path}/${value.name}" target="_blank">${value.preview}</a>`;
+
+            if(options.deletable){
+                output += `   
+                    <div class="checkbox">
+                        <label class="small">
+                            <input type="checkbox" name="${name}__delete"> Удалить изображение
+                        </label>
+                    </div>
+                `;
+            }
         }
 
         return `
@@ -155,7 +148,7 @@ module Creonit.Admin.Component.Helpers {
         var name = options && options[0] ? options[0] : '',
             output = 'Изображение не загружено';
 
-        return component('CreonitUtils.GalleryTable', {field_name: name}, {});
+        return component('CreonitUtils.GalleryTable', {field_name: name, gallery_id: value}, {}) + `<input type="hidden" name="${name}" value="${value}">`;
     }
 
     export function select(value:any, options?:any){
@@ -245,8 +238,7 @@ module Creonit.Admin.Component.Helpers {
         [
             'button',
             'submit',
-            'button_visible',
-            'button_delete',
+            'buttons',
             'component',
             'panel',
             'group',

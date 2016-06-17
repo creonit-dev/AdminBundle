@@ -48,7 +48,7 @@ class ImageField extends Field
     {
         if(is_array($data)){
             $data['size'] = $this->container->get('creonit_utils.file_manager')->formatSize($data['size']);
-            $data['preview'] = $this->container->get('image.handling')->open("{$this->getWebDir()}/{$data['path']}/{$data['name']}")->cropResize(100, 100)->html();
+            $data['preview'] = $this->container->get('image.handling')->open("{$this->getWebDir()}/{$data['path']}/{$data['name']}")->cropResize(100, 100)->html('', 'png');
         }
         return $data;
     }

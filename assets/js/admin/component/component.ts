@@ -79,6 +79,10 @@ module Creonit.Admin.Component {
                 this.applySchema(response.schema);
             }
 
+            if(response.query){
+                $.extend(this.query, response.query);
+            }
+            
             this.data = response.data || {};
             this.render();
         }

@@ -1,7 +1,6 @@
 parameters:
     creonit_admin.component.storage.default.class: '%creonit_admin.component.storage.propel.class%'
     creonit_admin.component.storage.propel.class: Creonit\AdminBundle\Component\Storage\PropelStorage
-    creonit_admin.component.storage.doctrine.class: Creonit\AdminBundle\Component\Storage\DoctrineStorage
 
     creonit_admin.component.pattern.editor.class: Creonit\AdminBundle\Component\Pattern\EditorPattern
     creonit_admin.component.pattern.list.class: Creonit\AdminBundle\Component\Pattern\ListPattern
@@ -37,11 +36,6 @@ services:
     creonit_admin.component.storage.propel:
         class: '%creonit_admin.component.storage.propel.class%'
         parent: creonit_admin.component.storage
-
-    creonit_admin.component.storage.doctrine:
-        class: '%creonit_admin.component.storage.doctrine.class%'
-        parent: creonit_admin.component.storage
-
 
 
     creonit_admin.component.pattern:

@@ -118,5 +118,14 @@ class Field
         return $this->data;
     }
 
+    /**
+     * @return mixed
+     */
+    public function setData($data)
+    {
+        $this->data = $data;
+        return $this;
+    }
+
 
 }

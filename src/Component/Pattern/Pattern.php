@@ -129,10 +129,10 @@ abstract class Pattern
                     $name = $match[1];
                     if(isset($match[3])){
                         $language = new ExpressionLanguage();
-                        $language->register('NotBlank', function(){}, function ($arguments, $options) {return new NotBlank($options);});
-                        $language->register('Email', function(){}, function ($arguments, $options) {return new Email($options);});
-                        $language->register('Image', function(){}, function ($arguments, $options) {return new Image($options);});
-                        $language->register('File', function(){}, function ($arguments, $options) {return new File($options);});
+                        $language->register('NotBlank', function(){}, function ($arguments, $options = []) {return new NotBlank($options);});
+                        $language->register('Email', function(){}, function ($arguments, $options = []) {return new Email($options);});
+                        $language->register('Image', function(){}, function ($arguments, $options = []) {return new Image($options);});
+                        $language->register('File', function(){}, function ($arguments, $options = []) {return new File($options);});
 
                         $options = $language->evaluate($match[3]);
                     }else{

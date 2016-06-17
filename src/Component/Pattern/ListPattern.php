@@ -28,7 +28,8 @@ class ListPattern extends Pattern
         foreach ($entities as $entity){
             $entityData = [];
             foreach ($this->fields as $field){
-                $entityData[$field->getName()] = $storage->getData($entity, $field);
+                $field->load($storage, $entity);
+                $entityData[$field->getName()] = $field->getData();
             }
             $entityData['_key'] = $storage->getKey($entity);
             $data[] = $this->decorate($entityData, $entity);

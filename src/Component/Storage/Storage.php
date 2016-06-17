@@ -57,5 +57,7 @@ abstract class Storage
      */
     abstract public function saveEntity($entity);
 
+    abstract public function deleteEntity($entity);
+    
     abstract public function getKey($entity);
 }

@@ -1,5 +1,7 @@
 module Creonit.Admin.Component.Utils{
     export const ATTR_HANDLER = 'js-component';
+    var increment = 0;
+
 
     export function escape(value:any){
         return value.toString().replace(/&/g, "&amp;")
@@ -41,5 +43,14 @@ module Creonit.Admin.Component.Utils{
             node.data('creonit-component-initialized', true);
         });
     }
-    
+
+    export function raw(string){
+        var output:any = new String(string);
+        output.twig_markup = true;
+        return output;
+    }
+
+    export function generateId(){
+        return ++increment;
+    }
 }

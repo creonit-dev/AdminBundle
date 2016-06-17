@@ -3,6 +3,18 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+$.arcticmodal('setDefault', {
+    modal: false,
+    closeOnEsc: false,
+    openEffect: {
+        type: 'none'
+    },
+    closeEffect: {
+        type: 'none'
+    },
+    //fixed: '.header.is-fixed',
+    closeOnOverlayClick: true
+});
 $.fn.reverse = [].reverse;
 $.fn.serializeObject = function () {
     var json = {};
@@ -82,6 +94,9 @@ var Creonit;
                     if (response.schema) {
                         this.applySchema(response.schema);
                     }
+                    if (response.query) {
+                        $.extend(this.query, response.query);
+                    }
                     this.data = response.data || {};
                     this.render();
                 };
@@ -143,13 +158,13 @@ var Creonit;
                     if (this.options.modal) {
                         this.node.append(node = $("\n                    <div class=\"modal-content\"> \n                        <div class=\"modal-header\"> \n                            <button type=\"button\" class=\"close\"><span>\u00D7</span></button> \n                            <h4 class=\"modal-title\">" + this.schema.title + "</h4> \n                        </div> \n                        \n                        <div class=\"modal-body\">\n                        </div>\n                   </div>    \n                "));
                         node = node.find('.modal-body');
-                        this.node.find('.modal-content').append("<div class=\"modal-footer\">" + Component.Helpers.submit('Сохранить и закрыть') + " " + Component.Helpers.submit('Сохранить') + " " + Component.Helpers.button('Закрыть') + "</div>");
+                        this.node.find('.modal-content').append("<div class=\"modal-footer\">" + Component.Helpers.submit('Сохранить и закрыть', { className: 'editor-save-and-close' }) + " " + Component.Helpers.submit('Сохранить') + " " + Component.Helpers.button('Закрыть') + "</div>");
                         this.node.find('.modal-footer button[type=button], .modal-header .close').on('click', function () {
                             _this.node.arcticmodal('close');
                         });
                     }
                     this.patterns.forEach(function (pattern) {
-                        node.append(pattern.template.render($.extend({}, _this.data, { parameters: _this.query })));
+                        node.append(pattern.template.render($.extend({}, _this.data, { _query: _this.query })));
                     });
                     if (!this.options.modal) {
                         this.node.append(Component.Helpers.submit('Сохранить'));
@@ -177,10 +192,16 @@ var Creonit;
                         setup: function (editor) {
                         }
                     });
+                    this.node.find('.editor-save-and-close').on('click', function (e) {
+                        $(e.currentTarget).attr('clicked', true);
+                    });
                     $form.on('submit', function (e) {
                         e.preventDefault();
-                        var $form = $(e.currentTarget);
-                        var data = $form.serializeObject();
+                        var $form = $(e.currentTarget), data = $form.serializeObject(), query = _this.getQuery(), $buttonCloseAfterSave = _this.node.find('.editor-save-and-close[clicked]'), closeAfterSave = !!$buttonCloseAfterSave.length;
+                        $buttonCloseAfterSave.removeAttr('clicked');
+                        if (closeAfterSave) {
+                            query.closeAfterSave = 1;
+                        }
                         _this.node.find("input[type=\"file\"][form=\"" + formId + "\"]").each(function () {
                             var value = $(this)[0].files[0];
                             if (value) {
@@ -192,13 +213,15 @@ var Creonit;
                             $message.remove();
                             $group.removeClass('has-error');
                         });
-                        _this.request('send_data', _this.getQuery(), data, function (response) {
+                        _this.request('send_data', query, data, function (response) {
                             if (_this.checkResponse(response)) {
-                                _this.applyResponse(response);
-                                if (response.success && _this.options.modal) {
+                                if (closeAfterSave) {
+                                    _this.node.arcticmodal('close');
                                 }
-                                if (response.success && _this.parent) {
-                                    _this.parent.loadData();
+                                else {
+                                    _this.applyResponse(response);
+                                }
+                                if (_this.parent) {
                                 }
                             }
                             else {
@@ -213,6 +236,9 @@ var Creonit;
                                 });
                             }
                         });
+                        if (_this.parent) {
+                            _this.parent.loadData();
+                        }
                     });
                     Component.Utils.initializeComponents(this.node, this);
                 };
@@ -262,22 +288,14 @@ var Creonit;
                 // Twig Functions
                 function button(caption, _a) {
                     var _b = _a === void 0 ? {} : _a, _c = _b.size, size = _c === void 0 ? '' : _c, _d = _b.type, type = _d === void 0 ? 'default' : _d, _e = _b.icon, icon = _e === void 0 ? '' : _e, _f = _b.className, className = _f === void 0 ? '' : _f;
-                    return ("\n            <button \n                class=\"btn btn-" + type + " " + (size ? "btn-" + size : '') + " " + className + "\" \n                type=\"button\" \n            >\n                ") + (icon ? "<i class=\"" + resolveIconClass(icon) + "\"></i>" + (caption ? ' ' : '') : '') + (caption + "\n            </button>\n        ");
+                    return ("<button \n                class=\"btn btn-" + type + " " + (size ? "btn-" + size : '') + " " + className + "\" \n                type=\"button\" \n            >\n                ") + (icon ? "<i class=\"" + resolveIconClass(icon) + "\"></i>" + (caption ? ' ' : '') : '') + (caption + "\n            </button>");
                 }
                 Helpers.button = button;
                 function submit(caption, _a) {
                     var _b = _a === void 0 ? {} : _a, _c = _b.size, size = _c === void 0 ? '' : _c, _d = _b.type, type = _d === void 0 ? 'primary' : _d, _e = _b.icon, icon = _e === void 0 ? '' : _e, _f = _b.className, className = _f === void 0 ? '' : _f;
-                    return ("\n            <button \n                class=\"btn btn-" + type + " " + (size ? "btn-" + size : '') + "\" \n                type=\"submit\" \n            >\n                ") + (icon ? "<i class=\"" + resolveIconClass(icon) + "\"></i>" + (caption ? ' ' : '') : '') + (caption + "\n            </button>\n        ");
+                    return ("\n            <button \n                class=\"btn btn-" + type + " " + (size ? "btn-" + size : '') + " " + className + "\" \n                type=\"submit\" \n            >\n                ") + (icon ? "<i class=\"" + resolveIconClass(icon) + "\"></i>" + (caption ? ' ' : '') : '') + (caption + "\n            </button>\n        ");
                 }
                 Helpers.submit = submit;
-                function button_visible() {
-                    return "<button class=\"btn btn-default btn-xs\" type=\"submit\"><i class=\"fa fa-eye\"></i></button>";
-                }
-                Helpers.button_visible = button_visible;
-                function button_delete() {
-                    return "<button class=\"btn btn-danger btn-xs\" type=\"submit\"><i class=\"fa fa-remove\"></i></button>";
-                }
-                Helpers.button_delete = button_delete;
                 function component(name, query, options) {
                     query = JSON.stringify(cleanOptions(query));
                     options = JSON.stringify(cleanOptions(options));
@@ -300,11 +318,11 @@ var Creonit;
                         return '';
                     }
                     var injection = "js-component-action data-name=\"" + name + "\" data-options='" + JSON.stringify(cleanOptions(options)) + "'";
-                    if (typeof value == 'object' && value.twig_function) {
-                        return value.toString().replace(/<(div|button)/, "<$1 " + injection);
-                    }
                     if (typeof value != 'object' || !value.twig_markup) {
                         value = Component.Utils.escape(value);
+                    }
+                    if (value.toString().match(/<(a|button)/)) {
+                        return value.toString().replace(/<(a|button)/, "<$1 " + injection);
                     }
                     return "<a href=\"#\" " + injection + ">" + value + "</a>";
                 }
@@ -314,25 +332,31 @@ var Creonit;
                     return action(value, ['openComponent', name, query, options]);
                 }
                 Helpers.open = open;
-                function file(value, options) {
-                    var name = options && options[0] ? options[0] : '', output = 'Файл не загружен';
+                function file(value, _a) {
+                    var name = _a[0], _b = _a[1], options = _b === void 0 ? {} : _b;
+                    var output = 'Файл не загружен';
                     if (value) {
                         output = "\n                <a href=\"" + value.path + "/" + value.name + "\" target=\"_blank\">" + value.original_name + "</a> (" + value.size + ")\n                <div class=\"checkbox\">\n                    <label class=\"small\">\n                        <input type=\"checkbox\" name=\"" + name + "__delete\"> \u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0444\u0430\u0439\u043B\n                    </label>\n                </div>\n            ";
                     }
                     return "\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\"><input type=\"file\" name=\"" + name + "\"></div>\n                <div class=\"panel-body\">" + output + "</div>\n            </div>\n        ";
                 }
                 Helpers.file = file;
-                function image(value, options) {
-                    var name = options && options[0] ? options[0] : '', output = 'Изображение не загружено';
+                function image(value, _a) {
+                    var _b = _a === void 0 ? ['', {}] : _a, name = _b[0], _c = _b[1], options = _c === void 0 ? {} : _c;
+                    options = $.extend({ deletable: true }, options);
+                    var output = 'Изображение не загружено';
                     if (value) {
-                        output = "\n                <a href=\"" + value.path + "/" + value.name + "\" target=\"_blank\">" + value.preview + "</a>\n                <div class=\"checkbox\">\n                    <label class=\"small\">\n                        <input type=\"checkbox\" name=\"" + name + "__delete\"> \u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435\n                    </label>\n                </div>\n            ";
+                        output = "<a href=\"" + value.path + "/" + value.name + "\" target=\"_blank\">" + value.preview + "</a>";
+                        if (options.deletable) {
+                            output += "   \n                    <div class=\"checkbox\">\n                        <label class=\"small\">\n                            <input type=\"checkbox\" name=\"" + name + "__delete\"> \u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435\n                        </label>\n                    </div>\n                ";
+                        }
                     }
                     return "\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\"><input type=\"file\" name=\"" + name + "\"></div>\n                <div class=\"panel-body\">" + output + "</div>\n            </div>\n        ";
                 }
                 Helpers.image = image;
                 function gallery(value, options) {
                     var name = options && options[0] ? options[0] : '', output = 'Изображение не загружено';
-                    return component('CreonitUtils.GalleryTable', { field_name: name }, {});
+                    return component('CreonitUtils.GalleryTable', { field_name: name, gallery_id: value }, {}) + ("<input type=\"hidden\" name=\"" + name + "\" value=\"" + value + "\">");
                 }
                 Helpers.gallery = gallery;
                 function select(value, options) {
@@ -409,8 +433,7 @@ var Creonit;
                     [
                         'button',
                         'submit',
-                        'button_visible',
-                        'button_delete',
+                        'buttons',
                         'component',
                         'panel',
                         'group',
@@ -697,7 +720,39 @@ var Creonit;
                 __extends(Table, _super);
                 function Table() {
                     _super.apply(this, arguments);
+                    this.helpers = function (aa) {
+                        var output = new String("<b>3333" + aa + "</b>");
+                        output.twig_markup = true;
+                        return output;
+                    };
                 }
+                Table.prototype.applySchema = function (schema) {
+                    var _this = this;
+                    _super.prototype.applySchema.call(this, schema);
+                    this.actions['_visible'] = function (options) {
+                        var $row = _this.findRowById(options.row_id), $button = $row.find('.table-row-visible'), visible = !$button.hasClass('mod-visible');
+                        $button.toggleClass('mod-visible', visible);
+                        _this.request('_visible', { key: options.key, pattern: options.pattern }, { visible: visible }, function (response) {
+                            if (_this.checkResponse(response)) {
+                                $button.toggleClass('mod-visible', response.data.visible);
+                            }
+                        });
+                    };
+                    this.actions['_delete'] = function (options) {
+                        if (!confirm('Элемент будет удален, продолжить?')) {
+                            return;
+                        }
+                        _this.findRowById(options.row_id).remove();
+                        _this.request('_delete', options, null, function (response) {
+                            _this.checkResponse(response);
+                        });
+                        _this.loadData();
+                    };
+                };
+                Table.prototype.findRowById = function (id) {
+                    var result = this.node.find("tr[data-row-id=" + id + "]:eq(0)");
+                    return result.length ? result : null;
+                };
                 Table.prototype.render = function () {
                     var _this = this;
                     this.node.empty();
@@ -709,10 +764,18 @@ var Creonit;
                             _this.node.arcticmodal('close');
                         });
                     }
-                    node.html(this.template.render($.extend({}, this.data, { parameters: this.query })));
+                    node.html(this.template.render($.extend({}, this.data, { _query: this.query })));
                     this.patterns.forEach(function (pattern) {
                         _this.data.entities.forEach(function (entity) {
-                            var $entity = $('<tr>' + pattern.template.render(entity) + '</tr>');
+                            var rowId = Component.Utils.generateId();
+                            var $entity = $(("<tr data-row-id=\"" + rowId + "\">") + pattern.template.render($.extend({}, entity, {
+                                _visible: function () {
+                                    return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'eye', className: "table-row-visible " + (entity.visible ? 'mod-visible' : '') })), ['_visible', { pattern: pattern.name, key: entity._key, row_id: rowId }]));
+                                },
+                                _delete: function () {
+                                    return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'remove' })), ['_delete', { pattern: pattern.name, key: entity._key, row_id: rowId }]));
+                                }
+                            })) + '</tr>');
                             _this.node.find('tbody').append($entity);
                         });
                     });
@@ -741,6 +804,7 @@ var Creonit;
             var Utils;
             (function (Utils) {
                 Utils.ATTR_HANDLER = 'js-component';
+                var increment = 0;
                 function escape(value) {
                     return value.toString().replace(/&/g, "&amp;")
                         .replace(/</g, "&lt;")
@@ -777,6 +841,16 @@ var Creonit;
                     });
                 }
                 Utils.initializeComponents = initializeComponents;
+                function raw(string) {
+                    var output = new String(string);
+                    output.twig_markup = true;
+                    return output;
+                }
+                Utils.raw = raw;
+                function generateId() {
+                    return ++increment;
+                }
+                Utils.generateId = generateId;
             })(Utils = Component.Utils || (Component.Utils = {}));
         })(Component = Admin.Component || (Admin.Component = {}));
     })(Admin = Creonit.Admin || (Creonit.Admin = {}));

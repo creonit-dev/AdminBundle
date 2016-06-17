@@ -35,6 +35,13 @@ class TablePattern extends ListPattern
     public function prepareTemplate()
     {
         $this->setTemplate(implode('', array_map(function($column){return "<td>{$column}</td>";}, $this->columns)));
+
+        if(preg_match('/_visible()/usi', $this->template)){
+            if(!$this->hasField('visible')){
+                $this->addField($this->createField('visible'));
+            }
+        }
+
         return parent::prepareTemplate();
     }
 

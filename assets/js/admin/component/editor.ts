@@ -22,7 +22,7 @@ module Creonit.Admin.Component{
                 `));
                 node = node.find('.modal-body');
 
-                this.node.find('.modal-content').append(`<div class="modal-footer">${Helpers.submit('Сохранить и закрыть')} ${Helpers.submit('Сохранить')} ${Helpers.button('Закрыть')}</div>`);
+                this.node.find('.modal-content').append(`<div class="modal-footer">${Helpers.submit('Сохранить и закрыть', {className: 'editor-save-and-close'})} ${Helpers.submit('Сохранить')} ${Helpers.button('Закрыть')}</div>`);
 
                 this.node.find('.modal-footer button[type=button], .modal-header .close').on('click', () => {
                     this.node.arcticmodal('close');
@@ -32,7 +32,7 @@ module Creonit.Admin.Component{
 
 
             this.patterns.forEach((pattern:Pattern) => {
-                node.append(pattern.template.render($.extend({}, this.data, {parameters: this.query})));
+                node.append(pattern.template.render($.extend({}, this.data, {_query: this.query})));
             });
 
             if(!this.options.modal){
@@ -74,10 +74,23 @@ module Creonit.Admin.Component{
             });
 
 
+            this.node.find('.editor-save-and-close').on('click', (e) => {
+                $(e.currentTarget).attr('clicked', true);
+            });
+
             $form.on('submit', (e) => {
                 e.preventDefault();
-                var $form = $(e.currentTarget);
-                var data = $form.serializeObject();
+                var $form = $(e.currentTarget),
+                    data = $form.serializeObject(),
+                    query = this.getQuery(),
+                    $buttonCloseAfterSave = this.node.find('.editor-save-and-close[clicked]'),
+                    closeAfterSave = !!$buttonCloseAfterSave.length;
+
+                $buttonCloseAfterSave.removeAttr('clicked');
+
+                if(closeAfterSave){
+                    query.closeAfterSave = 1;
+                }
 
                 this.node.find(`input[type="file"][form="${formId}"]`).each(function(){
                     var value = $(this)[0].files[0];
@@ -86,8 +99,6 @@ module Creonit.Admin.Component{
                     }
                 });
 
-
-
                 this.node.find('.error-message').each(function(){
                     var $message = $(this),
                         $group = $message.closest('.form-group');
@@ -95,18 +106,18 @@ module Creonit.Admin.Component{
                     $message.remove();
                     $group.removeClass('has-error');
                 });
-                
-                this.request('send_data', this.getQuery(), data, (response) => {
+
+
+                this.request('send_data', query, data, (response) => {
                     if(this.checkResponse(response)){
-
-                        this.applyResponse(response);
-
-                        if (response.success && this.options.modal) {
-                            //this.node.arcticmodal('close');
+                        if(closeAfterSave){
+                            this.node.arcticmodal('close');
+                        }else{
+                            this.applyResponse(response);
                         }
 
-                        if (response.success && this.parent) {
-                            this.parent.loadData();
+                        if (this.parent) {
+                            //this.parent.loadData();
                         }
                         
                     }else{
@@ -123,6 +134,9 @@ module Creonit.Admin.Component{
                     }
                 });
 
+                if (this.parent) {
+                    this.parent.loadData();
+                }
             });
 
             Utils.initializeComponents(this.node, this);

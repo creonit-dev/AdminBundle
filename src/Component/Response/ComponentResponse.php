@@ -9,6 +9,7 @@ class ComponentResponse
 {
 
     public $data;
+    public $query;
     protected $schema;
     protected $error;
     protected $success;
@@ -16,6 +17,7 @@ class ComponentResponse
     public function __construct()
     {
         $this->data = new ParameterBag();
+        $this->query = new ParameterBag();
         $this->error = new ParameterBag();
     }
 
@@ -55,6 +57,10 @@ class ComponentResponse
             $response = [];
             if($this->data->count()){
                 $response['data'] = $this->data->all();
+            }
+
+            if($this->query->count()){
+                $response['query'] = $this->query->all();
             }
 
             if($this->schema){
