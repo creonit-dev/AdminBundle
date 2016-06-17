@@ -119,16 +119,51 @@ module Creonit.Admin.Component {
 
         openComponent(name:string, query:any = {}, options:any = {}) {
             options.modal = true;
-            let component = Helpers.component(name, query, options);
+            var interval;
+
+
+
             $(`
                 <div class="modal-dialog modal-lg">
-                    ${component}
+                    ${Helpers.component(name, query, options)}
                 </div>
             `
             ).arcticmodal({
                 beforeOpen: (modal, $modal) => {
                     Utils.initializeComponents($modal, this);
+                },
+                afterOpen: (modal, $modal) => {
+                    var $container = $modal.closest('.arcticmodal-container');
+
+                    interval = setInterval(function(){
+                        var $footer = $modal.find('.modal-footer');
+
+                        if(!$footer.length){
+                            return;
+                        }
+
+                        clearInterval(interval);
+
+                        var fix = () => {
+                            $footer.offset({top: $container.height() + $(window).scrollTop() - $footer.outerHeight()});
+                            if(parseInt($footer.css('top')) > 0){
+                                $footer.removeAttr('style');
+                            }
+                        };
+
+                        interval = setInterval(fix, 10);
+
+                        fix();
+                        $container.on('scroll', fix);
+
+                    }, 10);
+
+
+                },
+                afterClose: () => {
+                    clearInterval(interval);
                 }
+
             });
         }
 

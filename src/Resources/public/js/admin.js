@@ -127,10 +127,32 @@ var Creonit;
                     if (query === void 0) { query = {}; }
                     if (options === void 0) { options = {}; }
                     options.modal = true;
-                    var component = Component_1.Helpers.component(name, query, options);
-                    $("\n                <div class=\"modal-dialog modal-lg\">\n                    " + component + "\n                </div>\n            ").arcticmodal({
+                    var interval;
+                    $("\n                <div class=\"modal-dialog modal-lg\">\n                    " + Component_1.Helpers.component(name, query, options) + "\n                </div>\n            ").arcticmodal({
                         beforeOpen: function (modal, $modal) {
                             Component_1.Utils.initializeComponents($modal, _this);
+                        },
+                        afterOpen: function (modal, $modal) {
+                            var $container = $modal.closest('.arcticmodal-container');
+                            interval = setInterval(function () {
+                                var $footer = $modal.find('.modal-footer');
+                                if (!$footer.length) {
+                                    return;
+                                }
+                                clearInterval(interval);
+                                var fix = function () {
+                                    $footer.offset({ top: $container.height() + $(window).scrollTop() - $footer.outerHeight() });
+                                    if (parseInt($footer.css('top')) > 0) {
+                                        $footer.removeAttr('style');
+                                    }
+                                };
+                                interval = setInterval(fix, 10);
+                                fix();
+                                $container.on('scroll', fix);
+                            }, 10);
+                        },
+                        afterClose: function () {
+                            clearInterval(interval);
                         }
                     });
                 };

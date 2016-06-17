@@ -24,7 +24,6 @@ class GalleryTable extends TableComponent
      * @field url:image
      *
      * @col
-     * {% if url
      * {{ image_id.preview | raw | open('CreonitUtils.GalleryImageEditor', {key: _key}) }}
      * @col {{ sortable_rank }}
      * @col {{ _delete() }}
@@ -34,13 +33,6 @@ class GalleryTable extends TableComponent
     {
 
 
-    }
-
-    public function decorate(TablePattern $pattern, $data, $entity)
-    {
-
-
-        return $data;
     }
 
 

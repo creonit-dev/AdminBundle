@@ -54,6 +54,10 @@
   text-align: left;
   box-shadow: 0 -3px 1px rgba(0,0,0,0.02);
   position: relative;
+  background: #fff;
+}
+.modal-footer[style] {
+  box-shadow: 0 -3px 10px rgba(0,0,0,0.1);
 }
 .mce-panel {
   border-color: #ccc !important;
