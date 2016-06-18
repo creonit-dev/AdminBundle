@@ -19,18 +19,6 @@ class GalleryImageEditor extends EditorComponent
      *
      * @template
      * {{ image_id | image({deletable:false}) }}
-     * {{ image_id | image({deletable:false}) }}
-     * {{ image_id | image({deletable:false}) }}
-     * {{ image_id | image({deletable:false}) }}
-     * {{ image_id | image({deletable:false}) }}
-     * {{ image_id | image({deletable:false}) }}
-     * {{ image_id | image({deletable:false}) }}
-     * {{ image_id | image({deletable:false}) }}
-     * {{ image_id | image({deletable:false}) }}
-     * {{ image_id | image({deletable:false}) }}
-     * {{ image_id | image({deletable:false}) }}
-     * {{ image_id | image({deletable:false}) }}
-     * {{ image_id | image({deletable:false}) }}
      *
      * {% if _query.key %}
      *      {{ sortable_rank | text | group('Сортировка') }}
