@@ -1,12 +1,9 @@
 <?php
 
-namespace Creonit\AdminBundle\Component\Pattern;
+namespace Creonit\AdminBundle\Component\Scope;
 
-use Creonit\AdminBundle\Component\Component;
-use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Field\Field;
-use Creonit\AdminBundle\Component\Response\ComponentResponse;
-use Creonit\AdminBundle\Component\Storage\Storage;
+use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Validator\Constraints\Email;
@@ -14,52 +11,46 @@ use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Image;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-abstract class Pattern
+class Scope
 {
 
     protected $name;
     protected $entity;
-
-    protected $storage;
+    protected $tableMap;
 
     protected $template = '';
-    
+
+    /** @var Scope */
+    protected $parentScope;
+
+    /** @var Scope[] */
+    protected $scopes = [];
+    protected $scopesType = 'default';
+
+
     /** @var ContainerInterface */
     protected $container;
-    
-    /** @var Component */
-    protected $component;
 
-    /** @var Pattern|null */
-    protected $parentPattern;
-    
+
     /** @var Field[] */
     protected $fields = [];
 
-    protected $actions = [];
-
-
-    public function __construct(ContainerInterface $container){
-        $this->container = $container;
+    public function __construct(){
     }
+
 
     /**
-     * @param Pattern|null $parentPattern
+     * @param ContainerInterface $container
+     * @return $this
      */
-    public function setParentPattern($parentPattern){
-        $this->parentPattern = $parentPattern;
-    }
-
-    public function getName(){
-        return $this->name;
-    }
-
-    public function setName($name){
-        $this->name = $name;
+    public function setContainer(ContainerInterface $container)
+    {
+        $this->container = $container;
+        return $this;
     }
 
     public function addField(Field $field){
-        $this->fields[$field->getName()] = $field->setPattern($this);
+        $this->fields[$field->getName()] = $field;
         return $this;
     }
 
@@ -68,61 +59,80 @@ abstract class Pattern
         return array_key_exists($fieldName, $this->fields);
     }
 
-    public function getTemplate()
+
+    public function setName($name)
     {
-        return $this->template;
+        $this->name = $name;
+        $this->setEntity('AppBundle\\Model\\' . $this->name);
+        return $this;
+    }
+
+    protected function setEntity($entity)
+    {
+        $this->entity = $entity;
+        $tableMap = $entity::TABLE_MAP;
+        $this->tableMap = $tableMap::getTableMap();
+        return $this;
     }
 
     /**
-     * @param mixed $template
-     * @return Pattern
+     * @return mixed
      */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+
+    /**
+     * @param $entity
+     * @return ModelCriteria
+     */
+    public function createQuery(){
+        $queryClass = $this->entity . 'Query';
+        return new $queryClass;
+    }
+
+    public function createEntity(){
+        $entityClass = $this->entity;
+        return new $entityClass;
+    }
+
+    public function applySchemaAnnotations($annotations){
+        
+        if(array_key_exists('parameters', $annotations)){
+            foreach ($annotations['parameters'] as $annotation){
+                $this->applySchemaAnnotation($annotation);
+            }
+        }
+
+        if(array_key_exists('scopes', $annotations)) {
+            foreach ($annotations['scopes'] as $scopeName => $scopeAnnotations){
+                /** @var Scope $scope */
+                $scope = $this->container->get('creonit_admin.component.scope.' . $this->scopesType);
+                $scope->setContainer($this->container);
+                $scope->setName($scopeName);
+                $scope->applySchemaAnnotations($scopeAnnotations);
+                $this->addScope($scope);
+            }
+        }
+
+        return $this;
+    }
+
     public function setTemplate($template)
     {
         $this->template = $template;
         return $this;
     }
 
-    /**
-     * @return Field[]
-     */
-    public function getFields()
+    public function getTemplate()
     {
-        return $this->fields;
-    }
-
-    public function getField($name){
-        return $this->fields[$name];
-    }
-
-
-    public function dump(){
-        $pattern = [
-            'name' => $this->name,
-            'template' => $this->template,
-            'fields' => [],
-        ];
-
-        foreach ($this->fields as $field){
-            $pattern['fields'][] = $field->dump();
-        }
-
-        return $pattern;
-    }
-
-
-    public function applySchemaAnnotations($annotations){
-        foreach ($annotations as $annotation){
-            $this->applySchemaAnnotation($annotation);
-        }
-        return $this;
+        return $this->template;
     }
 
     public function applySchemaAnnotation($annotation){
         switch($annotation['key']){
-            case 'storage':
-                $this->setStorage($annotation['value']);
-                break;
             case 'field':
                 if(preg_match('/^([\w_]+)(?:\:([\w_]+))?(?: *(\{.*\}))?$/usi', $annotation['value'], $match)){
                     $type = isset($match[2]) ? $match[2] : 'default';
@@ -151,38 +161,49 @@ abstract class Pattern
         return $this;
     }
 
-    abstract public function getData(ComponentRequest $request, ComponentResponse $response);
 
 
-    public function setData(ComponentRequest $request, ComponentResponse $response){}
+    public function createField($name, $parameters = [], $type = null){
+        /** @var Field $field */
+        $field = $this->container->get('creonit_admin.component.field.' . ($type ?: 'default'));
+        $field->setName($name);
+        $field->parameters->add($parameters);
+        return $field;
+    }
 
-    /**
-     * @param Component $component
-     * @return Pattern
-     */
-    public function setComponent($component)
+
+    public function getFields(){
+        return $this->fields;
+    }
+
+    public function addScope(Scope $scope)
     {
-        $this->component = $component;
+        $this->scopes[$scope->getName()] = $scope;
         return $this;
     }
 
-    /**
-     * @param mixed $entity
-     * @return Pattern
-     */
-    public function setEntity($entity)
-    {
-        $this->entity = $entity;
-        return $this;
+    public function hasScope($scopeName){
+        return array_key_exists($scopeName, $this->scopes);
     }
 
-    /**
-     * @return mixed
-     */
-    public function getEntity()
-    {
-        return $this->entity ?: $this->name;
+    public function getScope($scopeName){
+        return $this->scopes[$scopeName];
     }
+
+    public function dump(){
+        $schema = [
+            'name' => $this->name,
+            'template' => $this->template,
+        ];
+
+        foreach ($this->scopes as $scope){
+            $schema['scopes'][$scope->getName()] = $scope->dump();
+        }
+
+
+        return $schema;
+    }
+
 
     public function prepareTemplate()
     {
@@ -239,40 +260,13 @@ abstract class Pattern
             }
         }
 
+        foreach ($this->scopes as $scope) {
+            $scope->prepareTemplate();
+            $scope->prepareTemplate();
+        }
+
         return $this;
     }
 
-
-    /**
-     * @param string $storage
-     * @return Storage
-     */
-    public function getStorage(){
-        return $this->container->get('creonit_admin.component.storage.' . ($this->storage ?: 'default'));
-    }
-
-    /**
-     * @param $storage
-     * @return Pattern
-     */
-    protected function setStorage($storage)
-    {
-        $this->storage = $storage;
-        return $this;
-    }
-
-    /**
-     * @param $name
-     * @param array $parameters
-     * @param $type
-     * @return Field
-     */
-    public function createField($name, $parameters = [], $type = null){
-        /** @var Field $field */
-        $field = $this->container->get('creonit_admin.component.field.' . ($type ?: 'default'));
-        $field->setName($name);
-        $field->parameters->add($parameters);
-        return $field;
-    }
 
 }

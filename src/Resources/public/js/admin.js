@@ -36,7 +36,7 @@ var Creonit;
                 function Component(node, name, query, options, parent) {
                     if (query === void 0) { query = {}; }
                     if (options === void 0) { options = {}; }
-                    this.patterns = [];
+                    this.scopes = [];
                     this.query = {};
                     this.options = {};
                     this.data = {};
@@ -62,9 +62,6 @@ var Creonit;
                 };
                 Component.prototype.getQuery = function () {
                     return $.extend({}, this.query);
-                };
-                Component.prototype.getPattern = function (name) {
-                    return this.patterns[name];
                 };
                 Component.prototype.loadSchema = function () {
                     var _this = this;
@@ -110,9 +107,9 @@ var Creonit;
                     $.extend(this.actions, {
                         openComponent: this.openComponent
                     });
-                    if (schema.patterns) {
-                        schema.patterns.forEach(function (pattern) {
-                            _this.patterns.push(new Component_1.Pattern(_this, pattern));
+                    if (schema.scopes) {
+                        $.each(schema.scopes, function (i, scope) {
+                            _this.scopes.push(new Component_1.Scope(_this, scope));
                         });
                     }
                 };
@@ -185,9 +182,7 @@ var Creonit;
                             _this.node.arcticmodal('close');
                         });
                     }
-                    this.patterns.forEach(function (pattern) {
-                        node.append(pattern.template.render($.extend({}, _this.data, { _query: _this.query })));
-                    });
+                    node.append(this.template.render($.extend({}, this.data, { _query: this.query })));
                     if (!this.options.modal) {
                         this.node.append(Component.Helpers.submit('Сохранить'));
                     }
@@ -665,24 +660,6 @@ var Creonit;
     (function (Admin) {
         var Component;
         (function (Component) {
-            var Pattern = (function () {
-                function Pattern(component, options) {
-                    $.extend(this, options);
-                    this.component = component;
-                    this.template = twig({ autoescape: true, data: this.template });
-                }
-                return Pattern;
-            }());
-            Component.Pattern = Pattern;
-        })(Component = Admin.Component || (Admin.Component = {}));
-    })(Admin = Creonit.Admin || (Creonit.Admin = {}));
-})(Creonit || (Creonit = {}));
-var Creonit;
-(function (Creonit) {
-    var Admin;
-    (function (Admin) {
-        var Component;
-        (function (Component) {
             var Request = (function () {
                 function Request(component, type, query, data, callback) {
                     this.id = Request.increment++;
@@ -738,15 +715,28 @@ var Creonit;
     (function (Admin) {
         var Component;
         (function (Component) {
+            var Scope = (function () {
+                function Scope(component, options) {
+                    $.extend(this, options);
+                    this.component = component;
+                    this.template = twig({ autoescape: true, data: this.template });
+                }
+                return Scope;
+            }());
+            Component.Scope = Scope;
+        })(Component = Admin.Component || (Admin.Component = {}));
+    })(Admin = Creonit.Admin || (Creonit.Admin = {}));
+})(Creonit || (Creonit = {}));
+var Creonit;
+(function (Creonit) {
+    var Admin;
+    (function (Admin) {
+        var Component;
+        (function (Component) {
             var Table = (function (_super) {
                 __extends(Table, _super);
                 function Table() {
                     _super.apply(this, arguments);
-                    this.helpers = function (aa) {
-                        var output = new String("<b>3333" + aa + "</b>");
-                        output.twig_markup = true;
-                        return output;
-                    };
                 }
                 Table.prototype.applySchema = function (schema) {
                     var _this = this;
@@ -754,7 +744,7 @@ var Creonit;
                     this.actions['_visible'] = function (options) {
                         var $row = _this.findRowById(options.row_id), $button = $row.find('.table-row-visible'), visible = !$button.hasClass('mod-visible');
                         $button.toggleClass('mod-visible', visible);
-                        _this.request('_visible', { key: options.key, pattern: options.pattern }, { visible: visible }, function (response) {
+                        _this.request('_visible', { key: options.key, scope: options.scope }, { visible: visible }, function (response) {
                             if (_this.checkResponse(response)) {
                                 $button.toggleClass('mod-visible', response.data.visible);
                             }
@@ -787,15 +777,15 @@ var Creonit;
                         });
                     }
                     node.html(this.template.render($.extend({}, this.data, { _query: this.query })));
-                    this.patterns.forEach(function (pattern) {
+                    this.scopes.forEach(function (scope) {
                         _this.data.entities.forEach(function (entity) {
                             var rowId = Component.Utils.generateId();
-                            var $entity = $(("<tr data-row-id=\"" + rowId + "\">") + pattern.template.render($.extend({}, entity, {
+                            var $entity = $(("<tr data-row-id=\"" + rowId + "\">") + scope.template.render($.extend({}, entity, {
                                 _visible: function () {
-                                    return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'eye', className: "table-row-visible " + (entity.visible ? 'mod-visible' : '') })), ['_visible', { pattern: pattern.name, key: entity._key, row_id: rowId }]));
+                                    return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'eye', className: "table-row-visible " + (entity.visible ? 'mod-visible' : '') })), ['_visible', { scope: scope.name, key: entity._key, row_id: rowId }]));
                                 },
                                 _delete: function () {
-                                    return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'remove' })), ['_delete', { pattern: pattern.name, key: entity._key, row_id: rowId }]));
+                                    return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'remove' })), ['_delete', { scope: scope.name, key: entity._key, row_id: rowId }]));
                                 }
                             })) + '</tr>');
                             _this.node.find('tbody').append($entity);

@@ -1,5 +1,5 @@
 module Creonit.Admin.Component {
-    export class Pattern{
+    export class Scope{
         public name:string;
         public template:any;
         protected component:Component;

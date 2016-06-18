@@ -1,11 +1,4 @@
 parameters:
-    creonit_admin.component.storage.default.class: '%creonit_admin.component.storage.propel.class%'
-    creonit_admin.component.storage.propel.class: Creonit\AdminBundle\Component\Storage\PropelStorage
-
-    creonit_admin.component.pattern.editor.class: Creonit\AdminBundle\Component\Pattern\EditorPattern
-    creonit_admin.component.pattern.list.class: Creonit\AdminBundle\Component\Pattern\ListPattern
-    creonit_admin.component.pattern.table.class: Creonit\AdminBundle\Component\Pattern\TablePattern
-
     creonit_admin.component.field.default.class: Creonit\AdminBundle\Component\Field\Field
     creonit_admin.component.field.file.class: Creonit\AdminBundle\Component\Field\FileField
     creonit_admin.component.field.image.class: Creonit\AdminBundle\Component\Field\ImageField
@@ -25,38 +18,11 @@ services:
         tags: [{ name: creonit_admin.module }]
 
 
-    creonit_admin.component.storage:
-        abstract: true
-        arguments: ['@service_container']
+    creonit_admin.component.scope.default:
+        class: Creonit\AdminBundle\Component\Scope\Scope
 
-    creonit_admin.component.storage.default:
-        class: '%creonit_admin.component.storage.default.class%'
-        parent: creonit_admin.component.storage
-
-    creonit_admin.component.storage.propel:
-        class: '%creonit_admin.component.storage.propel.class%'
-        parent: creonit_admin.component.storage
-
-
-    creonit_admin.component.pattern:
-        abstract: true
-        arguments: ['@service_container']
-
-    creonit_admin.component.pattern.editor:
-        class: '%creonit_admin.component.pattern.editor.class%'
-        parent: creonit_admin.component.pattern
-        shared: false
-
-    creonit_admin.component.pattern.list:
-        class: '%creonit_admin.component.pattern.list.class%'
-        parent: creonit_admin.component.pattern
-        shared: false
-
-    creonit_admin.component.pattern.table:
-        class: '%creonit_admin.component.pattern.table.class%'
-        parent: creonit_admin.component.pattern
-        shared: false
-
+    creonit_admin.component.scope.table_row:
+        class: Creonit\AdminBundle\Component\Scope\TableRowScope
 
 
     creonit_admin.component.field:
@@ -65,30 +31,30 @@ services:
 
     creonit_admin.component.field.default:
         class: '%creonit_admin.component.field.default.class%'
-        parent: creonit_admin.component.pattern
+        parent: creonit_admin.component.field
         shared: false
 
     creonit_admin.component.field.file:
         class: '%creonit_admin.component.field.file.class%'
-        parent: creonit_admin.component.pattern
+        parent: creonit_admin.component.field
         shared: false
 
     creonit_admin.component.field.image:
         class: '%creonit_admin.component.field.image.class%'
-        parent: creonit_admin.component.pattern
+        parent: creonit_admin.component.field
         shared: false
 
     creonit_admin.component.field.gallery:
         class: '%creonit_admin.component.field.gallery.class%'
-        parent: creonit_admin.component.pattern
+        parent: creonit_admin.component.field
         shared: false
 
     creonit_admin.component.field.select:
         class: '%creonit_admin.component.field.select.class%'
-        parent: creonit_admin.component.pattern
+        parent: creonit_admin.component.field
         shared: false
 
     creonit_admin.component.field.checkbox:
         class: '%creonit_admin.component.field.checkbox.class%'
-        parent: creonit_admin.component.pattern
+        parent: creonit_admin.component.field
         shared: false

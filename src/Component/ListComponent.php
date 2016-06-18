@@ -2,12 +2,25 @@
 
 namespace Creonit\AdminBundle\Component;
 
-use Creonit\AdminBundle\Component\Pattern\ListPattern;
+use Creonit\AdminBundle\Component\Request\ComponentRequest;
+use Creonit\AdminBundle\Component\Response\ComponentResponse;
+use Creonit\AdminBundle\Component\Scope\Scope;
+use Creonit\AdminBundle\Component\Scope\ScopeRelation;
 
 abstract class ListComponent extends Component
 {
 
     protected $header = '';
+
+    protected $relations = [];
+
+
+    public function addRelation(ScopeRelation $relation){
+        $this->relations[] = $relation;
+        return $this;
+    }
+
+
 
     /**
      * @param string $header
@@ -49,33 +62,6 @@ EOD
     }
 
 
-    public function createPattern($name){
-        $pattern = $this->container->get('creonit_admin.component.pattern.list');
-        $pattern->setName($name);
-        return $pattern;
-    }
-
-
-    /**
-     * @param $name
-     * @return ListPattern
-     */
-    public function getPattern($name){
-        return parent::getPattern($name);
-    }
-
-
-    /**
-     * @param ListPattern $pattern
-     * @param array $data
-     * @param mixed $entity
-     * @return array
-     */
-    public function decorate(ListPattern $pattern, $data, $entity){
-        return $data;
-    }
-
-
     public function applySchemaAnnotation($annotation)
     {
         switch($annotation['key']){
@@ -85,6 +71,49 @@ EOD
             default:
                 parent::applySchemaAnnotation($annotation);
         }
+    }
+
+
+    protected function loadData(ComponentRequest $request, ComponentResponse $response)
+    {
+        $entities = [];
+
+        foreach($this->scopes as $scope){
+            $data = $this->getData($scope);
+
+            $entities[$scope->getName()] = $data;
+
+        }
+
+
+        $response->data->set('entities', $entities);
+
+    }
+
+    /**
+     * @param Scope $scope
+     * @param null|ScopeRelation $relation
+     * @param null|mixed $relationId
+     * @param int $level
+     * @return array
+     */
+    protected function getData(Scope $scope, $relation = null, $relationValue = null, $level = 0){
+        $entities = [];
+        $query = $scope->createQuery();
+
+        if(null !== $relation){
+            $query->filterBy($relation->getSourceField(), $relationValue);
+        }
+
+        foreach($query->find() as $entity){
+            $entityData = [];
+            foreach($scope->getFields() as $field){
+                $entityData[$field->getName()] = $field->load($entity);
+                $entityData['_key'] = $entity->getPrimaryKey();
+            }
+            $entities[] = $entityData;
+        }
+        return $entities;
     }
 
 

@@ -4,7 +4,7 @@ module Creonit.Admin.Component {
     export class Component {
         protected name:string;
         protected manager:Manager;
-        protected patterns:Pattern[] = [];
+        protected scopes:Scope[] = [];
         protected parent:Component;
 
         protected query:any = {};
@@ -43,10 +43,6 @@ module Creonit.Admin.Component {
 
         getQuery() {
             return $.extend({}, this.query);
-        }
-
-        getPattern(name:string):Pattern {
-            return this.patterns[name];
         }
 
         loadSchema() {
@@ -99,9 +95,9 @@ module Creonit.Admin.Component {
                 openComponent: this.openComponent
             });
 
-            if (schema.patterns) {
-                schema.patterns.forEach((pattern:any) => {
-                    this.patterns.push(new Pattern(this, pattern));
+            if (schema.scopes) {
+                $.each(schema.scopes, (i, scope) => {
+                    this.scopes.push(new Scope(this, scope));
                 });
             }
 

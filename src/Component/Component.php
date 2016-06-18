@@ -2,15 +2,15 @@
 
 namespace Creonit\AdminBundle\Component;
 
-use Creonit\AdminBundle\Component\Pattern\Pattern;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Response\ComponentResponse;
+use Creonit\AdminBundle\Component\Scope\Scope;
 use Creonit\AdminBundle\Exception\ConfigurationException;
 use Creonit\AdminBundle\Exception\HandleException;
 use Creonit\AdminBundle\Module;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-abstract class Component
+abstract class Component extends Scope
 {
     /** @var  ContainerInterface */
     protected $container;
@@ -20,13 +20,10 @@ abstract class Component
 
     protected $initialized = false;
 
-    /** @var Pattern[] */
-    protected $patterns = [];
-
-    protected $template = '';
     protected $title = '';
-
     protected $actions = [];
+
+
 
     /** @var callable[] */
     protected $handlers = [];
@@ -40,25 +37,6 @@ abstract class Component
         }
     }
 
-    public function getPattern($name){
-        return $this->patterns[$name];
-    }
-
-    public function hasPattern($name){
-        return array_key_exists($name, $this->patterns);
-    }
-
-    public function addPattern(Pattern $pattern){
-        $this->patterns[$pattern->getName()] = $pattern->setComponent($this);
-        return $this;
-    }
-
-    /**
-     * @param $name
-     * @return Pattern
-     */
-    abstract public function createPattern($name);
-
 
     public function initialize(){
         if(true === $this->initialized){
@@ -66,20 +44,18 @@ abstract class Component
         }
 
         if(null !== $schema = $this->parseSchemaAnnotations()){
-            $this->applySchemaAnnotations(array_shift($schema));
-
-            foreach ($schema as $name => $pattern){
-                $this->addPattern($this->createPattern($name)->applySchemaAnnotations($pattern));
-            }
-
+            $this->applySchemaAnnotations($schema['\\']);
         }
-
         $this->prepareSchema();
         $this->schema();
-        
+
+        $this->prepareTemplate();
+
+        /*
         foreach($this->patterns as $pattern){
             $pattern->prepareTemplate();
         }
+        */
 
         $this->initialized = true;
     }
@@ -95,15 +71,25 @@ abstract class Component
             if($request->getType() == ComponentRequest::TYPE_LOAD_SCHEMA) {
                 $response->setSchema($this->dump());
 
+                /*
                 foreach ($this->patterns as $pattern) {
                     $pattern->getData($request, $response);
                 }
+
+                */
+
+                $this->loadData($request, $response);
+
 
             }else if($request->getType() == ComponentRequest::TYPE_LOAD_DATA){
 
+                $this->loadData($request, $response);
+
+                /*
                 foreach ($this->patterns as $pattern) {
                     $pattern->getData($request, $response);
                 }
+                */
 
             }else{
                 $this->handle($request->getType(), $request, $response);
@@ -141,26 +127,26 @@ abstract class Component
         $cursorEntity = null;
 
         $schema = [];
-        $pattern = [];
-        $patternName = 'root';
+        $scope = [];
+        $scopeName = '\\';
         $parameter = null;
 
         foreach($lines as $line) {
             if (!$line = trim($line)) continue;
 
-            if (preg_match('#^\\\\(\w+) *$#', $line, $match)) {
+            if (preg_match('#^((?:\\\\\w*)+) *$#', $line, $match)) {
                 if($parameter && $parameter['key'] != '#'){
-                    $pattern[] = $parameter;
+                    $scope[] = $parameter;
                     $parameter = null;
                 }
 
-                $schema[$patternName] = $pattern;
-                $pattern = [];
-                $patternName = $match[1];
+                $schema[$scopeName] = $scope;
+                $scope = [];
+                $scopeName = $match[1] ?: 'root';
 
             } else if (preg_match('#^(\#?)\@(\w+)\s*(.*)$#', $line, $match)) {
                 if($parameter && $parameter['key'] != '#'){
-                    $pattern[] = $parameter;
+                    $scope[] = $parameter;
                 }
 
                 $parameter = ['key' => $match[1] ?: $match[2], 'value' => $match[3]];
@@ -173,17 +159,22 @@ abstract class Component
         }
 
         if($parameter && $parameter['key'] != '#'){
-            $pattern[] = $parameter;
+            $scope[] = $parameter;
         }
-        $schema[$patternName] = $pattern;
+        $schema[$scopeName] = $scope;
 
-        return $schema;
-    }
+        $accessor = $this->container->get('property_accessor');
 
-    public function applySchemaAnnotations($annotations){
-        foreach ($annotations as $annotation){
-            $this->applySchemaAnnotation($annotation);
+        $result = [];
+
+        foreach($schema as $path => $parameters){
+            $path = preg_replace('/^\\\\$/', '[\]', $path);
+            $path = preg_replace('/^\\\\/', '[\]\\', $path);
+            $path = preg_replace('/\\\\([\w_-]+)/', '[scopes][$1]', $path);
+            $accessor->setValue($result, $path . '[parameters]', $parameters);
         }
+
+        return $result;
     }
 
     public function applySchemaAnnotation($annotation){
@@ -196,63 +187,28 @@ abstract class Component
             case 'title':
                 $this->setTitle($annotation['value']);
                 break;
-            case 'template':
-                $this->setTemplate($annotation['value']);
-                break;
+            default:
+                parent::applySchemaAnnotation($annotation);
         }
     }
 
-    public function dump(){
-        $schema = [
-            'title' => $this->getTitle(),
-            'template' => $this->template,
-            'actions' => $this->actions,
-            'patterns' => [],
-        ];
-        
-        foreach ($this->patterns as $pattern){
-            $schema['patterns'][] = $pattern->dump();
-        }
-
-        return $schema;
-    }
 
     abstract public function schema();
 
-    public function load(ComponentRequest $request, ComponentResponse $response){}
-
-    public function send(ComponentRequest $request, ComponentResponse $response){}
-
     protected function prepareSchema(){}
 
-    /**
-     * @param string $template
-     * @return Component
-     */
-    public function setTemplate($template)
+
+    public function setTitle($title)
     {
-        $this->template = $template;
+        $this->title = $title;
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getTemplate()
+    public function getTitle()
     {
-        return $this->template;
+        return $this->title;
     }
 
-
-    /**
-     * @param ContainerInterface $container
-     * @return $this
-     */
-    public function setContainer(ContainerInterface $container)
-    {
-        $this->container = $container;
-        return $this;
-    }
 
     /**
      * @param Module $module
@@ -264,23 +220,6 @@ abstract class Component
         return $this;
     }
 
-    /**
-     * @param string $title
-     * @return Component
-     */
-    public function setTitle($title)
-    {
-        $this->title = $title;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTitle()
-    {
-        return $this->title;
-    }
 
 
     public function setAction($name, $script)
@@ -288,5 +227,19 @@ abstract class Component
         $this->actions[$name] = $script;
         return $this;
     }
+
+    protected function loadData(ComponentRequest $request, ComponentResponse $response)
+    {
+    }
+
+
+    public function dump()
+    {
+        return  array_merge(parent::dump(), [
+            'title' => $this->title,
+            'actions' => $this->actions,
+        ]);
+    }
+
 
 }

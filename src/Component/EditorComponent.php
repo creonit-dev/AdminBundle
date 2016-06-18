@@ -11,34 +11,75 @@ abstract class EditorComponent extends Component
     protected function prepareSchema()
     {
         $this->setHandler('send_data', function (ComponentRequest $request, ComponentResponse $response){
-            foreach($this->patterns as $pattern){
-                $pattern->setData($request, $response);
-                if(!$request->query->has('closeAfterSave')){
-                    $pattern->getData($request, $response);
-                }
-            }
+            
+            $this->saveData($request, $response);
+            $response->flushError();
+            $this->loadData($request, $response);
         });
     }
 
-
-    public function applySchemaAnnotation($annotation)
+    public function loadData(ComponentRequest $request, ComponentResponse $response)
     {
-        switch($annotation['key']){
-            default:
-                parent::applySchemaAnnotation($annotation);
+        $key = $request->query->get('key');
+        if($key){
+            $entity = $this->createQuery()->findPk($key) or $response->flushError('Элемент не найден');
+        }else{
+            $entity = $this->createEntity();
+        }
+        foreach ($this->fields as $field){
+            $response->data->set($field->getName(), $field->load($entity));
         }
     }
 
-    /**
-     * @param $name
-     * @return EditorPattern
-     */
-    public function createPattern($name)
+    public function saveData(ComponentRequest $request, ComponentResponse $response)
     {
-        $pattern = $this->container->get('creonit_admin.component.pattern.editor');
-        $pattern->setName($name);
-        return $pattern;
+        $key = $request->query->get('key');
+        if($key){
+            $entity = $this->createQuery()->findPk($key) or $response->flushError('Элемент не найден');
+        }else{
+            $entity = $this->createEntity();
+        }
+
+        $dataMap = [];
+
+
+        foreach ($this->fields as $field){
+            $dataMap[$field->getName()] = $data = $field->extract($request);
+            foreach($field->validate($data) as $error){
+                $response->error($error->getMessage(), $field->getName());
+            }
+        }
+
+        if($response->hasError()){
+            return;
+        }
+
+        $this->validate($request, $response, $entity);
+
+        if($response->hasError()){
+            return;
+        }
+
+
+        foreach ($this->fields as $field){
+            $field->save($entity, $dataMap[$field->getName()]);
+        }
+
+        $this->preSave($request, $response, $entity);
+
+        $entity->save();
+
+        $this->postSave($request, $response, $entity);
+
+
+        $response->sendSuccess();
+
+        $request->query->set('key', $key = $entity->getPrimaryKey());
+        $response->query->set('key', $key);
+
     }
+    
+
 
     /**
      * @param ComponentRequest $request
@@ -51,11 +92,5 @@ abstract class EditorComponent extends Component
 
     public function postSave(ComponentRequest $request, ComponentResponse $response, $entity){}
 
-    /**
-     * @return Storage\Storage
-     */
-    public function getStorage(){
-        return $this->patterns[0]->getStorage();
-    }
 
 }

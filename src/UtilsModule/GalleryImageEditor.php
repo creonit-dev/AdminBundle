@@ -6,7 +6,6 @@ use AppBundle\Model\GalleryItem;
 use Creonit\AdminBundle\Component\EditorComponent;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Response\ComponentResponse;
-use Propel\Runtime\Map\TableMap;
 
 class GalleryImageEditor extends EditorComponent
 {

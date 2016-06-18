@@ -2,14 +2,15 @@
 
 namespace Creonit\AdminBundle\Component;
 
-use Creonit\AdminBundle\Component\Field\Field;
-use Creonit\AdminBundle\Component\Pattern\TablePattern;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Response\ComponentResponse;
+use Creonit\AdminBundle\Component\Scope\ScopeRelation;
+use Propel\Runtime\Map\TableMap;
 
 abstract class TableComponent extends ListComponent
 {
 
+    protected $scopesType = 'table_row';
     protected $columns = [];
 
     /**
@@ -44,16 +45,11 @@ abstract class TableComponent extends ListComponent
 
         $this->setHandler('_delete', function (ComponentRequest $request, ComponentResponse $response){
             $query = $request->query;
-            if($query->has('key') and $query->has('pattern') and $this->hasPattern($query->get('pattern'))){
-                $pattern = $this->getPattern($query->get('pattern'));
-                $storage = $pattern->getStorage();
-                $entity = $storage->getEntity([
-                    'entity' => $pattern->getEntity(),
-                    'key' => $query->get('key')
-                ]);
+            if($query->has('key') and $query->has('scope') and $this->hasScope($query->get('scope'))){
+                $scope = $this->getScope($query->get('scope'));
 
-                if($entity){
-                    $storage->deleteEntity($entity);
+                if($entity = $scope->createQuery()->findPk($query->get('key'))){
+                    $entity->delete();
                     $response->data->set('success', true);
                     
                 }else{
@@ -71,29 +67,19 @@ abstract class TableComponent extends ListComponent
             if(
                 $request->data->has('visible')
                 and $query->get('key')
-                and $pattern = $query->get('pattern')
-                and $this->hasPattern($pattern)
+                and $scope = $query->get('scope')
+                and $this->hasScope($scope)
             ){
-                $pattern = $this->getPattern($pattern);
-                $storage = $pattern->getStorage();
-                $entity = $storage->getEntity([
-                    'entity' => $pattern->getEntity(),
-                    'key' => $query->get('key')
-                ]);
+                $scope = $this->getScope($scope);
 
-                if($entity){
+                if($entity = $scope->createQuery()->findPk($query->get('key'))){
                     $visible = $request->data->getBoolean('visible');
-
-
-                    $field = $pattern->createField('visible');
-                    $field->setData($visible);
-                    $storage->setData($entity, $field);
-                    $storage->saveEntity($entity);
-
-                    $visible = $storage->getData($entity, $field);
+                    $visibleField = $this->createField('visible');
+                    $visibleField->save($entity, $visible);
+                    $entity->save();
 
                     $response->data->set('success', true);
-                    $response->data->set('visible', $visible);
+                    $response->data->set('visible', $visibleField->load($entity));
 
                 }else{
                     $response->flushError('Элемент не найден');
@@ -106,16 +92,6 @@ abstract class TableComponent extends ListComponent
 
     }
 
-    /**
-     * @param $name
-     * @return TablePattern
-     */
-    public function createPattern($name)
-    {
-        $pattern = $this->container->get('creonit_admin.component.pattern.table');
-        $pattern->setName($name);
-        return $pattern;
-    }
 
     public function applySchemaAnnotation($annotation)
     {
@@ -128,6 +104,8 @@ abstract class TableComponent extends ListComponent
                 parent::applySchemaAnnotation($annotation);
         }
     }
+
+  
 
 
 }

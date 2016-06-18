@@ -31,9 +31,7 @@ module Creonit.Admin.Component{
 
 
 
-            this.patterns.forEach((pattern:Pattern) => {
-                node.append(pattern.template.render($.extend({}, this.data, {_query: this.query})));
-            });
+                node.append(this.template.render($.extend({}, this.data, {_query: this.query})));
 
             if(!this.options.modal){
                 this.node.append(Helpers.submit('Сохранить'));

@@ -1,12 +1,6 @@
 module Creonit.Admin.Component{
     export class Table extends Component{
 
-        helpers = function(aa){
-            var output:any = new String(`<b>3333${aa}</b>`);
-            output.twig_markup = true;
-            return output;
-        };
-
         applySchema(schema:any){
             super.applySchema(schema);
 
@@ -16,7 +10,7 @@ module Creonit.Admin.Component{
                     visible = !$button.hasClass('mod-visible');
 
                 $button.toggleClass('mod-visible', visible);
-                this.request('_visible', {key: options.key, pattern: options.pattern}, {visible: visible}, (response) => {
+                this.request('_visible', {key: options.key, scope: options.scope}, {visible: visible}, (response) => {
                     if(this.checkResponse(response)){
                         $button.toggleClass('mod-visible', response.data.visible);
                     }
@@ -71,15 +65,15 @@ module Creonit.Admin.Component{
 
 
 
-            this.patterns.forEach((pattern:Pattern) => {
+            this.scopes.forEach((scope:Scope) => {
                 this.data.entities.forEach((entity:any) => {
                     let rowId = Utils.generateId();
-                    let $entity = $(`<tr data-row-id="${rowId}">` + pattern.template.render($.extend({}, entity, {
+                    let $entity = $(`<tr data-row-id="${rowId}">` + scope.template.render($.extend({}, entity, {
                             _visible: function(){
-                                return Utils.raw(Helpers.action(Utils.raw(Helpers.button('', {size: 'xs', icon: 'eye', className: `table-row-visible ${entity.visible ? 'mod-visible' : ''}`})), ['_visible', {pattern: pattern.name, key: entity._key, row_id: rowId}]));
+                                return Utils.raw(Helpers.action(Utils.raw(Helpers.button('', {size: 'xs', icon: 'eye', className: `table-row-visible ${entity.visible ? 'mod-visible' : ''}`})), ['_visible', {scope: scope.name, key: entity._key, row_id: rowId}]));
                             },
                             _delete: function(){
-                                return Utils.raw(Helpers.action(Utils.raw(Helpers.button('', {size: 'xs', icon: 'remove'})), ['_delete', {pattern: pattern.name, key: entity._key, row_id: rowId}]));
+                                return Utils.raw(Helpers.action(Utils.raw(Helpers.button('', {size: 'xs', icon: 'remove'})), ['_delete', {scope: scope.name, key: entity._key, row_id: rowId}]));
                             }
                         })) + '</tr>');
                     this.node.find('tbody').append($entity);
