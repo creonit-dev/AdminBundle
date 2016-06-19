@@ -2,13 +2,8 @@
 
 namespace Creonit\AdminBundle\Component\Scope;
 
-use Creonit\AdminBundle\Component\TableComponent;
-
-class TableRowScope extends Scope
+class TableRowScope extends ListRowScope
 {
-
-    /** @var TableComponent */
-    protected $parentScope;
 
     protected $columns = [];
 
@@ -21,11 +16,6 @@ class TableRowScope extends Scope
                     $template = "{{ $match[1] }}";
                 }
                 $this->addColumn($template);
-                break;
-            case 'relation':
-                if(preg_match('/^\s*([\w_]+)\s*>\s*([\w_-]+)\.([\w_]+)\s*$/ui', $annotation['value'], $match)){
-                    $this->parentScope->addRelation(new ScopeRelation($this->getName(), $match[1], $match[2], $match[3]));
-                }
                 break;
             default:
                 parent::applySchemaAnnotation($annotation);

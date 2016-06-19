@@ -71,6 +71,13 @@ module Creonit.Admin.Component.Helpers {
         return value.toString().replace(/<(a|div|button)/, `<$1 ${injection}`)
     }
 
+    export function icon(value:any, [icon = ''] = ['']){
+        if(!icon){
+            return value;
+        }
+        return `<i class="icon ${resolveIconClass(icon)}"></i>${value}`;
+    }
+
     export function action(value:any, [name, ...options] : [string, any]){
         if(!value){
             return '';
@@ -268,6 +275,7 @@ module Creonit.Admin.Component.Helpers {
             'buttons',
             'group',
             'tooltip',
+            'icon',
             'action',
             'open',
             'panel',

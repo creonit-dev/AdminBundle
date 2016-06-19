@@ -31,12 +31,58 @@ var Creonit;
     var Admin;
     (function (Admin) {
         var Component;
+        (function (Component) {
+            var Scope = (function () {
+                function Scope() {
+                    this.scopes = [];
+                    this.parameters = {};
+                }
+                Scope.prototype.applySchema = function (schema) {
+                    var _this = this;
+                    if (schema.template) {
+                        this.template = twig({ autoescape: true, data: schema.template });
+                        delete schema.template;
+                    }
+                    if (schema.scopes) {
+                        schema.scopes.forEach(function (scope) {
+                            var child = new Scope();
+                            child.applySchema(scope);
+                            _this.addScope(child);
+                        });
+                        delete schema.scopes;
+                    }
+                    $.extend(this.parameters, schema);
+                };
+                Scope.prototype.getScope = function (name) {
+                    return this.scopes.filter(function (scope) { return scope.parameters.name == name; })[0];
+                };
+                Scope.prototype.addScope = function (scope) {
+                    scope.setParentScope(this);
+                    this.scopes.push(scope);
+                    return this;
+                };
+                Scope.prototype.setParentScope = function (scope) {
+                    this.parentScope = scope;
+                    return this;
+                };
+                return Scope;
+            }());
+            Component.Scope = Scope;
+        })(Component = Admin.Component || (Admin.Component = {}));
+    })(Admin = Creonit.Admin || (Creonit.Admin = {}));
+})(Creonit || (Creonit = {}));
+var Creonit;
+(function (Creonit) {
+    var Admin;
+    (function (Admin) {
+        var Component;
         (function (Component_1) {
-            var Component = (function () {
+            var Component = (function (_super) {
+                __extends(Component, _super);
                 function Component(node, name, query, options, parent) {
                     if (query === void 0) { query = {}; }
                     if (options === void 0) { options = {}; }
-                    this.scopes = [];
+                    _super.call(this);
                     this.query = {};
                     this.options = {};
                     this.data = {};
@@ -99,19 +145,13 @@ var Creonit;
                 };
                 Component.prototype.applySchema = function (schema) {
                     var _this = this;
-                    this.schema = schema;
-                    this.template = twig({ autoescape: true, data: schema.template });
-                    $.each(this.schema.actions, function (name, action) {
+                    $.each(schema.actions, function (name, action) {
                         _this.actions[name] = eval('(function(){return ' + action + '})()');
                     });
                     $.extend(this.actions, {
                         openComponent: this.openComponent
                     });
-                    if (schema.scopes) {
-                        $.each(schema.scopes, function (i, scope) {
-                            _this.scopes.push(new Component_1.Scope(_this, scope));
-                        });
-                    }
+                    _super.prototype.applySchema.call(this, schema);
                 };
                 Component.prototype.render = function () {
                 };
@@ -143,7 +183,7 @@ var Creonit;
                                         $footer.removeAttr('style');
                                     }
                                 };
-                                interval = setInterval(fix, 10);
+                                interval = setInterval(fix, 100);
                                 fix();
                                 $container.on('scroll', fix);
                             }, 10);
@@ -154,7 +194,7 @@ var Creonit;
                     });
                 };
                 return Component;
-            }());
+            }(Component_1.Scope));
             Component_1.Component = Component;
         })(Component = Admin.Component || (Admin.Component = {}));
     })(Admin = Creonit.Admin || (Creonit.Admin = {}));
@@ -175,14 +215,14 @@ var Creonit;
                     this.node.empty();
                     var node = this.node;
                     if (this.options.modal) {
-                        this.node.append(node = $("\n                    <div class=\"modal-content\"> \n                        <div class=\"modal-header\"> \n                            <button type=\"button\" class=\"close\"><span>\u00D7</span></button> \n                            <h4 class=\"modal-title\">" + this.schema.title + "</h4> \n                        </div> \n                        \n                        <div class=\"modal-body\">\n                        </div>\n                   </div>    \n                "));
+                        this.node.append(node = $("\n                    <div class=\"modal-content\"> \n                        <div class=\"modal-header\"> \n                            <button type=\"button\" class=\"close\"><span>\u00D7</span></button> \n                            <h4 class=\"modal-title\">" + this.parameters.title + "</h4> \n                        </div> \n                        \n                        <div class=\"modal-body\">\n                        </div>\n                   </div>    \n                "));
                         node = node.find('.modal-body');
                         this.node.find('.modal-content').append("<div class=\"modal-footer\">" + Component.Helpers.submit('Сохранить и закрыть', { className: 'editor-save-and-close' }) + " " + Component.Helpers.submit('Сохранить') + " " + Component.Helpers.button('Закрыть') + "</div>");
                         this.node.find('.modal-footer button[type=button], .modal-header .close').on('click', function () {
                             _this.node.arcticmodal('close');
                         });
                     }
-                    node.append(this.template.render($.extend({}, this.data, { _query: this.query })));
+                    node.append(this.template.render($.extend({}, this.data, { _query: this.query, _key: this.query.key || null })));
                     if (!this.options.modal) {
                         this.node.append(Component.Helpers.submit('Сохранить'));
                     }
@@ -329,6 +369,14 @@ var Creonit;
                     return value.toString().replace(/<(a|div|button)/, "<$1 " + injection);
                 }
                 Helpers.tooltip = tooltip;
+                function icon(value, _a) {
+                    var _b = (_a === void 0 ? [''] : _a)[0], icon = _b === void 0 ? '' : _b;
+                    if (!icon) {
+                        return value;
+                    }
+                    return "<i class=\"icon " + resolveIconClass(icon) + "\"></i>" + value;
+                }
+                Helpers.icon = icon;
                 function action(value, _a) {
                     var name = _a[0], options = _a.slice(1);
                     if (!value) {
@@ -483,6 +531,7 @@ var Creonit;
                         'buttons',
                         'group',
                         'tooltip',
+                        'icon',
                         'action',
                         'open',
                         'panel',
@@ -523,13 +572,7 @@ var Creonit;
                     _super.apply(this, arguments);
                 }
                 List.prototype.render = function () {
-                    var _this = this;
                     this.node.html(this.template.render($.extend({}, this.data, { parameters: this.query })));
-                    this.patterns.forEach(function (pattern) {
-                        _this.data[pattern.name].entities.forEach(function (entity) {
-                            _this.node.find('.component-list-body').append(pattern.template.render(entity));
-                        });
-                    });
                     Component.Utils.initializeComponents(this.node, this);
                 };
                 return List;
@@ -715,24 +758,6 @@ var Creonit;
     (function (Admin) {
         var Component;
         (function (Component) {
-            var Scope = (function () {
-                function Scope(component, options) {
-                    $.extend(this, options);
-                    this.component = component;
-                    this.template = twig({ autoescape: true, data: this.template });
-                }
-                return Scope;
-            }());
-            Component.Scope = Scope;
-        })(Component = Admin.Component || (Admin.Component = {}));
-    })(Admin = Creonit.Admin || (Creonit.Admin = {}));
-})(Creonit || (Creonit = {}));
-var Creonit;
-(function (Creonit) {
-    var Admin;
-    (function (Admin) {
-        var Component;
-        (function (Component) {
             var Table = (function (_super) {
                 __extends(Table, _super);
                 function Table() {
@@ -770,7 +795,7 @@ var Creonit;
                     this.node.empty();
                     var node = this.node;
                     if (this.options.modal) {
-                        this.node.append(node = $("\n                    <div class=\"modal-content\"> \n                        <div class=\"modal-header\"> \n                            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">\u00D7</span></button> \n                            <h4 class=\"modal-title\">" + this.schema.title + "</h4> \n                        </div> \n                        \n                        <div class=\"modal-body\">\n                        </div>\n                   </div>    \n                "));
+                        this.node.append(node = $("\n                    <div class=\"modal-content\"> \n                        <div class=\"modal-header\"> \n                            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">\u00D7</span></button> \n                            <h4 class=\"modal-title\">" + this.parameters.title + "</h4> \n                        </div> \n                        \n                        <div class=\"modal-body\">\n                        </div>\n                   </div>    \n                "));
                         node = node.find('.modal-body');
                         this.node.find('.modal-header .close').on('click', function () {
                             _this.node.arcticmodal('close');
@@ -778,18 +803,22 @@ var Creonit;
                     }
                     node.html(this.template.render($.extend({}, this.data, { _query: this.query })));
                     this.scopes.forEach(function (scope) {
-                        _this.data.entities.forEach(function (entity) {
-                            var rowId = Component.Utils.generateId();
-                            var $entity = $(("<tr data-row-id=\"" + rowId + "\">") + scope.template.render($.extend({}, entity, {
-                                _visible: function () {
-                                    return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'eye', className: "table-row-visible " + (entity.visible ? 'mod-visible' : '') })), ['_visible', { scope: scope.name, key: entity._key, row_id: rowId }]));
-                                },
-                                _delete: function () {
-                                    return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'remove' })), ['_delete', { scope: scope.name, key: entity._key, row_id: rowId }]));
-                                }
-                            })) + '</tr>');
-                            _this.node.find('tbody').append($entity);
-                        });
+                        if (scope.parameters.independent) {
+                            if (scope.parameters.recursive) {
+                                $.each(_this.parameters.relations, function (i, relation) {
+                                    if (relation.source.scope == scope.parameters.name) {
+                                        _this.renderRow(scope, relation);
+                                        return false;
+                                    }
+                                });
+                            }
+                            else {
+                                _this.renderRow(scope);
+                            }
+                        }
+                        /*
+        
+                        */
                     });
                     this.node.find('[js-component-action]').on('click', function (e) {
                         e.preventDefault();
@@ -797,9 +826,38 @@ var Creonit;
                         _this.action($action.data('name'), $action.data('options'));
                     });
                     if (!this.node.find('tbody').children().length) {
+                        this.node.find('thead').remove();
                         this.node.find('tbody').html('<tr><td colspan="' + (this.node.find('thead td').length) + '">Список пуст</td></tr>');
                     }
+                    this.node.find('[data-toggle="tooltip"]').tooltip();
                     Component.Utils.initializeComponents(this.node, this);
+                };
+                Table.prototype.renderRow = function (scope, relation, relationValue, level) {
+                    var _this = this;
+                    if (relation === void 0) { relation = null; }
+                    if (relationValue === void 0) { relationValue = null; }
+                    if (level === void 0) { level = 0; }
+                    this.data.entities[(scope.parameters.name + "." + (relation ? relation.target.scope + "." + (relationValue || '') : '_'))].forEach(function (entity) {
+                        var rowId = Component.Utils.generateId();
+                        var $entity = $(("<tr data-row-id=\"" + rowId + "\">") + scope.template.render($.extend({}, entity, {
+                            _level: function () {
+                                return Component.Utils.raw(new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'));
+                            },
+                            _visible: function () {
+                                return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'eye', className: "table-row-visible " + (entity.visible ? 'mod-visible' : '') })), ['_visible', { scope: scope.parameters.name, key: entity._key, row_id: rowId }]));
+                            },
+                            _delete: function () {
+                                return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'remove' })), ['_delete', { scope: scope.parameters.name, key: entity._key, row_id: rowId }]));
+                            }
+                        })) + '</tr>');
+                        _this.node.find('tbody').append($entity);
+                        $.each(_this.parameters.relations, function (i, rel) {
+                            if (rel.target.scope == scope.parameters.name) {
+                                _this.renderRow(_this.getScope(rel.source.scope), rel, entity[rel.target.field], level + 1);
+                                return false;
+                            }
+                        });
+                    });
                 };
                 return Table;
             }(Component.Component));

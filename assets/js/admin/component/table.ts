@@ -46,7 +46,7 @@ module Creonit.Admin.Component{
                     <div class="modal-content"> 
                         <div class="modal-header"> 
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button> 
-                            <h4 class="modal-title">${this.schema.title}</h4> 
+                            <h4 class="modal-title">${this.parameters.title}</h4> 
                         </div> 
                         
                         <div class="modal-body">
@@ -64,20 +64,24 @@ module Creonit.Admin.Component{
             node.html(this.template.render($.extend({}, this.data, {_query: this.query})));
 
 
-
             this.scopes.forEach((scope:Scope) => {
-                this.data.entities.forEach((entity:any) => {
-                    let rowId = Utils.generateId();
-                    let $entity = $(`<tr data-row-id="${rowId}">` + scope.template.render($.extend({}, entity, {
-                            _visible: function(){
-                                return Utils.raw(Helpers.action(Utils.raw(Helpers.button('', {size: 'xs', icon: 'eye', className: `table-row-visible ${entity.visible ? 'mod-visible' : ''}`})), ['_visible', {scope: scope.name, key: entity._key, row_id: rowId}]));
-                            },
-                            _delete: function(){
-                                return Utils.raw(Helpers.action(Utils.raw(Helpers.button('', {size: 'xs', icon: 'remove'})), ['_delete', {scope: scope.name, key: entity._key, row_id: rowId}]));
+                if(scope.parameters.independent){
+
+                    if(scope.parameters.recursive){
+                        $.each(this.parameters.relations, (i, relation) => {
+                            if(relation.source.scope == scope.parameters.name){
+                                this.renderRow(scope, relation);
+                                return false;
                             }
-                        })) + '</tr>');
-                    this.node.find('tbody').append($entity);
-                });
+                        });
+
+                    }else{
+                        this.renderRow(scope)
+                    }
+                }
+                /*
+
+                */
             });
 
 
@@ -91,11 +95,40 @@ module Creonit.Admin.Component{
 
 
             if(!this.node.find('tbody').children().length){
+                this.node.find('thead').remove();
                 this.node.find('tbody').html('<tr><td colspan="'+(this.node.find('thead td').length)+'">Список пуст</td></tr>');
             }
 
+            this.node.find('[data-toggle="tooltip"]').tooltip();
+
 
             Utils.initializeComponents(this.node, this);
+        }
+
+        protected renderRow(scope:Scope, relation = null, relationValue = null, level = 0){
+            this.data.entities[`${scope.parameters.name}.${relation ? `${relation.target.scope}.${relationValue || ''}` : '_'}`].forEach((entity:any) => {
+                let rowId = Utils.generateId();
+                let $entity = $(`<tr data-row-id="${rowId}">` + scope.template.render($.extend({}, entity, {
+                        _level: function(){
+                            return Utils.raw(new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'));
+                        },
+                        _visible: function(){
+                            return Utils.raw(Helpers.action(Utils.raw(Helpers.button('', {size: 'xs', icon: 'eye', className: `table-row-visible ${entity.visible ? 'mod-visible' : ''}`})), ['_visible', {scope: scope.parameters.name, key: entity._key, row_id: rowId}]));
+                        },
+                        _delete: function(){
+                            return Utils.raw(Helpers.action(Utils.raw(Helpers.button('', {size: 'xs', icon: 'remove'})), ['_delete', {scope: scope.parameters.name, key: entity._key, row_id: rowId}]));
+                        }
+                    })) + '</tr>');
+                this.node.find('tbody').append($entity);
+
+                $.each(this.parameters.relations, (i, rel) => {
+                    if(rel.target.scope == scope.parameters.name){
+                        this.renderRow(this.getScope(rel.source.scope), rel, entity[rel.target.field], level+1);
+                        return false;
+                    }
+                });
+
+            });
         }
 
     }

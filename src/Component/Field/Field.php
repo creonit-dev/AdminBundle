@@ -5,6 +5,7 @@ namespace Creonit\AdminBundle\Component\Field;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Propel\Runtime\Map\TableMap;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
@@ -62,7 +63,13 @@ class Field
     public function save($entity, $data)
     {
         if(null !== $data){
-            $entity->setByName($this->name, $this->process($data), TableMap::TYPE_FIELDNAME);
+            if($this->parameters->has('save')){
+                $language = new ExpressionLanguage();
+                return $language->evaluate($this->parameters->get('load'), ['entity' => $entity, 'data' => $this->process($data)]);
+                
+            }else if(property_exists($entity, $this->name)){
+                $entity->setByName($this->name, $this->process($data), TableMap::TYPE_FIELDNAME);
+            }
         }
 
     }
@@ -77,7 +84,16 @@ class Field
 
     public function load($entity)
     {
-        return $this->decorate($entity->getByName($this->name, TableMap::TYPE_FIELDNAME));
+        if($this->parameters->has('load')){
+            $language = new ExpressionLanguage();
+            return $language->evaluate($this->parameters->get('load'), ['entity' => $entity]);
+
+        }else if(property_exists($entity, $this->name)){
+            return $this->decorate($entity->getByName($this->name, TableMap::TYPE_FIELDNAME));
+
+        }else{
+            return null;
+        }
     }
 
     public function decorate($data){

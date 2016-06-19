@@ -4,7 +4,7 @@ namespace Creonit\AdminBundle\Component;
 
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Response\ComponentResponse;
-use Creonit\AdminBundle\Component\Scope\ScopeRelation;
+use Creonit\AdminBundle\Component\Scope\ListRowScopeRelation;
 use Propel\Runtime\Map\TableMap;
 
 abstract class TableComponent extends ListComponent
@@ -39,6 +39,10 @@ abstract class TableComponent extends ListComponent
 
     protected function prepareSchema()
     {
+        $this->initializeRelations();
+
+
+
         $this->setTemplate($this->container->get('templating')->render('CreonitAdminBundle:Components:table.html.twig', ['component' => $this]));
 
 

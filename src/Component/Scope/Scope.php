@@ -4,6 +4,7 @@ namespace Creonit\AdminBundle\Component\Scope;
 
 use Creonit\AdminBundle\Component\Field\Field;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
+use Propel\Runtime\Map\TableMap;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Validator\Constraints\Email;
@@ -63,12 +64,15 @@ class Scope
     public function setName($name)
     {
         $this->name = $name;
-        $this->setEntity('AppBundle\\Model\\' . $this->name);
+        $this->setEntity($this->name);
         return $this;
     }
 
     protected function setEntity($entity)
     {
+        if(strpos($entity, '\\') === false){
+            $entity = 'AppBundle\\Model\\' . $entity;
+        }
         $this->entity = $entity;
         $tableMap = $entity::TABLE_MAP;
         $this->tableMap = $tableMap::getTableMap();
@@ -98,8 +102,17 @@ class Scope
         return new $entityClass;
     }
 
+
+    /**
+     * @return TableMap
+     */
+    public function getTableMap()
+    {
+        return $this->tableMap;
+    }
+
     public function applySchemaAnnotations($annotations){
-        
+
         if(array_key_exists('parameters', $annotations)){
             foreach ($annotations['parameters'] as $annotation){
                 $this->applySchemaAnnotation($annotation);
@@ -130,6 +143,8 @@ class Scope
     {
         return $this->template;
     }
+
+
 
     public function applySchemaAnnotation($annotation){
         switch($annotation['key']){
@@ -162,7 +177,6 @@ class Scope
     }
 
 
-
     public function createField($name, $parameters = [], $type = null){
         /** @var Field $field */
         $field = $this->container->get('creonit_admin.component.field.' . ($type ?: 'default'));
@@ -171,13 +185,17 @@ class Scope
         return $field;
     }
 
-
     public function getFields(){
         return $this->fields;
     }
 
+    public function getField($name){
+        return $this->fields[$name];
+    }
+
     public function addScope(Scope $scope)
     {
+        $scope->setParentScope($this);
         $this->scopes[$scope->getName()] = $scope;
         return $this;
     }
@@ -190,6 +208,11 @@ class Scope
         return $this->scopes[$scopeName];
     }
 
+    public function setParentScope(Scope $scope){
+        $this->parentScope = $scope;
+    }
+
+
     public function dump(){
         $schema = [
             'name' => $this->name,
@@ -197,13 +220,12 @@ class Scope
         ];
 
         foreach ($this->scopes as $scope){
-            $schema['scopes'][$scope->getName()] = $scope->dump();
+            $schema['scopes'][] = $scope->dump();
         }
 
 
         return $schema;
     }
-
 
     public function prepareTemplate()
     {

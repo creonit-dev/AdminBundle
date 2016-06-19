@@ -1,10 +1,10 @@
 module Creonit.Admin.Component {
     
 
-    export class Component {
+    export class Component extends Scope{
+        protected title:string;
         protected name:string;
         protected manager:Manager;
-        protected scopes:Scope[] = [];
         protected parent:Component;
 
         protected query:any = {};
@@ -13,10 +13,12 @@ module Creonit.Admin.Component {
         protected node:any;
 
         protected schema:any;
-        protected template:any;
         protected actions:any = {};
 
         constructor(node:any, name:string, query:any = {}, options:any = {}, parent?:Component) {
+            super();
+
+
             this.manager = Manager.getInstance();
             this.name = name;
 
@@ -27,6 +29,9 @@ module Creonit.Admin.Component {
             this.options = options;
 
             this.loadSchema();
+
+
+
         }
 
         action(name, options) {
@@ -84,10 +89,7 @@ module Creonit.Admin.Component {
         }
 
         applySchema(schema:any) {
-            this.schema = schema;
-            this.template = twig({autoescape: true, data: schema.template});
-
-            $.each(this.schema.actions, (name, action) => {
+            $.each(schema.actions, (name, action) => {
                 this.actions[name] = eval('(function(){return ' + action + '})()');
             });
 
@@ -95,12 +97,7 @@ module Creonit.Admin.Component {
                 openComponent: this.openComponent
             });
 
-            if (schema.scopes) {
-                $.each(schema.scopes, (i, scope) => {
-                    this.scopes.push(new Scope(this, scope));
-                });
-            }
-
+            super.applySchema(schema);
         }
 
         render() {
@@ -147,7 +144,7 @@ module Creonit.Admin.Component {
                             }
                         };
 
-                        interval = setInterval(fix, 10);
+                        interval = setInterval(fix, 100);
 
                         fix();
                         $container.on('scroll', fix);

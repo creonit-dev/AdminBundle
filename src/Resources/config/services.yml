@@ -20,9 +20,11 @@ services:
 
     creonit_admin.component.scope.default:
         class: Creonit\AdminBundle\Component\Scope\Scope
+        shared: false
 
     creonit_admin.component.scope.table_row:
         class: Creonit\AdminBundle\Component\Scope\TableRowScope
+        shared: false
 
 
     creonit_admin.component.field:

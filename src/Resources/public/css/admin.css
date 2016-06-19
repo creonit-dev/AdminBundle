@@ -80,6 +80,9 @@
 .table-row-visible:not(.mod-visible) {
   opacity: 0.3;
 }
+.icon {
+  margin-right: 5px;
+}
 body {
   padding-top: 50px;
 }

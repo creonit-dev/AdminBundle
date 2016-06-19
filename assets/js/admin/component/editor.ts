@@ -13,7 +13,7 @@ module Creonit.Admin.Component{
                     <div class="modal-content"> 
                         <div class="modal-header"> 
                             <button type="button" class="close"><span>×</span></button> 
-                            <h4 class="modal-title">${this.schema.title}</h4> 
+                            <h4 class="modal-title">${this.parameters.title}</h4> 
                         </div> 
                         
                         <div class="modal-body">
@@ -31,7 +31,7 @@ module Creonit.Admin.Component{
 
 
 
-                node.append(this.template.render($.extend({}, this.data, {_query: this.query})));
+                node.append(this.template.render($.extend({}, this.data, {_query: this.query, _key: this.query.key || null})));
 
             if(!this.options.modal){
                 this.node.append(Helpers.submit('Сохранить'));
