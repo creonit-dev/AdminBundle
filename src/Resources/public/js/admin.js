@@ -829,7 +829,7 @@ var Creonit;
                         this.node.find('thead').remove();
                         this.node.find('tbody').html('<tr><td colspan="' + (this.node.find('thead td').length) + '">Список пуст</td></tr>');
                     }
-                    this.node.find('[data-toggle="tooltip"]').tooltip();
+                    this.node.find('[data-toggle="tooltip"]').tooltip({ container: 'body', trigger: 'hover' });
                     Component.Utils.initializeComponents(this.node, this);
                 };
                 Table.prototype.renderRow = function (scope, relation, relationValue, level) {
@@ -844,10 +844,10 @@ var Creonit;
                                 return Component.Utils.raw(new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'));
                             },
                             _visible: function () {
-                                return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'eye', className: "table-row-visible " + (entity.visible ? 'mod-visible' : '') })), ['_visible', { scope: scope.parameters.name, key: entity._key, row_id: rowId }]));
+                                return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.tooltip(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'eye', className: "table-row-visible " + (entity.visible ? 'mod-visible' : '') })), ['Скрыть&nbsp;/&nbsp;Показать', 'top'])), ['_visible', { scope: scope.parameters.name, key: entity._key, row_id: rowId }]));
                             },
                             _delete: function () {
-                                return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'remove' })), ['_delete', { scope: scope.parameters.name, key: entity._key, row_id: rowId }]));
+                                return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.tooltip(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'remove' })), ['Удалить', 'top'])), ['_delete', { scope: scope.parameters.name, key: entity._key, row_id: rowId }]));
                             }
                         })) + '</tr>');
                         _this.node.find('tbody').append($entity);

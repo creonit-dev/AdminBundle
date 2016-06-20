@@ -99,7 +99,7 @@ module Creonit.Admin.Component{
                 this.node.find('tbody').html('<tr><td colspan="'+(this.node.find('thead td').length)+'">Список пуст</td></tr>');
             }
 
-            this.node.find('[data-toggle="tooltip"]').tooltip();
+            this.node.find('[data-toggle="tooltip"]').tooltip({container: 'body', trigger: 'hover'});
 
 
             Utils.initializeComponents(this.node, this);
@@ -113,10 +113,20 @@ module Creonit.Admin.Component{
                             return Utils.raw(new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'));
                         },
                         _visible: function(){
-                            return Utils.raw(Helpers.action(Utils.raw(Helpers.button('', {size: 'xs', icon: 'eye', className: `table-row-visible ${entity.visible ? 'mod-visible' : ''}`})), ['_visible', {scope: scope.parameters.name, key: entity._key, row_id: rowId}]));
+                            return Utils.raw(Helpers.action(
+                                Utils.raw(Helpers.tooltip(
+                                    Utils.raw(Helpers.button('', {size: 'xs', icon: 'eye', className: `table-row-visible ${entity.visible ? 'mod-visible' : ''}`})),
+                                    ['Скрыть&nbsp;/&nbsp;Показать', 'top']
+                                )),
+                                ['_visible', {scope: scope.parameters.name, key: entity._key, row_id: rowId}]));
                         },
                         _delete: function(){
-                            return Utils.raw(Helpers.action(Utils.raw(Helpers.button('', {size: 'xs', icon: 'remove'})), ['_delete', {scope: scope.parameters.name, key: entity._key, row_id: rowId}]));
+                            return Utils.raw(Helpers.action(
+                                Utils.raw(Helpers.tooltip(
+                                    Utils.raw(Helpers.button('', {size: 'xs', icon: 'remove'})),
+                                    ['Удалить', 'top']
+                                )),
+                                ['_delete', {scope: scope.parameters.name, key: entity._key, row_id: rowId}]));
                         }
                     })) + '</tr>');
                 this.node.find('tbody').append($entity);

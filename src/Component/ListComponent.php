@@ -182,7 +182,7 @@ abstract class ListComponent extends Component
         return $relations;
     }
 
-    protected function filter(ComponentRequest $request, ComponentResponse $response, ModelCriteria $query, Scope $scope, $relation, $relationValue, $level)
+    protected function filter(ComponentRequest $request, ComponentResponse $response, $query, Scope $scope, $relation, $relationValue, $level)
     {
     }
 

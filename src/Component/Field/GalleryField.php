@@ -7,16 +7,16 @@ use Creonit\AdminBundle\Component\Storage\Storage;
 
 class GalleryField extends Field
 {
-    public function load(Storage $storage, $entity)
-    {
-        parent::load($storage, $entity);
 
-        if(!$this->data){
+    public function load($entity)
+    {
+        if($data = parent::load($entity)){
+            return $data;
+        }else{
             $gallery = new Gallery();
             $gallery->save();
-            $this->data = $gallery->getId();
+            return $gallery->getId();
         }
     }
-
 
 }
