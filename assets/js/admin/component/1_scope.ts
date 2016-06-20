@@ -10,8 +10,10 @@ module Creonit.Admin.Component {
         }
 
         applySchema(schema:any) {
+            schema = $.extend({}, schema);
+            
             if(schema.template){
-                this.template = twig({autoescape: true, data: schema.template});
+                this.template = twig({autoescape: true, data: schema.template, options: {asdas: 'vertal'}});
                 delete schema.template;
             }
 

@@ -76,6 +76,12 @@ module Creonit.Admin.Component{
                 $(e.currentTarget).attr('clicked', true);
             });
 
+            this.node.find('[js-component-action]').on('click', (e) => {
+                e.preventDefault();
+                let $action = $(e.currentTarget);
+                this.action($action.data('name'), $action.data('options'));
+            });
+
             $form.on('submit', (e) => {
                 e.preventDefault();
                 var $form = $(e.currentTarget),

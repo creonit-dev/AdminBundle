@@ -16,6 +16,8 @@ abstract class Module
     protected $manager;
 
     protected $active;
+    
+    protected $visible = true;
 
     /** @var  ContainerInterface */
     protected $container;
@@ -90,6 +92,14 @@ abstract class Module
 
     public function isActive(){
         return true === $this->active;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isVisible()
+    {
+        return $this->visible;
     }
 
 

@@ -11,11 +11,7 @@ class TableRowScope extends ListRowScope
         switch($annotation['key']){
             case 'col':
             case 'column':
-                $template = $annotation['value'];
-                if(preg_match('/^\s*([\w_]+)\s*$/ui', $template, $match)){
-                    $template = "{{ $match[1] }}";
-                }
-                $this->addColumn($template);
+                $this->addColumn($annotation['value']);
                 break;
             default:
                 parent::applySchemaAnnotation($annotation);

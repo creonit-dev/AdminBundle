@@ -1,12 +1,13 @@
 <ul class="nav nav-sidebar">
     {% for module in admin.getModules %}
-
-        <li {{ module.isActive ? 'class="active"' }}>
-            <a href="{{ url('creonit_admin_module', {module: module.getUri}) }}">
-                <i class="{{ module.getIcon }}"></i>
-                <span>{{ module.getTitle }}</span>
-            </a>
-        </li>
+        {% if module.isVisible %}
+            <li {{ module.isActive ? 'class="active"' }}>
+                <a href="{{ url('creonit_admin_module', {module: module.getUri}) }}">
+                    <i class="{{ module.getIcon }}"></i>
+                    <span>{{ module.getTitle }}</span>
+                </a>
+            </li>
+        {% endif %}
 
     {% endfor %}
 </ul>

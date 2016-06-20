@@ -39,7 +39,7 @@ module Creonit.Admin.Component.Helpers {
                 class="btn btn-${type} ${size ? `btn-${size}` : ''} ${className}" 
                 type="button" 
             >
-                `+ (icon ? `<i class="${resolveIconClass(icon)}"></i>${caption ? ' ' : ''}` : '') +`${caption}
+                `+ (icon ? `<i class="${caption ? 'icon' : ''} ${resolveIconClass(icon)}"></i>` : '') +`${caption}
             </button>`;
     }
 
@@ -141,6 +141,30 @@ module Creonit.Admin.Component.Helpers {
         `;
     }
 
+    export function external(value:any, [name, component, options = {}]:[string, string, any] = ['', '', {}]){
+        var id = Utils.generateId(),
+            empty = options.empty || 'Значение не выбрано';
+
+        if(!value){
+            value = {
+                title: empty,
+                value: '',
+            };
+        }
+
+        return `
+            <div class="input-group">
+                <div class="input-group-addon"><i class="fa fa-arrow-right"></i></div>
+                ${open(Utils.raw(`
+                        <div class="form-control" js-component-external-field="${id}" data-empty="${empty}">${value.title}</div>
+                    `), [component, $.extend(options.query || {}, {value: value.value}), {external: id}])
+                }
+                <div class="input-group-addon" js-component-external-field-reset><i class="fa fa-remove"></i></div>
+            </div>
+           
+            <input type="hidden" name="${name}" value="${value.value}">
+        `;
+    }
     export function image(value:any, [name, options = {}]:[string, any] = ['', {}]){
         options = $.extend({deletable: true}, options);
 
@@ -288,6 +312,7 @@ module Creonit.Admin.Component.Helpers {
             'file',
             'video',
             'image',
+            'external',
             'gallery',
             'select',
             'buttons',

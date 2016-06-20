@@ -86,6 +86,14 @@ module Creonit.Admin.Component {
             
             this.data = response.data || {};
             this.render();
+
+            this.node.find('[js-component-external-field-reset]')
+                .off('.component')
+                .on('click.component', (e) => {
+                    e.preventDefault();
+                    var $input = $(e.currentTarget).prev('a').find('[js-component-external-field]');
+                    $input.text($input.data('empty')).parent().parent().next('input').val('');
+                });
         }
 
         applySchema(schema:any) {
@@ -96,6 +104,13 @@ module Creonit.Admin.Component {
             $.extend(this.actions, {
                 openComponent: this.openComponent
             });
+
+            if(this.options.external){
+                this.actions['external'] = (value, title) => {
+                    this.parent.node.find(`[js-component-external-field=${this.options.external}]`).text(title).parent().parent().next('input').val(value);
+                    this.node.arcticmodal('close');
+                }
+            }
 
             super.applySchema(schema);
         }

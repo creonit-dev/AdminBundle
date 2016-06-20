@@ -2240,8 +2240,8 @@ table {
   background-color: transparent;
 }
 caption {
-  padding-top: 8px;
-  padding-bottom: 8px;
+  padding-top: 6px 12px;
+  padding-bottom: 6px 12px;
   color: #777777;
   text-align: left;
 }
@@ -2259,7 +2259,7 @@ th {
 .table > thead > tr > td,
 .table > tbody > tr > td,
 .table > tfoot > tr > td {
-  padding: 8px;
+  padding: 6px 12px;
   line-height: 1.53846154;
   vertical-align: top;
   border-top: 1px solid #ddd;
@@ -5432,7 +5432,7 @@ button.list-group-item-danger.active:focus {
   padding: 15px;
 }
 .panel-heading {
-  padding: 10px 15px;
+  padding: 5px;
   border-bottom: 1px solid transparent;
   border-top-right-radius: 2px;
   border-top-left-radius: 2px;
@@ -5454,7 +5454,7 @@ button.list-group-item-danger.active:focus {
   color: inherit;
 }
 .panel-footer {
-  padding: 10px 15px;
+  padding: 5px;
   background-color: #f5f5f5;
   border-top: 1px solid #ddd;
   border-bottom-right-radius: 2px;

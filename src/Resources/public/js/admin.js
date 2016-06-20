@@ -39,8 +39,9 @@ var Creonit;
                 }
                 Scope.prototype.applySchema = function (schema) {
                     var _this = this;
+                    schema = $.extend({}, schema);
                     if (schema.template) {
-                        this.template = twig({ autoescape: true, data: schema.template });
+                        this.template = twig({ autoescape: true, data: schema.template, options: { asdas: 'vertal' } });
                         delete schema.template;
                     }
                     if (schema.scopes) {
@@ -142,6 +143,13 @@ var Creonit;
                     }
                     this.data = response.data || {};
                     this.render();
+                    this.node.find('[js-component-external-field-reset]')
+                        .off('.component')
+                        .on('click.component', function (e) {
+                        e.preventDefault();
+                        var $input = $(e.currentTarget).prev('a').find('[js-component-external-field]');
+                        $input.text($input.data('empty')).parent().parent().next('input').val('');
+                    });
                 };
                 Component.prototype.applySchema = function (schema) {
                     var _this = this;
@@ -151,6 +159,12 @@ var Creonit;
                     $.extend(this.actions, {
                         openComponent: this.openComponent
                     });
+                    if (this.options.external) {
+                        this.actions['external'] = function (value, title) {
+                            _this.parent.node.find("[js-component-external-field=" + _this.options.external + "]").text(title).parent().parent().next('input').val(value);
+                            _this.node.arcticmodal('close');
+                        };
+                    }
                     _super.prototype.applySchema.call(this, schema);
                 };
                 Component.prototype.render = function () {
@@ -252,6 +266,11 @@ var Creonit;
                     this.node.find('.editor-save-and-close').on('click', function (e) {
                         $(e.currentTarget).attr('clicked', true);
                     });
+                    this.node.find('[js-component-action]').on('click', function (e) {
+                        e.preventDefault();
+                        var $action = $(e.currentTarget);
+                        _this.action($action.data('name'), $action.data('options'));
+                    });
                     $form.on('submit', function (e) {
                         e.preventDefault();
                         var $form = $(e.currentTarget), data = $form.serializeObject(), query = _this.getQuery(), $buttonCloseAfterSave = _this.node.find('.editor-save-and-close[clicked]'), closeAfterSave = !!$buttonCloseAfterSave.length;
@@ -345,7 +364,7 @@ var Creonit;
                 // Twig Functions
                 function button(caption, _a) {
                     var _b = _a === void 0 ? {} : _a, _c = _b.size, size = _c === void 0 ? '' : _c, _d = _b.type, type = _d === void 0 ? 'default' : _d, _e = _b.icon, icon = _e === void 0 ? '' : _e, _f = _b.className, className = _f === void 0 ? '' : _f;
-                    return ("<button \n                class=\"btn btn-" + type + " " + (size ? "btn-" + size : '') + " " + className + "\" \n                type=\"button\" \n            >\n                ") + (icon ? "<i class=\"" + resolveIconClass(icon) + "\"></i>" + (caption ? ' ' : '') : '') + (caption + "\n            </button>");
+                    return ("<button \n                class=\"btn btn-" + type + " " + (size ? "btn-" + size : '') + " " + className + "\" \n                type=\"button\" \n            >\n                ") + (icon ? "<i class=\"" + (caption ? 'icon' : '') + " " + resolveIconClass(icon) + "\"></i>" : '') + (caption + "\n            </button>");
                 }
                 Helpers.button = button;
                 function submit(caption, _a) {
@@ -416,6 +435,18 @@ var Creonit;
                     return "\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\"><input type=\"text\" class=\"form-control\" name=\"" + name + "\" value=\"" + url + "\" placeholder=\"\u0421\u0441\u044B\u043B\u043A\u0430 \u043D\u0430 YouTube\"></div>\n                <div class=\"panel-body\">" + output + "</div>\n            </div>\n        ";
                 }
                 Helpers.video = video;
+                function external(value, _a) {
+                    var _b = _a === void 0 ? ['', '', {}] : _a, name = _b[0], component = _b[1], _c = _b[2], options = _c === void 0 ? {} : _c;
+                    var id = Component.Utils.generateId(), empty = options.empty || 'Значение не выбрано';
+                    if (!value) {
+                        value = {
+                            title: empty,
+                            value: '',
+                        };
+                    }
+                    return "\n            <div class=\"input-group\">\n                <div class=\"input-group-addon\"><i class=\"fa fa-arrow-right\"></i></div>\n                " + open(Component.Utils.raw("\n                        <div class=\"form-control\" js-component-external-field=\"" + id + "\" data-empty=\"" + empty + "\">" + value.title + "</div>\n                    "), [component, $.extend(options.query || {}, { value: value.value }), { external: id }]) + "\n                <div class=\"input-group-addon\" js-component-external-field-reset><i class=\"fa fa-remove\"></i></div>\n            </div>\n           \n            <input type=\"hidden\" name=\"" + name + "\" value=\"" + value.value + "\">\n        ";
+                }
+                Helpers.external = external;
                 function image(value, _a) {
                     var _b = _a === void 0 ? ['', {}] : _a, name = _b[0], _c = _b[1], options = _c === void 0 ? {} : _c;
                     options = $.extend({ deletable: true }, options);
@@ -537,6 +568,7 @@ var Creonit;
                         'file',
                         'video',
                         'image',
+                        'external',
                         'gallery',
                         'select',
                         'buttons',

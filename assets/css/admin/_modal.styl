@@ -9,7 +9,7 @@
    top 0
    right 0
    bottom 0
-   z-index 1000
+   z-index 1031
 }
 .arcticmodal-container {
    overflow-y scroll
@@ -25,6 +25,10 @@
 .arcticmodal-container_i {
    height 100%
    margin 0 auto
+}
+
+.arcticmodal-container_i2{
+   vertical-align top
 }
    /*
 .arcticmodal-container_i2 {
@@ -80,5 +84,17 @@
 
    &[style]{
       box-shadow 0 -3px 10px rgba(black, .1)
+   }
+}
+
+sel = '.arcticmodal-container'
+for num in (2..10) {
+   sel = sel + ' + .arcticmodal-overlay + .arcticmodal-container'
+
+   {sel}{
+      .modal-dialog{
+         padding 0 ((num - 1) * 15)px
+         margin-top ((num + 1) * 15)px
+      }
    }
 }
