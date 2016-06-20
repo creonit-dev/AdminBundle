@@ -20,7 +20,7 @@ class GalleryVideoEditor extends EditorComponent
      *
      * @template
      *
-     * {{ video_id | video }}
+     * {{ video_id | video | group }}
      *
      */
     public function schema()

@@ -16,7 +16,7 @@ class GalleryImageEditor extends EditorComponent
      * @title Изображение
      * @entity GalleryItem
      * @template
-     * {{ image_id | image({deletable:false}) }}
+     * {{ image_id | image({deletable:false}) | group }}
      *
      */
     public function schema()

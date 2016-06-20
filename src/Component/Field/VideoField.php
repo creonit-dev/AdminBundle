@@ -8,7 +8,7 @@ use Symfony\Component\Validator\Constraints\Regex;
 
 class VideoField extends Field
 {
-    public function validate1($data)
+    public function validate($data)
     {
 
         $violations = parent::validate($data);
@@ -16,12 +16,11 @@ class VideoField extends Field
             return $violations;
         }
 
-        return $this->container->get('validator')->validate(new Regex('#^(https?://)?(www\.)?(youtu\.be|youtube\.com)/(watch\?v=[\w\d_-]+|[\w\d_-]+)$#i', ['message' => 'Неверный формат ссылки. Разрешены ссылки только на YouTube.']));
-
-        //if(!preg_match(, $request->data->get('url'))){
-        //    $response->error('Неверный формат ссылки. Разрешены ссылки только на YouTube.', 'url');
-        //}
-        
+        return $this->container->get('validator')
+            ->validate($data, new Regex([
+                'pattern' => '#^(https?://)?(www\.)?(youtu\.be|youtube\.com)/(watch\?v=[\w\d_-]+|[\w\d_-]+)$#i',
+                'message' => 'Неверный формат ссылки. Разрешены ссылки только на YouTube.'
+            ]));
     }
 
     public function save($entity, $data, $processed = false)
