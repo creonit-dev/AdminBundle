@@ -42,7 +42,7 @@ module Creonit.Admin.Component{
                 $form = $(`<form id="${formId}"></form>`);
 
             this.node.append($form);
-            this.node.find('input, textarea, select, button').attr('form', formId);
+            this.node.find('input, textarea, select, button').attr('form', formId).filter('input').eq(0).focus();
 
 
             this.node.find('.text-editor').tinymce({

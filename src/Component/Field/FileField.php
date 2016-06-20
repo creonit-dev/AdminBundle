@@ -2,45 +2,80 @@
 
 namespace Creonit\AdminBundle\Component\Field;
 
+use AppBundle\Model\File;
+use AppBundle\Model\FileQuery;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
+use Propel\Runtime\Map\TableMap;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class FileField extends Field
 {
+
     public function extract(ComponentRequest $request)
     {
-        parent::extract($request);
-        if(null === $this->data){
-            if($request->data->has($this->name . '__delete')){
-                $this->attributes->set('delete', true);
-            }
-        }
+        return [
+            'file' => parent::extract($request),
+            'delete' => $request->data->has($this->name . '__delete')
+        ];
     }
 
 
-    /**
-     * @param UploadedFile $data
-     * @return string
-     */
     public function process($data)
     {
-        $extension = $data->guessExtension();
-        $size = $data->getSize();
-        $mime = $data->getMimeType();
-        $path = '/uploads';
-        $name = md5(uniqid()) . '.' . $extension;
-        $originalName = $data->getClientOriginalName();
+        /** @var UploadedFile $file */
+        if($file = $data['file'] and !$file instanceof NoData){
 
-        $data->move($this->container->getParameter('kernel.root_dir') . '/../web' . $path, $name);
+            $extension = $file->guessExtension();
+            $size = $file->getSize();
+            $mime = $file->getMimeType();
+            $path = '/uploads';
+            $name = md5(uniqid()) . '.' . $extension;
+            $originalName = $file->getClientOriginalName();
 
-        return [
-            'extension' => $extension,
-            'size' => $size,
-            'mime' => $mime,
-            'path' => $path,
-            'name' => $name,
-            'original_name' => $originalName,
-        ];
+            $file->move($this->getWebDir() . $path, $name);
+
+            $data['file'] = [
+                'extension' => $extension,
+                'size' => $size,
+                'mime' => $mime,
+                'path' => $path,
+                'name' => $name,
+                'original_name' => $originalName,
+            ];
+
+        }
+
+        return $data;
+    }
+
+    public function save($entity, $data, $processed = false)
+    {
+        if($processed === false){
+            $data = $this->process($data);
+        }
+
+        if($data['delete']){
+            $fileId = $entity->getByName($this->name, TableMap::TYPE_FIELDNAME);
+            parent::save($entity, null, true);
+
+            if($file = FileQuery::create()->findPk($fileId)){
+                $file->delete();
+            }
+
+        }else if($data['file'] and !$data['file'] instanceof NoData){
+
+            /** @var File $file */
+            $file = new File();
+            $file->setPath($data['path']);
+            $file->setName($data['name']);
+            $file->setOriginalName($data['original_name']);
+            $file->setExtension($data['extension']);
+            $file->setMime($data['mime']);
+            $file->setSize($data['size']);
+
+            parent::save($entity, $file->getId(), true);
+        }
+
     }
 
     public function decorate($data)
@@ -49,6 +84,27 @@ class FileField extends Field
             $data['size'] = $this->container->get('creonit_utils.file_manager')->formatSize($data['size']);
         }
         return $data;
+    }
+
+    public function load($entity)
+    {
+        if($value = parent::load($entity)){
+            $file = FileQuery::create()->findPk($value);
+            return $this->decorate([
+                'mime' => $file->getMime(),
+                'size' => $file->getSize(),
+                'extension' => $file->getExtension(),
+                'path' => $file->getPath(),
+                'name' => $file->getName(),
+                'original_name' => $file->getOriginalName(),
+            ]);
+        }else{
+            return $value;
+        }
+    }
+
+    protected function getWebDir(){
+        return $this->container->getParameter('kernel.root_dir') . '/../web';
     }
 
 

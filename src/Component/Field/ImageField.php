@@ -2,7 +2,11 @@
 
 namespace Creonit\AdminBundle\Component\Field;
 
+use AppBundle\Model\File;
+use AppBundle\Model\Image;
+use AppBundle\Model\ImageQuery;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
+use Propel\Runtime\Map\TableMap;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ImageField extends Field
@@ -10,38 +14,73 @@ class ImageField extends Field
 
     public function extract(ComponentRequest $request)
     {
-        parent::extract($request);
-        if(null === $this->data){
-            if($request->data->has($this->name . '__delete')){
-                $this->attributes->set('delete', true);
-            }
-        }
+        return [
+            'file' => parent::extract($request),
+            'delete' => $request->data->has($this->name . '__delete')
+        ];
     }
 
 
-    /**
-     * @param UploadedFile $data
-     * @return string
-     */
     public function process($data)
     {
-        $extension = $data->guessExtension();
-        $size = $data->getSize();
-        $mime = $data->getMimeType();
-        $path = '/uploads';
-        $name = md5(uniqid()) . '.' . $extension;
-        $originalName = $data->getClientOriginalName();
+        /** @var UploadedFile $file */
+        if($file = $data['file'] and !$file instanceof NoData){
 
-        $data->move($this->getWebDir() . $path, $name);
+            $extension = $file->guessExtension();
+            $size = $file->getSize();
+            $mime = $file->getMimeType();
+            $path = '/uploads';
+            $name = md5(uniqid()) . '.' . $extension;
+            $originalName = $file->getClientOriginalName();
 
-        return [
-            'extension' => $extension,
-            'size' => $size,
-            'mime' => $mime,
-            'path' => $path,
-            'name' => $name,
-            'original_name' => $originalName,
-        ];
+            $file->move($this->getWebDir() . $path, $name);
+
+            $data['file'] = [
+                'extension' => $extension,
+                'size' => $size,
+                'mime' => $mime,
+                'path' => $path,
+                'name' => $name,
+                'original_name' => $originalName,
+            ];
+
+        }
+
+        return $data;
+    }
+
+    public function save($entity, $data, $processed = false)
+    {
+        if($processed === false){
+            $data = $this->process($data);
+        }
+
+        if($data['delete']){
+            $fileId = $entity->getByName($this->name, TableMap::TYPE_FIELDNAME);
+            parent::save($entity, null, true);
+
+            if($image = ImageQuery::create()->findPk($fileId)){
+                $image->delete();
+            }
+
+        }else if($data['file'] and !$data['file'] instanceof NoData){
+
+            /** @var File $file */
+            $file = new File();
+            $file->setPath($data['file']['path']);
+            $file->setName($data['file']['name']);
+            $file->setOriginalName($data['file']['original_name']);
+            $file->setExtension($data['file']['extension']);
+            $file->setMime($data['file']['mime']);
+            $file->setSize($data['file']['size']);
+
+            $image = new Image();
+            $image->setFile($file);
+            $image->save();
+
+            parent::save($entity, $image->getId(), true);
+        }
+
     }
 
     public function decorate($data)
@@ -53,7 +92,30 @@ class ImageField extends Field
         return $data;
     }
 
-    private function getWebDir(){
+
+    public function load($entity)
+    {
+        if($value = parent::load($entity)){
+            dump($value);
+            $image = ImageQuery::create()->findPk($value);
+            $file = $image->getFile();
+
+            return $this->decorate([
+                'mime' => $file->getMime(),
+                'size' => $file->getSize(),
+                'extension' => $file->getExtension(),
+                'path' => $file->getPath(),
+                'name' => $file->getName(),
+                'original_name' => $file->getOriginalName(),
+            ]);
+            
+        }else{
+            return $value;
+        }
+    }
+
+
+    protected function getWebDir(){
         return $this->container->getParameter('kernel.root_dir') . '/../web';
     }
 

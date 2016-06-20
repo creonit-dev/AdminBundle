@@ -114,8 +114,6 @@ module Creonit.Admin.Component {
             options.modal = true;
             var interval;
 
-
-
             $(`
                 <div class="modal-dialog modal-lg">
                     ${Helpers.component(name, query, options)}
@@ -144,7 +142,7 @@ module Creonit.Admin.Component {
                             }
                         };
 
-                        interval = setInterval(fix, 100);
+                        interval = setInterval(fix, 1000);
 
                         fix();
                         $container.on('scroll', fix);

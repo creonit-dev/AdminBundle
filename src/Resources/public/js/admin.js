@@ -183,7 +183,7 @@ var Creonit;
                                         $footer.removeAttr('style');
                                     }
                                 };
-                                interval = setInterval(fix, 100);
+                                interval = setInterval(fix, 1000);
                                 fix();
                                 $container.on('scroll', fix);
                             }, 10);
@@ -228,7 +228,7 @@ var Creonit;
                     }
                     var formId = "form" + ++Editor.increment, $form = $("<form id=\"" + formId + "\"></form>");
                     this.node.append($form);
-                    this.node.find('input, textarea, select, button').attr('form', formId);
+                    this.node.find('input, textarea, select, button').attr('form', formId).filter('input').eq(0).focus();
                     this.node.find('.text-editor').tinymce({
                         doctype: 'html5',
                         element_format: 'html',

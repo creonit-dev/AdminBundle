@@ -60,15 +60,19 @@ class Field
         return $data;
     }
 
-    public function save($entity, $data)
+    public function save($entity, $data, $processed = false)
     {
-        if(null !== $data){
+        if($processed === false){
+            $data = $this->process($data);
+        }
+
+        if(!$data instanceof NoData){
             if($this->parameters->has('save')){
                 $language = new ExpressionLanguage();
-                return $language->evaluate($this->parameters->get('load'), ['entity' => $entity, 'data' => $this->process($data)]);
-                
+                return $language->evaluate($this->parameters->get('load'), ['entity' => $entity, 'data' => $data]);
+
             }else if(property_exists($entity, $this->name)){
-                $entity->setByName($this->name, $this->process($data), TableMap::TYPE_FIELDNAME);
+                $entity->setByName($this->name, $data, TableMap::TYPE_FIELDNAME);
             }
         }
 
@@ -79,14 +83,14 @@ class Field
         if($request->data->has($this->name)){
             return $request->data->get($this->name);
         }
-        return null;
+        return new NoData();
     }
 
     public function load($entity)
     {
         if($this->parameters->has('load')){
             $language = new ExpressionLanguage();
-            return $language->evaluate($this->parameters->get('load'), ['entity' => $entity]);
+            return $this->decorate($language->evaluate($this->parameters->get('load'), ['entity' => $entity]));
 
         }else if(property_exists($entity, $this->name)){
             return $this->decorate($entity->getByName($this->name, TableMap::TYPE_FIELDNAME));
