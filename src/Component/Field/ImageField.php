@@ -96,7 +96,6 @@ class ImageField extends Field
     public function load($entity)
     {
         if($value = parent::load($entity)){
-            dump($value);
             $image = ImageQuery::create()->findPk($value);
             $file = $image->getFile();
 

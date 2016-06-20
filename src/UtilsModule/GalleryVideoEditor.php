@@ -7,7 +7,6 @@ use AppBundle\Model\GalleryQuery;
 use Creonit\AdminBundle\Component\EditorComponent;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Response\ComponentResponse;
-use Propel\Runtime\Map\TableMap;
 
 class GalleryVideoEditor extends EditorComponent
 {
@@ -16,15 +15,12 @@ class GalleryVideoEditor extends EditorComponent
     /**
      *
      * @title Видео
-     *
-     * \GalleryItem
-     *
-     * @field url {constraints: [NotBlank()]}
+     * @entity GalleryItem
+     * @field video_id:video {constraints: [NotBlank()]}
      *
      * @template
      *
-     * {{ url | text | group('Ссылка', {notice: 'видео на YouTube'}) }}
-     * {{ sortable_rank | text | group('Сортировка') }}
+     * {{ video_id | video }}
      *
      */
     public function schema()
@@ -40,10 +36,6 @@ class GalleryVideoEditor extends EditorComponent
     {
         if ($entity->isNew() and !GalleryQuery::create()->findPk($request->query->get('gallery_id'))) {
             $response->error('Галерея не найдена');
-        }
-
-        if(!preg_match('#^(https?://)?(www\.)?(youtu\.be|youtube\.com)/(watch\?v=[\w\d_-]+|[\w\d_-]+)$#i', $request->data->get('url'))){
-            $response->error('Неверный формат ссылки. Разрешены ссылки только на YouTube.', 'url');
         }
     }
 

@@ -9,7 +9,7 @@ class CheckboxField extends Field
 
     public function extract(ComponentRequest $request)
     {
-        $this->data = $request->data->has($this->name);
+        return $request->data->has($this->name);
     }
 
 }

@@ -406,6 +406,16 @@ var Creonit;
                     return "\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\"><input type=\"file\" name=\"" + name + "\"></div>\n                <div class=\"panel-body\">" + output + "</div>\n            </div>\n        ";
                 }
                 Helpers.file = file;
+                function video(value, _a) {
+                    var _b = _a === void 0 ? ['', {}] : _a, name = _b[0], _c = _b[1], options = _c === void 0 ? {} : _c;
+                    var output = 'Видео не загружено', url = '';
+                    if (value) {
+                        url = value.url;
+                        output = "<a href=\"" + value.url + "\" target=\"_blank\">" + value.preview + "</a>";
+                    }
+                    return "\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\"><input type=\"text\" class=\"form-control\" name=\"" + name + "\" value=\"" + url + "\" placeholder=\"\u0421\u0441\u044B\u043B\u043A\u0430 \u043D\u0430 YouTube\"></div>\n                <div class=\"panel-body\">" + output + "</div>\n            </div>\n        ";
+                }
+                Helpers.video = video;
                 function image(value, _a) {
                     var _b = _a === void 0 ? ['', {}] : _a, name = _b[0], _c = _b[1], options = _c === void 0 ? {} : _c;
                     options = $.extend({ deletable: true }, options);
@@ -525,6 +535,7 @@ var Creonit;
                         'textarea',
                         'textedit',
                         'file',
+                        'video',
                         'image',
                         'gallery',
                         'select',

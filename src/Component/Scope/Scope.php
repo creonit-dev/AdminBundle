@@ -235,9 +235,11 @@ class Scope
                     case 'file':
                         $type = 'file';
                         break;
+                    case 'video':
+                        $type = 'video';
+                        break;
                     case 'image':
                         $type = 'image';
-                        break;
                         break;
                     case 'gallery':
                         $type = 'gallery';
@@ -257,7 +259,7 @@ class Scope
         };
 
         $this->template = preg_replace_callback(
-            '/\{\{\s*([\w_]+)\s*\|\s*(textarea|textedit|text|gallery|file|image|select|checkbox|radio)(\(?\)?)(.*?\}\})/usi',
+            '/\{\{\s*([\w_]+)\s*\|\s*(textarea|textedit|text|gallery|file|image|video|select|checkbox|radio)(\(?\)?)(.*?\}\})/usi',
             function($match) use ($createField){
                 $createField($match);
                 return "{{ {$match[1]} | {$match[2]}" . (($match[3] && $match[3] != '()') ? "('{$match[1]}', " : "('{$match[1]}')") . $match[4];
@@ -266,7 +268,7 @@ class Scope
         );
 
         $this->template = preg_replace_callback(
-            '/\(\s*([\w_]+)\s*\|\s*(textarea|textedit|text|gallery|file|image|select|checkbox|radio)(\(?\)?)(.*?\))/usi',
+            '/\(\s*([\w_]+)\s*\|\s*(textarea|textedit|text|gallery|file|image|video|select|checkbox|radio)(\(?\)?)(.*?\))/usi',
             function($match) use ($createField){
                 $createField($match);
                 return "( {$match[1]} | {$match[2]}" . (($match[3] && $match[3] != '()') ? "('{$match[1]}', " : "('{$match[1]}')") . $match[4];

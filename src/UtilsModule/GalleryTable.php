@@ -22,9 +22,16 @@ class GalleryTable extends TableComponent
      * \GalleryItem
      *
      * @field image_id:image
+     * @field video_id:video
      * @field url:image
      *
-     * @col {{ image_id.preview | raw | open('CreonitUtils.GalleryImageEditor', {key: _key}) }}
+     * @col
+     * {% if image_id %}
+     *      {{ image_id.preview | raw | open('CreonitUtils.GalleryImageEditor', {key: _key}) }}
+     * {% else %}
+     *      {{ video_id.preview | raw | open('CreonitUtils.GalleryVideoEditor', {key: _key}) }}
+     * {% endif %}
+     *
      * @col {{ _delete() }}
      *
      */

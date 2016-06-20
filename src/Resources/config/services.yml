@@ -2,6 +2,7 @@ parameters:
     creonit_admin.component.field.default.class: Creonit\AdminBundle\Component\Field\Field
     creonit_admin.component.field.file.class: Creonit\AdminBundle\Component\Field\FileField
     creonit_admin.component.field.image.class: Creonit\AdminBundle\Component\Field\ImageField
+    creonit_admin.component.field.video.class: Creonit\AdminBundle\Component\Field\VideoField
     creonit_admin.component.field.gallery.class: Creonit\AdminBundle\Component\Field\GalleryField
     creonit_admin.component.field.select.class: Creonit\AdminBundle\Component\Field\SelectField
     creonit_admin.component.field.checkbox.class: Creonit\AdminBundle\Component\Field\CheckboxField
@@ -43,6 +44,11 @@ services:
 
     creonit_admin.component.field.image:
         class: '%creonit_admin.component.field.image.class%'
+        parent: creonit_admin.component.field
+        shared: false
+
+    creonit_admin.component.field.video:
+        class: '%creonit_admin.component.field.video.class%'
         parent: creonit_admin.component.field
         shared: false
 

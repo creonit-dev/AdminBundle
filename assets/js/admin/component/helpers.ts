@@ -124,6 +124,23 @@ module Creonit.Admin.Component.Helpers {
         `;
     }
 
+    export function video(value:any, [name, options = {}]:[string, any] = ['', {}]){
+        var output = 'Видео не загружено',
+            url = '';
+
+        if(value){
+            url = value.url;
+            output = `<a href="${value.url}" target="_blank">${value.preview}</a>`;
+        }
+
+        return `
+            <div class="panel panel-default">
+                <div class="panel-heading"><input type="text" class="form-control" name="${name}" value="${url}" placeholder="Ссылка на YouTube"></div>
+                <div class="panel-body">${output}</div>
+            </div>
+        `;
+    }
+
     export function image(value:any, [name, options = {}]:[string, any] = ['', {}]){
         options = $.extend({deletable: true}, options);
 
@@ -269,6 +286,7 @@ module Creonit.Admin.Component.Helpers {
             'textarea',
             'textedit',
             'file',
+            'video',
             'image',
             'gallery',
             'select',
