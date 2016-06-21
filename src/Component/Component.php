@@ -122,7 +122,7 @@ abstract class Component extends Scope
             return null;
         }
 
-        $docComment = preg_replace('#^ */?\*+ */?#m', '', $docComment);
+        $docComment = preg_replace('#^[ \t]*/?\*+ */?#m', '', $docComment);
         $lines = preg_split('#[\n\r]+#', $docComment);
         $cursorEntity = null;
 
