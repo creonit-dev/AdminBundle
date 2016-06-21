@@ -754,7 +754,7 @@ var Creonit;
                     this.type = type;
                     this.query = query;
                     this.data = data;
-                    this.callback = callback.bind(component);
+                    this.callback = callback ? callback.bind(component) : null;
                 }
                 Request.prototype.getId = function () {
                     return this.id;
@@ -768,7 +768,9 @@ var Creonit;
                     };
                 };
                 Request.prototype.passResponse = function (response) {
-                    this.callback(response);
+                    if (this.callback) {
+                        this.callback(response);
+                    }
                 };
                 Request.TYPE_LOAD_SCHEMA = 'load_schema';
                 Request.TYPE_LOAD_DATA = 'load_data';
@@ -882,7 +884,10 @@ var Creonit;
                     if (level === void 0) { level = 0; }
                     this.data.entities[(scope.parameters.name + "." + (relation ? relation.target.scope + "." + (relationValue || '') : '_'))].forEach(function (entity) {
                         var rowId = Component.Utils.generateId();
-                        var $entity = $(("<tr data-row-id=\"" + rowId + "\">") + scope.template.render($.extend({}, entity, {
+                        var className = entity._row_class;
+                        var $entity = $(("<tr data-row-id=\"" + rowId + "\" " + (className ? "class=\"" + className + "\"" : '') + ">") + scope.template.render($.extend({}, entity, {
+                            _query: _this.getQuery(),
+                            _row_id: rowId,
                             _level: function () {
                                 return Component.Utils.raw(new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'));
                             },

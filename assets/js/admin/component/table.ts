@@ -108,7 +108,10 @@ module Creonit.Admin.Component{
         protected renderRow(scope:Scope, relation = null, relationValue = null, level = 0){
             this.data.entities[`${scope.parameters.name}.${relation ? `${relation.target.scope}.${relationValue || ''}` : '_'}`].forEach((entity:any) => {
                 let rowId = Utils.generateId();
-                let $entity = $(`<tr data-row-id="${rowId}">` + scope.template.render($.extend({}, entity, {
+                let className = entity._row_class;
+                let $entity = $(`<tr data-row-id="${rowId}" ${className ? `class="${className}"` : ''}>` + scope.template.render($.extend({}, entity, {
+                        _query: this.getQuery(),
+                        _row_id: rowId,
                         _level: function(){
                             return Utils.raw(new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'));
                         },

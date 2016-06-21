@@ -17,9 +17,26 @@ abstract class ListComponent extends Component
     protected $scopes = [];
 
     protected $header = '';
+    protected $height;
 
     /** @var ListRowScopeRelation[] */
     protected $relations = [];
+
+    /**
+     * @param mixed $height
+     */
+    public function setHeight($height)
+    {
+        $this->height = $height;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHeight()
+    {
+        return $this->height;
+    }
 
 
     public function addRelation(ListRowScopeRelation $relation){
@@ -92,6 +109,9 @@ abstract class ListComponent extends Component
             case 'header':
                 $this->setHeader($annotation['value']);
                 break;
+            case 'height':
+                $this->setHeight($annotation['value']);
+                break;
             default:
                 parent::applySchemaAnnotation($annotation);
         }
@@ -146,7 +166,7 @@ abstract class ListComponent extends Component
                 $entityData->set($field->getName(), $field->load($entity));
                 $entityData->set('_key', $entity->getPrimaryKey());
             }
-            $this->decorate($request, $response, $entityData, $scope, $relation, $relationValue, $level);
+            $this->decorate($request, $response, $entityData, $entity, $scope, $relation, $relationValue, $level);
             $entities[] = $entityData->all();
         }
 
@@ -186,7 +206,7 @@ abstract class ListComponent extends Component
     {
     }
 
-    protected function decorate(ComponentRequest $request, ComponentResponse $response, ParameterBag $data, Scope $scope, $relation, $relationValue, $level)
+    protected function decorate(ComponentRequest $request, ComponentResponse $response, ParameterBag $data, $entity, Scope $scope, $relation, $relationValue, $level)
     {
     }
 }

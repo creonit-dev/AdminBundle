@@ -16,8 +16,10 @@ class GalleryTable extends TableComponent
     /**
      *
      * @header
-     * {{ button('Добавить изображение', {icon: 'image'}) | open('CreonitUtils.GalleryImageEditor', _query) }}
-     * {{ button('Добавить видео', {icon: 'youtube-play'}) | open('CreonitUtils.GalleryVideoEditor', _query) }}
+     * {{ button('Добавить изображение', {icon: 'image', size: 'sm', type: 'success'}) | open('CreonitUtils.GalleryImageEditor', _query) }}
+     * {{ button('Добавить видео', {icon: 'youtube-play', size: 'sm', type: 'success'}) | open('CreonitUtils.GalleryVideoEditor', _query) }}
+     *
+     * @cols Изображение / Видео, .
      *
      * \GalleryItem
      *

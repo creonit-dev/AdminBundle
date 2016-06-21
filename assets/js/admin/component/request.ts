@@ -21,7 +21,7 @@ module Creonit.Admin.Component {
             this.type = type;
             this.query = query;
             this.data = data;
-            this.callback = callback.bind(component);
+            this.callback = callback ? callback.bind(component) : null;
         }
 
         getId(){
@@ -39,7 +39,9 @@ module Creonit.Admin.Component {
         }
 
         passResponse(response:Response){
-            this.callback(response);
+            if(this.callback){
+                this.callback(response);
+            }
         }
     }
 }

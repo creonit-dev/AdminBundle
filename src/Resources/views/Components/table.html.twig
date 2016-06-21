@@ -1,4 +1,4 @@
-<div class="panel panel-default">
+<div class="panel panel-default table-responsive" {{ component.height ? ('style="height:' ~ component.height ~ 'px"') | raw }}>
     {% if component.header %}
         <div class="panel-heading">
             {{ component.header | raw }}
