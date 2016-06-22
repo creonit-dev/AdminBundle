@@ -39,7 +39,7 @@ module Creonit.Admin.Component.Helpers {
                 class="btn btn-${type} ${size ? `btn-${size}` : ''} ${className}" 
                 type="button" 
             >
-                `+ (icon ? `<i class="${caption ? 'icon' : ''} ${resolveIconClass(icon)}"></i>` : '') +`${caption}
+                `+ (icon ? `<i class="${caption !== '' ? 'icon' : ''} ${resolveIconClass(icon)}"></i>` : '') +`${caption}
             </button>`;
     }
 
@@ -63,7 +63,7 @@ module Creonit.Admin.Component.Helpers {
 
     // Twig Filters
 
-    export function tooltip(value:any, [text, placement = 'right']){
+    export function tooltip(value:any, [text, placement = 'top']){
         if(!text){
             return value;
         }

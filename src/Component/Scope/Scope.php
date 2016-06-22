@@ -272,7 +272,7 @@ class Scope
         );
 
         $this->template = preg_replace_callback(
-            '/\(\s*([\w_]+)\s*\|\s*(textarea|textedit|text|gallery|file|image|video|external|select|checkbox|radio)(\(?\)?)(.*?\))/usi',
+            '/\(\s*([\w_]+)\s*\|\s*(textarea|textedit|text|gallery|file|image|video|external|select|checkbox|radio)(\(?\)??)(.*?\))/usi',
             function($match) use ($createField){
                 $createField($match);
                 return "( {$match[1]} | {$match[2]}" . (($match[3] && $match[3] != '()') ? "('{$match[1]}', " : "('{$match[1]}')") . $match[4];

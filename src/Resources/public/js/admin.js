@@ -364,7 +364,7 @@ var Creonit;
                 // Twig Functions
                 function button(caption, _a) {
                     var _b = _a === void 0 ? {} : _a, _c = _b.size, size = _c === void 0 ? '' : _c, _d = _b.type, type = _d === void 0 ? 'default' : _d, _e = _b.icon, icon = _e === void 0 ? '' : _e, _f = _b.className, className = _f === void 0 ? '' : _f;
-                    return ("<button \n                class=\"btn btn-" + type + " " + (size ? "btn-" + size : '') + " " + className + "\" \n                type=\"button\" \n            >\n                ") + (icon ? "<i class=\"" + (caption ? 'icon' : '') + " " + resolveIconClass(icon) + "\"></i>" : '') + (caption + "\n            </button>");
+                    return ("<button \n                class=\"btn btn-" + type + " " + (size ? "btn-" + size : '') + " " + className + "\" \n                type=\"button\" \n            >\n                ") + (icon ? "<i class=\"" + (caption !== '' ? 'icon' : '') + " " + resolveIconClass(icon) + "\"></i>" : '') + (caption + "\n            </button>");
                 }
                 Helpers.button = button;
                 function submit(caption, _a) {
@@ -380,7 +380,7 @@ var Creonit;
                 Helpers.component = component;
                 // Twig Filters
                 function tooltip(value, _a) {
-                    var text = _a[0], _b = _a[1], placement = _b === void 0 ? 'right' : _b;
+                    var text = _a[0], _b = _a[1], placement = _b === void 0 ? 'top' : _b;
                     if (!text) {
                         return value;
                     }
@@ -814,7 +814,7 @@ var Creonit;
                     this.actions['_visible'] = function (options) {
                         var $row = _this.findRowById(options.row_id), $button = $row.find('.table-row-visible'), visible = !$button.hasClass('mod-visible');
                         $button.toggleClass('mod-visible', visible);
-                        _this.request('_visible', { key: options.key, scope: options.scope }, { visible: visible }, function (response) {
+                        _this.request('_visible', $.extend(_this.getQuery(), { key: options.key, scope: options.scope }), { visible: visible }, function (response) {
                             if (_this.checkResponse(response)) {
                                 $button.toggleClass('mod-visible', response.data.visible);
                             }
@@ -825,7 +825,7 @@ var Creonit;
                             return;
                         }
                         _this.findRowById(options.row_id).remove();
-                        _this.request('_delete', options, null, function (response) {
+                        _this.request('_delete', $.extend(_this.getQuery(), options), null, function (response) {
                             _this.checkResponse(response);
                         });
                         _this.loadData();
@@ -892,10 +892,10 @@ var Creonit;
                                 return Component.Utils.raw(new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'));
                             },
                             _visible: function () {
-                                return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.tooltip(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'eye', className: "table-row-visible " + (entity.visible ? 'mod-visible' : '') })), ['Скрыть&nbsp;/&nbsp;Показать', 'top'])), ['_visible', { scope: scope.parameters.name, key: entity._key, row_id: rowId }]));
+                                return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'eye', className: "table-row-visible " + (entity.visible ? 'mod-visible' : '') })), ['_visible', { scope: scope.parameters.name, key: entity._key, row_id: rowId }]));
                             },
                             _delete: function () {
-                                return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.tooltip(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'remove' })), ['Удалить', 'top'])), ['_delete', { scope: scope.parameters.name, key: entity._key, row_id: rowId }]));
+                                return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'remove' })), ['_delete', { scope: scope.parameters.name, key: entity._key, row_id: rowId }]));
                             }
                         })) + '</tr>');
                         _this.node.find('tbody').append($entity);

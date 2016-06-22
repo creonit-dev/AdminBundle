@@ -10,7 +10,7 @@ module Creonit.Admin.Component{
                     visible = !$button.hasClass('mod-visible');
 
                 $button.toggleClass('mod-visible', visible);
-                this.request('_visible', {key: options.key, scope: options.scope}, {visible: visible}, (response) => {
+                this.request('_visible', $.extend(this.getQuery(), {key: options.key, scope: options.scope}), {visible: visible}, (response) => {
                     if(this.checkResponse(response)){
                         $button.toggleClass('mod-visible', response.data.visible);
                     }
@@ -23,7 +23,7 @@ module Creonit.Admin.Component{
                 }
 
                 this.findRowById(options.row_id).remove();
-                this.request('_delete', options, null, (response) => {
+                this.request('_delete', $.extend(this.getQuery(), options), null, (response) => {
                     this.checkResponse(response);
                 });
                 this.loadData();
@@ -117,18 +117,12 @@ module Creonit.Admin.Component{
                         },
                         _visible: function(){
                             return Utils.raw(Helpers.action(
-                                Utils.raw(Helpers.tooltip(
                                     Utils.raw(Helpers.button('', {size: 'xs', icon: 'eye', className: `table-row-visible ${entity.visible ? 'mod-visible' : ''}`})),
-                                    ['Скрыть&nbsp;/&nbsp;Показать', 'top']
-                                )),
                                 ['_visible', {scope: scope.parameters.name, key: entity._key, row_id: rowId}]));
                         },
                         _delete: function(){
                             return Utils.raw(Helpers.action(
-                                Utils.raw(Helpers.tooltip(
                                     Utils.raw(Helpers.button('', {size: 'xs', icon: 'remove'})),
-                                    ['Удалить', 'top']
-                                )),
                                 ['_delete', {scope: scope.parameters.name, key: entity._key, row_id: rowId}]));
                         }
                     })) + '</tr>');
