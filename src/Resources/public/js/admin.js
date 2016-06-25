@@ -379,9 +379,9 @@ var Creonit;
                 }
                 Helpers.component = component;
                 // Twig Filters
-                function controls(value) {
+                function controls(value, options) {
                     if (this.context._controls) {
-                        return this.context._controls(value);
+                        return this.context._controls(value, options);
                     }
                     else {
                         return value;
@@ -885,22 +885,26 @@ var Creonit;
                         this.node.find('tbody').html('<tr><td colspan="' + (this.node.find('thead td').length) + '">Список пуст</td></tr>');
                     }
                     this.node.find('[data-toggle="tooltip"]').tooltip({ container: 'body', trigger: 'hover' });
-                    var sortData;
-                    this.node.find('table').tableDnD({
+                    var sortData, $table = this.node.find('table');
+                    $table.tableDnD({
                         onDragClass: 'move',
-                        onDrop: function ($table, row) {
+                        onDrop: function (_, row) {
                             if (sortData !== $.tableDnD.serialize()) {
                                 var item = $(row).closest('tr'), sort = item.data('sort'), selector = 'tr[data-sort="' + sort + '"]:first', prev = $(row).prevAll(selector), next = $(row).nextAll(selector);
+                                $table.addClass('sorting-send');
                                 _this.request('_sort', $.extend(_this.getQuery(), { key: item.data('key'), scope: item.data('scope') }), { prev: (prev.length ? prev.data('key') : 0), next: (next.length ? next.data('key') : 0) }, function (response) { return _this.checkResponse(response); });
                                 _this.loadData();
                             }
                             else {
                                 $('> tbody > tr', _this.node.find('table')).removeClass('nodrop');
+                                $table.removeClass('sorting');
                             }
                         },
-                        onDragStart: function ($table, row) {
+                        onDragStart: function (_, row) {
                             var item = $(row).closest('tr'), sort = item.data('sort');
                             sortData = $.tableDnD.serialize();
+                            $table.addClass('sorting');
+                            item.addClass('sorting');
                             $('> thead > tr', _this.node.find('table')).addClass('nodrop');
                             $('> tbody > tr:not([data-sort="' + sort + '"])', _this.node.find('table')).addClass('nodrop');
                         },
@@ -930,8 +934,9 @@ var Creonit;
                             _delete: function () {
                                 return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'remove' })), ['_delete', { scope: scope.parameters.name, key: entity._key, row_id: rowId }]));
                             },
-                            _controls: function (value) {
-                                return "\n                                <div class=\"list-controls\">\n                                    <div class=\"list-controls-level\">" + (new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')) + "</div>\n                                    <div class=\"list-controls-value\">" + value + "</div>\n                                    <div class=\"list-controls-sort\">\u0421\u041E\u0420\u0422\u0418\u0420\u041E\u0412\u041A\u0410</div>\n                                    <div class=\"list-controls-options\">" + Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'eye', className: "table-row-visible " + (entity.visible ? 'mod-visible' : '') })) + "</div>\n                                </div>\n                            ";
+                            _controls: function (value, _a) {
+                                var _b = (_a === void 0 ? [''] : _a)[0], options = _b === void 0 ? '' : _b;
+                                return "\n                                <div class=\"list-controls\">\n                                    <div class=\"list-controls-level\">" + (new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')) + "</div>\n                                    <div class=\"list-controls-value\">" + value + "</div>\n                                    <div class=\"list-controls-sort\"><i class=\"fa fa-arrows-v\"></i></div>\n                                    " + (options ? "<div class=\"list-controls-options\">" + options + "</div>" : '') + "\n                                </div>\n                            ";
                             }
                         })) + '</tr>');
                         _this.node.find('tbody').append($entity);

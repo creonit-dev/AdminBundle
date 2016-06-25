@@ -14,11 +14,32 @@
    }
 
    &-sort{
+      visibility hidden
       flex 0 0 auto
+      margin 0 5px
+      padding 0 5px
+      cursor move
+      color #ccc
+
+      &:hover, .table tr.move & {
+         color #666
+      }
+
+      /.table:not(.sorting) tr:hover &, /.table:not(.sorting-send) tr.sorting & {
+         visibility visible
+      }
+
+
+
    }
 
    &-options{
       flex 1 0 auto
+      visibility hidden
+
+      /.table:not(.sorting) tr:hover & {
+         visibility visible
+      }
    }
 
 }
@@ -26,4 +47,6 @@
 
 .table tbody tr.nodrop{
    opacity .3
+
+
 }

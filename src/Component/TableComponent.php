@@ -103,7 +103,7 @@ abstract class TableComponent extends ListComponent
                 /** @var ProductCategory $entity */
                 if($entity = $scope->createQuery()->findPk($query->get('key'))){
                     if($request->data->get('prev') and $prev = $scope->createQuery()->findPk($request->data->get('prev'))){
-                        $entity->moveToRank($prev->getSortableRank());
+                        $entity->moveToRank($entity->getRank() > $prev->getRank() ? $prev->getRank()+1 : $prev->getRank());
                     }else{
                         $entity->moveToTop();
                     }

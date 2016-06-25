@@ -101,18 +101,23 @@ module Creonit.Admin.Component{
 
             this.node.find('[data-toggle="tooltip"]').tooltip({container: 'body', trigger: 'hover'});
 
-            var sortData;
+            var sortData,
+                $table = this.node.find('table');
 
 
-            this.node.find('table').tableDnD({
+
+            $table.tableDnD({
                 onDragClass: 'move',
-                onDrop: ($table, row) => {
+                onDrop: (_, row) => {
                     if(sortData !== $.tableDnD.serialize()){
                         var item = $(row).closest('tr'),
                             sort = item.data('sort'),
                             selector = 'tr[data-sort="'+sort+'"]:first',
                             prev = $(row).prevAll(selector),
                             next = $(row).nextAll(selector);
+
+
+                        $table.addClass('sorting-send');
 
                         this.request('_sort',
                             $.extend(this.getQuery(), {key: item.data('key'), scope: item.data('scope')}),
@@ -123,14 +128,19 @@ module Creonit.Admin.Component{
 
                     }else{
                         $('> tbody > tr', this.node.find('table')).removeClass('nodrop');
+                        $table.removeClass('sorting');
                     }
 
                 },
-                onDragStart: ($table, row) => {
+                onDragStart: (_, row) => {
                     var item = $(row).closest('tr'),
                         sort = item.data('sort');
 
                     sortData = $.tableDnD.serialize();
+
+                    $table.addClass('sorting');
+                    item.addClass('sorting');
+
 
                     $('> thead > tr', this.node.find('table')).addClass('nodrop');
                     $('> tbody > tr:not([data-sort="'+sort+'"])', this.node.find('table')).addClass('nodrop');
@@ -165,13 +175,13 @@ module Creonit.Admin.Component{
                                     Utils.raw(Helpers.button('', {size: 'xs', icon: 'remove'})),
                                 ['_delete', {scope: scope.parameters.name, key: entity._key, row_id: rowId}]));
                         },
-                        _controls: (value:any) => {
+                        _controls: (value:any, [options = ''] = ['']) => {
                             return `
                                 <div class="list-controls">
                                     <div class="list-controls-level">${(new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'))}</div>
                                     <div class="list-controls-value">${value}</div>
-                                    <div class="list-controls-sort">СОРТИРОВКА</div>
-                                    <div class="list-controls-options">${Utils.raw(Helpers.button('', {size: 'xs', icon: 'eye', className: `table-row-visible ${entity.visible ? 'mod-visible' : ''}`}))}</div>
+                                    <div class="list-controls-sort"><i class="fa fa-arrows-v"></i></div>
+                                    ${options ? `<div class="list-controls-options">${options}</div>` : ''}
                                 </div>
                             `;
                         }

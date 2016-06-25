@@ -63,9 +63,9 @@ module Creonit.Admin.Component.Helpers {
 
     // Twig Filters
 
-    export function controls(value:any){
+    export function controls(value:any, options?:any){
         if(this.context._controls){
-            return this.context._controls(value);
+            return this.context._controls(value, options);
         }else{
             return value;
         }

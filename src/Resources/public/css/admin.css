@@ -140,10 +140,27 @@
   flex: 0 1 auto;
 }
 .list-controls-sort {
+  visibility: hidden;
   flex: 0 0 auto;
+  margin: 0 5px;
+  padding: 0 5px;
+  cursor: move;
+  color: #ccc;
+}
+.list-controls-sort:hover,
+.table tr.move .list-controls-sort {
+  color: #666;
+}
+.table:not(.sorting) tr:hover .list-controls-sort,
+.table:not(.sorting-send) tr.sorting .list-controls-sort {
+  visibility: visible;
 }
 .list-controls-options {
   flex: 1 0 auto;
+  visibility: hidden;
+}
+.table:not(.sorting) tr:hover .list-controls-options {
+  visibility: visible;
 }
 .table tbody tr.nodrop {
   opacity: 0.3;
