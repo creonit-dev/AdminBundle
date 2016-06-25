@@ -2,6 +2,7 @@
 
 namespace Creonit\AdminBundle\Component;
 
+use AppBundle\Model\Base\ProductCategory;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Response\ComponentResponse;
 use Creonit\AdminBundle\Component\Scope\ListRowScopeRelation;
@@ -84,6 +85,30 @@ abstract class TableComponent extends ListComponent
 
                     $response->data->set('success', true);
                     $response->data->set('visible', $visibleField->load($entity));
+
+                }else{
+                    $response->flushError('Элемент не найден');
+                }
+
+            }else{
+                $response->flushError('Ошибка при выполнения запроса');
+            }
+        });
+
+        $this->setHandler('_sort', function (ComponentRequest $request, ComponentResponse $response){
+            $query = $request->query;
+            if($query->has('key') and $query->has('scope') and $this->hasScope($query->get('scope'))){
+                $scope = $this->getScope($query->get('scope'));
+
+                /** @var ProductCategory $entity */
+                if($entity = $scope->createQuery()->findPk($query->get('key'))){
+                    if($request->data->get('prev') and $prev = $scope->createQuery()->findPk($request->data->get('prev'))){
+                        $entity->moveToRank($prev->getSortableRank());
+                    }else{
+                        $entity->moveToTop();
+                    }
+
+                    $response->data->set('success', true);
 
                 }else{
                     $response->flushError('Элемент не найден');

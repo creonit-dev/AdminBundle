@@ -127,6 +127,27 @@
   font-weight: normal;
   color: #999;
 }
+.list-controls {
+  display: flex;
+}
+.list-controls-level {
+  flex: 0 0 auto;
+}
+.list-controls-flex {
+  flex: 0 0 auto;
+}
+.list-controls-value {
+  flex: 0 1 auto;
+}
+.list-controls-sort {
+  flex: 0 0 auto;
+}
+.list-controls-options {
+  flex: 1 0 auto;
+}
+.table tbody tr.nodrop {
+  opacity: 0.3;
+}
 body {
   padding-top: 50px;
 }

@@ -63,6 +63,14 @@ module Creonit.Admin.Component.Helpers {
 
     // Twig Filters
 
+    export function controls(value:any){
+        if(this.context._controls){
+            return this.context._controls(value);
+        }else{
+            return value;
+        }
+    }
+
     export function tooltip(value:any, [text, placement = 'top']){
         if(!text){
             return value;
@@ -304,6 +312,7 @@ module Creonit.Admin.Component.Helpers {
 
     export function registerTwigFilters(){
         [
+            'controls',
             'checkbox',
             'radio',
             'text',

@@ -101,15 +101,55 @@ module Creonit.Admin.Component{
 
             this.node.find('[data-toggle="tooltip"]').tooltip({container: 'body', trigger: 'hover'});
 
+            var sortData;
+
+
+            this.node.find('table').tableDnD({
+                onDragClass: 'move',
+                onDrop: ($table, row) => {
+                    if(sortData !== $.tableDnD.serialize()){
+                        var item = $(row).closest('tr'),
+                            sort = item.data('sort'),
+                            selector = 'tr[data-sort="'+sort+'"]:first',
+                            prev = $(row).prevAll(selector),
+                            next = $(row).nextAll(selector);
+
+                        this.request('_sort',
+                            $.extend(this.getQuery(), {key: item.data('key'), scope: item.data('scope')}),
+                            {prev: (prev.length ? prev.data('key') : 0), next: (next.length ? next.data('key') : 0)},
+                            (response) => this.checkResponse(response)
+                        );
+                        this.loadData();
+
+                    }else{
+                        $('> tbody > tr', this.node.find('table')).removeClass('nodrop');
+                    }
+
+                },
+                onDragStart: ($table, row) => {
+                    var item = $(row).closest('tr'),
+                        sort = item.data('sort');
+
+                    sortData = $.tableDnD.serialize();
+
+                    $('> thead > tr', this.node.find('table')).addClass('nodrop');
+                    $('> tbody > tr:not([data-sort="'+sort+'"])', this.node.find('table')).addClass('nodrop');
+                },
+                dragHandle: '.list-controls-sort',
+                serializeRegexp: false
+            });
+
+
 
             Utils.initializeComponents(this.node, this);
         }
 
         protected renderRow(scope:Scope, relation = null, relationValue = null, level = 0){
-            this.data.entities[`${scope.parameters.name}.${relation ? `${relation.target.scope}.${relationValue || ''}` : '_'}`].forEach((entity:any) => {
+            var mask = `${scope.parameters.name}.${relation ? `${relation.target.scope}.${relationValue || ''}` : '_'}`;
+            this.data.entities[mask].forEach((entity:any) => {
                 let rowId = Utils.generateId();
                 let className = entity._row_class;
-                let $entity = $(`<tr data-row-id="${rowId}" ${className ? `class="${className}"` : ''}>` + scope.template.render($.extend({}, entity, {
+                let $entity = $(`<tr data-row-id="${rowId}" data-key="${entity._key}" data-scope="${scope.parameters.name}" data-sort="${mask}" ${className ? `class="${className}"` : ''}>` + scope.template.render($.extend({}, entity, {
                         _query: this.getQuery(),
                         _row_id: rowId,
                         _level: function(){
@@ -124,9 +164,20 @@ module Creonit.Admin.Component{
                             return Utils.raw(Helpers.action(
                                     Utils.raw(Helpers.button('', {size: 'xs', icon: 'remove'})),
                                 ['_delete', {scope: scope.parameters.name, key: entity._key, row_id: rowId}]));
+                        },
+                        _controls: (value:any) => {
+                            return `
+                                <div class="list-controls">
+                                    <div class="list-controls-level">${(new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'))}</div>
+                                    <div class="list-controls-value">${value}</div>
+                                    <div class="list-controls-sort">СОРТИРОВКА</div>
+                                    <div class="list-controls-options">${Utils.raw(Helpers.button('', {size: 'xs', icon: 'eye', className: `table-row-visible ${entity.visible ? 'mod-visible' : ''}`}))}</div>
+                                </div>
+                            `;
                         }
                     })) + '</tr>');
                 this.node.find('tbody').append($entity);
+
 
                 $.each(this.parameters.relations, (i, rel) => {
                     if(rel.target.scope == scope.parameters.name){
@@ -134,6 +185,8 @@ module Creonit.Admin.Component{
                         return false;
                     }
                 });
+
+
 
             });
         }

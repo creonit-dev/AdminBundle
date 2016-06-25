@@ -379,6 +379,15 @@ var Creonit;
                 }
                 Helpers.component = component;
                 // Twig Filters
+                function controls(value) {
+                    if (this.context._controls) {
+                        return this.context._controls(value);
+                    }
+                    else {
+                        return value;
+                    }
+                }
+                Helpers.controls = controls;
                 function tooltip(value, _a) {
                     var text = _a[0], _b = _a[1], placement = _b === void 0 ? 'top' : _b;
                     if (!text) {
@@ -560,6 +569,7 @@ var Creonit;
                 Helpers.registerTwigFunctions = registerTwigFunctions;
                 function registerTwigFilters() {
                     [
+                        'controls',
                         'checkbox',
                         'radio',
                         'text',
@@ -875,6 +885,28 @@ var Creonit;
                         this.node.find('tbody').html('<tr><td colspan="' + (this.node.find('thead td').length) + '">Список пуст</td></tr>');
                     }
                     this.node.find('[data-toggle="tooltip"]').tooltip({ container: 'body', trigger: 'hover' });
+                    var sortData;
+                    this.node.find('table').tableDnD({
+                        onDragClass: 'move',
+                        onDrop: function ($table, row) {
+                            if (sortData !== $.tableDnD.serialize()) {
+                                var item = $(row).closest('tr'), sort = item.data('sort'), selector = 'tr[data-sort="' + sort + '"]:first', prev = $(row).prevAll(selector), next = $(row).nextAll(selector);
+                                _this.request('_sort', $.extend(_this.getQuery(), { key: item.data('key'), scope: item.data('scope') }), { prev: (prev.length ? prev.data('key') : 0), next: (next.length ? next.data('key') : 0) }, function (response) { return _this.checkResponse(response); });
+                                _this.loadData();
+                            }
+                            else {
+                                $('> tbody > tr', _this.node.find('table')).removeClass('nodrop');
+                            }
+                        },
+                        onDragStart: function ($table, row) {
+                            var item = $(row).closest('tr'), sort = item.data('sort');
+                            sortData = $.tableDnD.serialize();
+                            $('> thead > tr', _this.node.find('table')).addClass('nodrop');
+                            $('> tbody > tr:not([data-sort="' + sort + '"])', _this.node.find('table')).addClass('nodrop');
+                        },
+                        dragHandle: '.list-controls-sort',
+                        serializeRegexp: false
+                    });
                     Component.Utils.initializeComponents(this.node, this);
                 };
                 Table.prototype.renderRow = function (scope, relation, relationValue, level) {
@@ -882,10 +914,11 @@ var Creonit;
                     if (relation === void 0) { relation = null; }
                     if (relationValue === void 0) { relationValue = null; }
                     if (level === void 0) { level = 0; }
-                    this.data.entities[(scope.parameters.name + "." + (relation ? relation.target.scope + "." + (relationValue || '') : '_'))].forEach(function (entity) {
+                    var mask = scope.parameters.name + "." + (relation ? relation.target.scope + "." + (relationValue || '') : '_');
+                    this.data.entities[mask].forEach(function (entity) {
                         var rowId = Component.Utils.generateId();
                         var className = entity._row_class;
-                        var $entity = $(("<tr data-row-id=\"" + rowId + "\" " + (className ? "class=\"" + className + "\"" : '') + ">") + scope.template.render($.extend({}, entity, {
+                        var $entity = $(("<tr data-row-id=\"" + rowId + "\" data-key=\"" + entity._key + "\" data-scope=\"" + scope.parameters.name + "\" data-sort=\"" + mask + "\" " + (className ? "class=\"" + className + "\"" : '') + ">") + scope.template.render($.extend({}, entity, {
                             _query: _this.getQuery(),
                             _row_id: rowId,
                             _level: function () {
@@ -896,6 +929,9 @@ var Creonit;
                             },
                             _delete: function () {
                                 return Component.Utils.raw(Component.Helpers.action(Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'remove' })), ['_delete', { scope: scope.parameters.name, key: entity._key, row_id: rowId }]));
+                            },
+                            _controls: function (value) {
+                                return "\n                                <div class=\"list-controls\">\n                                    <div class=\"list-controls-level\">" + (new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')) + "</div>\n                                    <div class=\"list-controls-value\">" + value + "</div>\n                                    <div class=\"list-controls-sort\">\u0421\u041E\u0420\u0422\u0418\u0420\u041E\u0412\u041A\u0410</div>\n                                    <div class=\"list-controls-options\">" + Component.Utils.raw(Component.Helpers.button('', { size: 'xs', icon: 'eye', className: "table-row-visible " + (entity.visible ? 'mod-visible' : '') })) + "</div>\n                                </div>\n                            ";
                             }
                         })) + '</tr>');
                         _this.node.find('tbody').append($entity);
