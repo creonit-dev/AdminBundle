@@ -120,67 +120,108 @@ abstract class ListComponent extends Component
 
     protected function loadData(ComponentRequest $request, ComponentResponse $response)
     {
-        $data = new ParameterBag();
-
         foreach($this->scopes as $scope){
             if($scope->isIndependent()){
                 if($scope->isRecursive()){
-                    $this->getData($request, $response, $data, $scope, $this->findRelations($scope, $scope)[0]);
+                    $this->getData($request, $response, $scope, $this->findRelations($scope, $scope)[0]);
                 }else{
-                    $this->getData($request, $response, $data, $scope);
+                    $this->getData($request, $response, $scope);
                 }
             }
         }
-
-        $response->data->set('entities', $data->all());
-
     }
 
     /**
      * @param ComponentRequest $request
      * @param ComponentResponse $response
-     * @param ParameterBag $data
-     * @param Scope $scope
+     * @param ListRowScope $scope
      * @param null|ListRowScopeRelation $relation
      * @param null $relationValue
      * @param int $level
      * @return array
      */
-    protected function getData(ComponentRequest $request, ComponentResponse $response, ParameterBag $data, Scope $scope, $relation = null, $relationValue = null, $level = 0){
+    protected function getData(ComponentRequest $request, ComponentResponse $response, ListRowScope $scope, $relation = null, $relationValue = null, $level = 0){
+        $mask = $scope->getName() . '.' . ($relation ? $relation->getTargetScope()->getName() . '.' . $relationValue : '_');
         $entities = [];
-        $query = $scope->createQuery();
 
-        if(null !== $relation){
-            $query->add($relation->getSourceField()->getName(), $relationValue);
+        $query = $this->getQuery($request, $response, $scope, $relation, $relationValue, $level);
+
+        if($pagination = $scope->getPagination()){
+            $queryPagination = $request->query->get('pagination');
+            $queryResult = $query->paginate(isset($queryPagination[$mask]) ? $queryPagination[$mask] : 1, $pagination);
+
+            $responsePagination = $response->data->get('pagination', []);
+            $responsePagination[$mask] = ['last_page' => $queryResult->getLastPage(), 'page' => $queryResult->getPage()];
+            $response->data->set('pagination', $responsePagination);
+
+        }else{
+            $queryResult = $query->find();
         }
-        
-        if($scope->getTableMap()->hasColumn('sortable_rank')){
-            $query->orderBySortableRank();
-        }
 
-        $this->filter($request, $response, $query, $scope, $relation, $relationValue, $level);
-
-        foreach($query->find() as $entity){
+        foreach($queryResult as $entity){
             $entityData = new ParameterBag();
             foreach($scope->getFields() as $field){
                 $entityData->set($field->getName(), $field->load($entity));
                 $entityData->set('_key', $entity->getPrimaryKey());
             }
             $this->decorate($request, $response, $entityData, $entity, $scope, $relation, $relationValue, $level);
-            $entities[] = $entityData->all();
+            $entities[] = $entityData;
         }
 
 
         if($entities){
+            $expanded = $request->query->get('expanded');
             foreach ($this->findRelations(null, $scope) as $rel){
-                foreach($entities as $entity) {
-                    $this->getData($request, $response, $data, $rel->getSourceScope(), $rel, $entity[$rel->getTargetField()->getName()], $level+1);
+                /** @var ParameterBag $entityData */
+                foreach($entities as $entityData) {
+                    if($scope->isCollapsed()){
+                        $relQuery = $this->getQuery($request, $response, $rel->getSourceScope(), $rel, $entityData->get($rel->getTargetField()->getName()), $level+1);
+                        if($hasChildren = $relQuery->count()){
+                            $entityData->set('_has_children', true);
+                        }
+
+                        if(empty($expanded[$mask]) || !in_array($entityData->get('_key'), $expanded[$mask])){
+                            continue;
+                        }else if(!$hasChildren){
+                            continue;
+                        }
+                    }
+
+                    $this->getData($request, $response, $rel->getSourceScope(), $rel, $entityData->get($rel->getTargetField()->getName()), $level+1);
                 }
             }
         }
 
-        $data->set($scope->getName() . '.' . ($relation ? $relation->getTargetScope()->getName() . '.' . $relationValue : '_'), $entities);
+        $responseEntities = $response->data->get('entities', []);
+        $responseEntities[$mask] = array_map(function($entityData){return $entityData->all();} , $entities);
+        $response->data->set('entities', $responseEntities);
     }
+
+    /**
+     * @param ComponentRequest $request
+     * @param ComponentResponse $response
+     * @param ListRowScope $scope
+     * @param null|ListRowScopeRelation $relation
+     * @param null $relationValue
+     * @param int $level
+     * @return ModelCriteria
+     */
+    protected function getQuery(ComponentRequest $request, ComponentResponse $response, ListRowScope $scope, $relation = null, $relationValue = null, $level = 0){
+        $query = $scope->createQuery();
+
+        if(null !== $relation){
+            $query->add($relation->getSourceField()->getName(), $relationValue);
+        }
+
+        if($scope->getTableMap()->hasColumn('sortable_rank')){
+            $query->orderBySortableRank();
+        }
+
+        $this->filter($request, $response, $query, $scope, $relation, $relationValue, $level);
+
+        return $query;
+    }
+
 
     public function dump()
     {
@@ -209,4 +250,5 @@ abstract class ListComponent extends Component
     protected function decorate(ComponentRequest $request, ComponentResponse $response, ParameterBag $data, $entity, Scope $scope, $relation, $relationValue, $level)
     {
     }
+
 }

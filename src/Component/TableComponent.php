@@ -104,6 +104,7 @@ abstract class TableComponent extends ListComponent
                 if($entity = $scope->createQuery()->findPk($query->get('key'))){
                     if($request->data->get('prev') and $prev = $scope->createQuery()->findPk($request->data->get('prev'))){
                         $entity->moveToRank($entity->getRank() > $prev->getRank() ? $prev->getRank()+1 : $prev->getRank());
+                        $entity->moveToRank($entity->getRank() > $prev->getRank() ? $prev->getRank()+1 : $prev->getRank());
                     }else{
                         $entity->moveToTop();
                     }
@@ -134,7 +135,12 @@ abstract class TableComponent extends ListComponent
         }
     }
 
-  
+    public function dump()
+    {
+        return array_replace(parent::dump(), [
+            'columns' => $this->columns
+        ]);
+    }
 
 
 }

@@ -7,6 +7,23 @@
 
    &-flex{
       flex 0 0 auto
+      cursor default
+      color #ddd
+      margin-right 5px
+      font-size .85em
+      padding .15em 0
+
+
+      &.has-children{
+         cursor pointer
+         color #999
+
+         &:hover{
+            color #666
+         }
+      }
+
+
    }
 
    &-value{
@@ -49,4 +66,29 @@
    opacity .3
 
 
+}
+
+.list-pagination{
+
+   & > td{
+      line-height 1 !important
+      padding-top 7px !important
+      padding-bottom 6px !important
+   }
+
+   .pagination{
+      margin 0
+
+      & > li > a, & > li > span {
+         font-size 10px
+         line-height 1
+         padding 2px 5px
+         cursor pointer
+      }
+
+      & > li.active > a, & > li.active > span {
+         background #bbb
+         border-color #aaa
+      }
+   }
 }

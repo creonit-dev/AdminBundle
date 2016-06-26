@@ -135,6 +135,18 @@
 }
 .list-controls-flex {
   flex: 0 0 auto;
+  cursor: default;
+  color: #ddd;
+  margin-right: 5px;
+  font-size: 0.85em;
+  padding: 0.15em 0;
+}
+.list-controls-flex.has-children {
+  cursor: pointer;
+  color: #999;
+}
+.list-controls-flex.has-children:hover {
+  color: #666;
 }
 .list-controls-value {
   flex: 0 1 auto;
@@ -164,6 +176,26 @@
 }
 .table tbody tr.nodrop {
   opacity: 0.3;
+}
+.list-pagination > td {
+  line-height: 1 !important;
+  padding-top: 7px !important;
+  padding-bottom: 6px !important;
+}
+.list-pagination .pagination {
+  margin: 0;
+}
+.list-pagination .pagination > li > a,
+.list-pagination .pagination > li > span {
+  font-size: 10px;
+  line-height: 1;
+  padding: 2px 5px;
+  cursor: pointer;
+}
+.list-pagination .pagination > li.active > a,
+.list-pagination .pagination > li.active > span {
+  background: #bbb;
+  border-color: #aaa;
 }
 body {
   padding-top: 50px;

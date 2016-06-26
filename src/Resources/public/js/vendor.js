@@ -27704,6 +27704,7 @@ jQuery.tableDnD = {
     },
 
 	serializeTable: function(table) {
+        console.log(111111111);
         var result = "";
         var tableId = table.id;
         var rows = table.rows;

@@ -1,6 +1,14 @@
 module Creonit.Admin.Component{
     export class Table extends Component{
 
+        protected expanded:any = {};
+        protected pagination:any = {};
+
+
+        getQuery() {
+            return $.extend(super.getQuery(), {expanded: this.expanded, pagination: this.pagination});
+        }
+
         applySchema(schema:any){
             super.applySchema(schema);
 
@@ -70,14 +78,15 @@ module Creonit.Admin.Component{
                     if(scope.parameters.recursive){
                         $.each(this.parameters.relations, (i, relation) => {
                             if(relation.source.scope == scope.parameters.name){
-                                this.renderRow(scope, relation);
+                                this.renderScope(scope, relation);
                                 return false;
                             }
                         });
 
                     }else{
-                        this.renderRow(scope)
+                        this.renderScope(scope)
                     }
+
                 }
                 /*
 
@@ -106,13 +115,40 @@ module Creonit.Admin.Component{
 
 
 
+            $table.find('.list-controls-flex.has-children').on('click', (e) => {
+                var $row = $(e.currentTarget).closest('tr'),
+                    mask = $row.data('mask'),
+                    key = $row.data('key'),
+                    index;
+
+                if(!this.expanded[mask]){
+                    this.expanded[mask] = [];
+                }
+
+                if((index = this.expanded[mask].indexOf(key)) >= 0){
+                    this.expanded[mask].splice(index, 1);
+                }else{
+                    this.expanded[mask].push(key);
+                }
+
+                this.loadData();
+            });
+
+            $table.find('.list-pagination li:not(.active) span').on('click', (e) => {
+                var $button = $(e.currentTarget),
+                    $row = $button.closest('tr');
+
+                this.pagination[$row.data('mask')] = $button.data('page');
+                this.loadData();
+            });
+
             $table.tableDnD({
                 onDragClass: 'move',
                 onDrop: (_, row) => {
                     if(sortData !== $.tableDnD.serialize()){
                         var item = $(row).closest('tr'),
-                            sort = item.data('sort'),
-                            selector = 'tr[data-sort="'+sort+'"]:first',
+                            mask = item.data('mask'),
+                            selector = 'tr[data-mask="'+mask+'"]:first',
                             prev = $(row).prevAll(selector),
                             next = $(row).nextAll(selector);
 
@@ -134,7 +170,7 @@ module Creonit.Admin.Component{
                 },
                 onDragStart: (_, row) => {
                     var item = $(row).closest('tr'),
-                        sort = item.data('sort');
+                        mask = item.data('mask');
 
                     sortData = $.tableDnD.serialize();
 
@@ -143,7 +179,7 @@ module Creonit.Admin.Component{
 
 
                     $('> thead > tr', this.node.find('table')).addClass('nodrop');
-                    $('> tbody > tr:not([data-sort="'+sort+'"])', this.node.find('table')).addClass('nodrop');
+                    $('> tbody > tr:not([data-mask="'+mask+'"])', this.node.find('table')).addClass('nodrop');
                 },
                 dragHandle: '.list-controls-sort',
                 serializeRegexp: false
@@ -154,12 +190,16 @@ module Creonit.Admin.Component{
             Utils.initializeComponents(this.node, this);
         }
 
-        protected renderRow(scope:Scope, relation = null, relationValue = null, level = 0){
+
+        protected renderScope(scope:Scope, relation = null, relationValue = null, level = 0){
             var mask = `${scope.parameters.name}.${relation ? `${relation.target.scope}.${relationValue || ''}` : '_'}`;
+            if(!this.data.entities[mask]){
+                return;
+            }
             this.data.entities[mask].forEach((entity:any) => {
                 let rowId = Utils.generateId();
                 let className = entity._row_class;
-                let $entity = $(`<tr data-row-id="${rowId}" data-key="${entity._key}" data-scope="${scope.parameters.name}" data-sort="${mask}" ${className ? `class="${className}"` : ''}>` + scope.template.render($.extend({}, entity, {
+                let $entity = $(`<tr data-row-id="${rowId}" data-key="${entity._key}" data-scope="${scope.parameters.name}" data-mask="${mask}" ${className ? `class="${className}"` : ''}>` + scope.template.render($.extend({}, entity, {
                         _query: this.getQuery(),
                         _row_id: rowId,
                         _level: function(){
@@ -179,8 +219,9 @@ module Creonit.Admin.Component{
                             return `
                                 <div class="list-controls">
                                     <div class="list-controls-level">${(new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'))}</div>
+                                    ${scope.parameters.collapsed ? `<div class="list-controls-flex ${entity._has_children ? 'has-children' : ''}">${!entity._has_children ? '<i class="fa fa-square-o"></i>' : (this.expanded[mask] && this.expanded[mask].indexOf(entity._key) >= 0) ? '<i class="fa fa-minus-square-o"></i>' : '<i class="fa fa-plus-square-o"></i>'}</div>` : ''}
                                     <div class="list-controls-value">${value}</div>
-                                    <div class="list-controls-sort"><i class="fa fa-arrows-v"></i></div>
+                                    ${scope.parameters.sortable ? `<div class="list-controls-sort"><i class="fa fa-arrows-v"></i></div>` : ''}
                                     ${options ? `<div class="list-controls-options">${options}</div>` : ''}
                                 </div>
                             `;
@@ -191,14 +232,27 @@ module Creonit.Admin.Component{
 
                 $.each(this.parameters.relations, (i, rel) => {
                     if(rel.target.scope == scope.parameters.name){
-                        this.renderRow(this.getScope(rel.source.scope), rel, entity[rel.target.field], level+1);
-                        return false;
+                        this.renderScope(this.getScope(rel.source.scope), rel, entity[rel.target.field], level+1);
+                        //return false;
                     }
                 });
 
-
-
             });
+
+            if(this.data.pagination && this.data.pagination[mask]){
+                let pagination = this.data.pagination[mask];
+                if(pagination.last_page > 1){
+                    let paginationNumbers = '';
+                    for(let i = 1; i <= pagination.last_page; i++){
+                        paginationNumbers += `<li ${i == pagination.page ? 'class="active"' : ''}><span data-page="${i}">${i}</span></li>`;
+                    }
+
+                    this.node.find('tbody').append(
+                        $(`<tr class="list-pagination" data-mask="${mask}"><td colspan="15">${(new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'))}<ul class="pagination pagination-info">${paginationNumbers}</ul></td></tr>`)
+                    );
+                }
+            }
+
         }
 
     }

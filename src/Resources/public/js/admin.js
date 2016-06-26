@@ -817,7 +817,12 @@ var Creonit;
                 __extends(Table, _super);
                 function Table() {
                     _super.apply(this, arguments);
+                    this.expanded = {};
+                    this.pagination = {};
                 }
+                Table.prototype.getQuery = function () {
+                    return $.extend(_super.prototype.getQuery.call(this), { expanded: this.expanded, pagination: this.pagination });
+                };
                 Table.prototype.applySchema = function (schema) {
                     var _this = this;
                     _super.prototype.applySchema.call(this, schema);
@@ -862,13 +867,13 @@ var Creonit;
                             if (scope.parameters.recursive) {
                                 $.each(_this.parameters.relations, function (i, relation) {
                                     if (relation.source.scope == scope.parameters.name) {
-                                        _this.renderRow(scope, relation);
+                                        _this.renderScope(scope, relation);
                                         return false;
                                     }
                                 });
                             }
                             else {
-                                _this.renderRow(scope);
+                                _this.renderScope(scope);
                             }
                         }
                         /*
@@ -886,11 +891,29 @@ var Creonit;
                     }
                     this.node.find('[data-toggle="tooltip"]').tooltip({ container: 'body', trigger: 'hover' });
                     var sortData, $table = this.node.find('table');
+                    $table.find('.list-controls-flex.has-children').on('click', function (e) {
+                        var $row = $(e.currentTarget).closest('tr'), mask = $row.data('mask'), key = $row.data('key'), index;
+                        if (!_this.expanded[mask]) {
+                            _this.expanded[mask] = [];
+                        }
+                        if ((index = _this.expanded[mask].indexOf(key)) >= 0) {
+                            _this.expanded[mask].splice(index, 1);
+                        }
+                        else {
+                            _this.expanded[mask].push(key);
+                        }
+                        _this.loadData();
+                    });
+                    $table.find('.list-pagination li:not(.active) span').on('click', function (e) {
+                        var $button = $(e.currentTarget), $row = $button.closest('tr');
+                        _this.pagination[$row.data('mask')] = $button.data('page');
+                        _this.loadData();
+                    });
                     $table.tableDnD({
                         onDragClass: 'move',
                         onDrop: function (_, row) {
                             if (sortData !== $.tableDnD.serialize()) {
-                                var item = $(row).closest('tr'), sort = item.data('sort'), selector = 'tr[data-sort="' + sort + '"]:first', prev = $(row).prevAll(selector), next = $(row).nextAll(selector);
+                                var item = $(row).closest('tr'), mask = item.data('mask'), selector = 'tr[data-mask="' + mask + '"]:first', prev = $(row).prevAll(selector), next = $(row).nextAll(selector);
                                 $table.addClass('sorting-send');
                                 _this.request('_sort', $.extend(_this.getQuery(), { key: item.data('key'), scope: item.data('scope') }), { prev: (prev.length ? prev.data('key') : 0), next: (next.length ? next.data('key') : 0) }, function (response) { return _this.checkResponse(response); });
                                 _this.loadData();
@@ -901,28 +924,31 @@ var Creonit;
                             }
                         },
                         onDragStart: function (_, row) {
-                            var item = $(row).closest('tr'), sort = item.data('sort');
+                            var item = $(row).closest('tr'), mask = item.data('mask');
                             sortData = $.tableDnD.serialize();
                             $table.addClass('sorting');
                             item.addClass('sorting');
                             $('> thead > tr', _this.node.find('table')).addClass('nodrop');
-                            $('> tbody > tr:not([data-sort="' + sort + '"])', _this.node.find('table')).addClass('nodrop');
+                            $('> tbody > tr:not([data-mask="' + mask + '"])', _this.node.find('table')).addClass('nodrop');
                         },
                         dragHandle: '.list-controls-sort',
                         serializeRegexp: false
                     });
                     Component.Utils.initializeComponents(this.node, this);
                 };
-                Table.prototype.renderRow = function (scope, relation, relationValue, level) {
+                Table.prototype.renderScope = function (scope, relation, relationValue, level) {
                     var _this = this;
                     if (relation === void 0) { relation = null; }
                     if (relationValue === void 0) { relationValue = null; }
                     if (level === void 0) { level = 0; }
                     var mask = scope.parameters.name + "." + (relation ? relation.target.scope + "." + (relationValue || '') : '_');
+                    if (!this.data.entities[mask]) {
+                        return;
+                    }
                     this.data.entities[mask].forEach(function (entity) {
                         var rowId = Component.Utils.generateId();
                         var className = entity._row_class;
-                        var $entity = $(("<tr data-row-id=\"" + rowId + "\" data-key=\"" + entity._key + "\" data-scope=\"" + scope.parameters.name + "\" data-sort=\"" + mask + "\" " + (className ? "class=\"" + className + "\"" : '') + ">") + scope.template.render($.extend({}, entity, {
+                        var $entity = $(("<tr data-row-id=\"" + rowId + "\" data-key=\"" + entity._key + "\" data-scope=\"" + scope.parameters.name + "\" data-mask=\"" + mask + "\" " + (className ? "class=\"" + className + "\"" : '') + ">") + scope.template.render($.extend({}, entity, {
                             _query: _this.getQuery(),
                             _row_id: rowId,
                             _level: function () {
@@ -936,17 +962,26 @@ var Creonit;
                             },
                             _controls: function (value, _a) {
                                 var _b = (_a === void 0 ? [''] : _a)[0], options = _b === void 0 ? '' : _b;
-                                return "\n                                <div class=\"list-controls\">\n                                    <div class=\"list-controls-level\">" + (new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')) + "</div>\n                                    <div class=\"list-controls-value\">" + value + "</div>\n                                    <div class=\"list-controls-sort\"><i class=\"fa fa-arrows-v\"></i></div>\n                                    " + (options ? "<div class=\"list-controls-options\">" + options + "</div>" : '') + "\n                                </div>\n                            ";
+                                return "\n                                <div class=\"list-controls\">\n                                    <div class=\"list-controls-level\">" + (new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')) + "</div>\n                                    " + (scope.parameters.collapsed ? "<div class=\"list-controls-flex " + (entity._has_children ? 'has-children' : '') + "\">" + (!entity._has_children ? '<i class="fa fa-square-o"></i>' : (_this.expanded[mask] && _this.expanded[mask].indexOf(entity._key) >= 0) ? '<i class="fa fa-minus-square-o"></i>' : '<i class="fa fa-plus-square-o"></i>') + "</div>" : '') + "\n                                    <div class=\"list-controls-value\">" + value + "</div>\n                                    " + (scope.parameters.sortable ? "<div class=\"list-controls-sort\"><i class=\"fa fa-arrows-v\"></i></div>" : '') + "\n                                    " + (options ? "<div class=\"list-controls-options\">" + options + "</div>" : '') + "\n                                </div>\n                            ";
                             }
                         })) + '</tr>');
                         _this.node.find('tbody').append($entity);
                         $.each(_this.parameters.relations, function (i, rel) {
                             if (rel.target.scope == scope.parameters.name) {
-                                _this.renderRow(_this.getScope(rel.source.scope), rel, entity[rel.target.field], level + 1);
-                                return false;
+                                _this.renderScope(_this.getScope(rel.source.scope), rel, entity[rel.target.field], level + 1);
                             }
                         });
                     });
+                    if (this.data.pagination && this.data.pagination[mask]) {
+                        var pagination = this.data.pagination[mask];
+                        if (pagination.last_page > 1) {
+                            var paginationNumbers = '';
+                            for (var i = 1; i <= pagination.last_page; i++) {
+                                paginationNumbers += "<li " + (i == pagination.page ? 'class="active"' : '') + "><span data-page=\"" + i + "\">" + i + "</span></li>";
+                            }
+                            this.node.find('tbody').append($("<tr class=\"list-pagination\" data-mask=\"" + mask + "\"><td colspan=\"15\">" + (new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')) + "<ul class=\"pagination pagination-info\">" + paginationNumbers + "</ul></td></tr>"));
+                        }
+                    }
                 };
                 return Table;
             }(Component.Component));
