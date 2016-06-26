@@ -186,6 +186,14 @@ module Creonit.Admin.Component{
             });
 
 
+            this.node.find('.panel-heading form').on('submit', (e) => {
+                e.preventDefault();
+                var $form = $(e.currentTarget);
+
+                $.extend(this.query, $form.serializeObject());
+                this.loadData();
+            });
+
 
             Utils.initializeComponents(this.node, this);
         }

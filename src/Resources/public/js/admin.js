@@ -475,7 +475,11 @@ var Creonit;
                 }
                 Helpers.gallery = gallery;
                 function select(value, options) {
-                    var name = options && options[0] ? options[0] : '', options = value.options.map(function (option) {
+                    var name = options && options[0] ? options[0] : '';
+                    if (!value) {
+                        value = { options: [], value: '' };
+                    }
+                    var options = value.options.map(function (option) {
                         return "<option value=\"" + option.value + "\" " + (value.value == option.value ? 'selected' : '') + ">" + option.title + "</option>";
                     }).join('');
                     return "<select name=\"" + name + "\" class=\"form-control\">" + options + "</select>";
@@ -933,6 +937,12 @@ var Creonit;
                         },
                         dragHandle: '.list-controls-sort',
                         serializeRegexp: false
+                    });
+                    this.node.find('.panel-heading form').on('submit', function (e) {
+                        e.preventDefault();
+                        var $form = $(e.currentTarget);
+                        $.extend(_this.query, $form.serializeObject());
+                        _this.loadData();
                     });
                     Component.Utils.initializeComponents(this.node, this);
                 };

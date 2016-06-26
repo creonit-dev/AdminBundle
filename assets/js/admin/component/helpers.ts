@@ -208,8 +208,14 @@ module Creonit.Admin.Component.Helpers {
     }
 
     export function select(value:any, options?:any){
-        var name = options && options[0] ? options[0] : '',
-            options = value.options.map((option) => {
+        var name = options && options[0] ? options[0] : '';
+
+        if(!value){
+            value = {options: [], value: ''};
+        }
+
+
+        var options = value.options.map((option) => {
                 return `<option value="${option.value}" ${value.value == option.value ? 'selected' : ''}>${option.title}</option>`;
             }).join('');
 

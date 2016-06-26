@@ -120,6 +120,12 @@ abstract class ListComponent extends Component
 
     protected function loadData(ComponentRequest $request, ComponentResponse $response)
     {
+        foreach ($this->fields as $field) {
+            $response->data->set($field->getName(), $field->decorate($request->query->get($field->getName())));
+        }
+
+
+
         foreach($this->scopes as $scope){
             if($scope->isIndependent()){
                 if($scope->isRecursive()){
