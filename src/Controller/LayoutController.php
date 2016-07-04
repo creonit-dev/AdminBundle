@@ -9,8 +9,8 @@ use Symfony\Component\HttpFoundation\Response;
 class LayoutController extends Controller
 {
 
-    public function menuAction(){
-        return $this->render('CreonitAdminBundle:Layout:menu.html.twig', ['admin' => $this->get('creonit_admin')]);
+    public function sidebarAction(){
+        return $this->render('CreonitAdminBundle:Layout:sidebar.html.twig', ['admin' => $this->get('creonit_admin')]);
     }
 
     public function headerAction(){

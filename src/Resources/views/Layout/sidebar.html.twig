@@ -1,4 +1,17 @@
 <ul class="nav nav-sidebar">
+
+    <li>
+        <a href="/">
+            {% if admin.icon %}
+                <i><img src="{{ admin.icon }}" alt=""></i>
+            {% else %}
+                <i class="fa fa-home"></i>
+            {% endif %}
+            
+            <span>{{ admin.title | raw }}</span>
+        </a>
+    </li>
+
     {% for module in admin.getModules %}
         {% if module.isVisible %}
             <li {{ module.isActive ? 'class="active"' }}>

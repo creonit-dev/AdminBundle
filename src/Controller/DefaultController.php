@@ -42,7 +42,7 @@ class DefaultController extends Controller
         $module = $admin->getModule($module);
         $admin->setActiveModule($module);
 
-        return $this->render('CreonitAdminBundle:Default:module.html.twig', ['module' => $module]);
+        return $this->render('CreonitAdminBundle:Default:module.html.twig', ['admin' => $admin, 'module' => $module]);
     }
 
 

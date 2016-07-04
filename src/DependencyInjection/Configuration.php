@@ -14,8 +14,12 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('creonit_admin');
-
-        
+        $rootNode
+            ->children()
+                ->scalarNode('title')->isRequired()->end()
+                ->scalarNode('icon')->end()
+            ->end()
+        ;
 
         return $treeBuilder;
     }

@@ -1,57 +1,102 @@
-/*
- * Base structure
- */
+.page{
 
-/* Move down content because we have a fixed navbar that is 50px tall */
-body {
-   padding-top: 50px;
-}
-
-
-/*
- * Global add-ons
- */
-
-.sub-header {
-   padding-bottom: 10px;
-   border-bottom: 1px solid #eee;
-}
-
-/*
- * Top navigation
- * Hide default border to remove 1px line.
- */
-.navbar-fixed-top {
-   border: 0;
-}
-
-/*
- * Sidebar
- */
-
-/* Hide for mobile, show later */
-.sidebar {
-   display: none;
-}
-@media (min-width: 768px) {
-   .sidebar {
-      position: fixed;
-      top: 51px;
-      bottom: 0;
-      left: 0;
-      z-index: 500;
-      display: block;
-      padding: 20px;
-      overflow-x: hidden;
-      overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-      background-color: #f5f5f5;
-      border-right: 1px solid #eee;
+   &-wrapper{
+      display flex
    }
+
+   &-sidebar{
+      $base-color = #222d32
+
+      font-size 11px
+      min-height 100vh
+      flex 0 0 auto
+      background $base-color
+      width 100px
+
+      .nav-sidebar{
+         border-bottom 1px solid lighten($base-color, 10%)
+         & > li {
+
+            &:hover{
+               background lighten($base-color, 5%)
+            }
+
+            &.active{
+               background darken($base-color, 30%)
+            }
+
+            & > a{
+               position relative
+               text-align center
+               color lighten($base-color, 70%)
+               border-top 1px solid lighten($base-color, 10%)
+               border-bottom 1px solid darken($base-color, 30%)
+               padding 10px 5px
+
+               ../.active > a{
+                  border-top-color darken($base-color, 40%)
+                  border-bottom 1px solid darken($base-color, 10%)
+
+                  &:after{
+                     content ''
+                     position absolute
+                     left 0
+                     right 0
+                     top 100%
+                     height 2px
+                     background rgba(black, .3)
+                     z-index 1
+                  }
+               }
+
+
+               &:hover,
+               &:focus{
+                  background none
+               }
+
+               i{
+                  font-size 1.75em
+                  display block
+                  margin-bottom .15em
+
+                  img{
+                     max-width 50px
+                  }
+               }
+
+
+
+            }
+         }
+      }
+   }
+
+   &-content{
+      flex 1 1 auto
+
+      &-header{
+
+
+         
+
+
+         .navbar{
+            margin-bottom 0
+         }
+      }
+
+      &-module{
+         padding 30px
+      }
+   }
+
 }
 
-/* Sidebar navigation */
+   /*
+
 .nav-sidebar {
-   margin-right: -21px; /* 20px padding + 1px border */
+   margin-right: -21px;
    margin-bottom: 20px;
    margin-left: -20px;
 }
@@ -63,23 +108,7 @@ body {
 .nav-sidebar > .active > a:hover,
 .nav-sidebar > .active > a:focus {
    color: #fff;
-   background-color: #428bca;
+   background: #1e282c none repeat scroll 0 0;
+   border-left-color: #3c8dbc;
 }
-
-
-/*
- * Main content
- */
-
-.main {
-   padding: 20px;
-}
-@media (min-width: 768px) {
-   .main {
-      padding-right: 40px;
-      padding-left: 40px;
-   }
-}
-.main .page-header {
-   margin-top: 0;
-}
+   */

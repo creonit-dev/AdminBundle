@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <title>{% block title %}Welcome!{% endblock %}</title>
+    <title>{% block title %}!{% endblock %}</title>
 
     {% block stylesheets %}
         <link href='https://fonts.googleapis.com/css?family=Noto+Serif:400,700,400italic,700italic|Noto+Sans:400,400italic,700italic,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
@@ -24,47 +24,19 @@
 </head>
 <body>
 
-
-<nav class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#">Project name</a>
+    <div class="page-wrapper">
+        <div class="page-sidebar">
+            {{ render(controller('CreonitAdminBundle:Layout:sidebar')) }}
         </div>
-        <div id="navbar" class="navbar-collapse collapse">
-            <ul class="nav navbar-nav navbar-right">
-                <li><a href="#">Dashboard</a></li>
-                <li><a href="#">Settings</a></li>
-                <li><a href="#">Profile</a></li>
-                <li><a href="#">Help</a></li>
-            </ul>
-            <form class="navbar-form navbar-right">
-                <input type="text" class="form-control" placeholder="Search...">
-            </form>
+        <div class="page-content">
+            {#<div class="page-content-header">
+                {{ render(controller('CreonitAdminBundle:Layout:header')) }}
+            </div>#}
+            <div class="page-content-module">
+                {% block content %}{% endblock %}
+            </div>
         </div>
     </div>
-</nav>
-
-<div class="container-fluid">
-
-
-
-
-    <div class="row">
-        <div class="col-sm-3 col-md-2 sidebar">
-            {{ render(controller('CreonitAdminBundle:Layout:menu')) }}
-        </div>
-        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-            {{ render(controller('CreonitAdminBundle:Layout:header')) }}
-            {% block content %}{% endblock %}
-        </div>
-    </div>
-</div>
 
 
 {% block javascripts %}

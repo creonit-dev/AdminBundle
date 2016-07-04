@@ -197,58 +197,65 @@
   background: #bbb;
   border-color: #aaa;
 }
-body {
-  padding-top: 50px;
+.page-wrapper {
+  display: flex;
 }
-.sub-header {
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
+.page-sidebar {
+  font-size: 11px;
+  min-height: 100vh;
+  flex: 0 0 auto;
+  background: #222d32;
+  width: 100px;
 }
-.navbar-fixed-top {
-  border: 0;
+.page-sidebar .nav-sidebar {
+  border-bottom: 1px solid #33444b;
 }
-.sidebar {
-  display: none;
+.page-sidebar .nav-sidebar > li:hover {
+  background: #2b383f;
 }
-@media (min-width: 768px) {
-  .sidebar {
-    position: fixed;
-    top: 51px;
-    bottom: 0;
-    left: 0;
-    z-index: 500;
-    display: block;
-    padding: 20px;
-    overflow-x: hidden;
-    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-    background-color: #f5f5f5;
-    border-right: 1px solid #eee;
-  }
+.page-sidebar .nav-sidebar > li.active {
+  background: #181f23;
 }
-.nav-sidebar {
-  margin-right: -21px; /* 20px padding + 1px border */
-  margin-bottom: 20px;
-  margin-left: -20px;
+.page-sidebar .nav-sidebar > li > a {
+  position: relative;
+  text-align: center;
+  color: #b3c4cb;
+  border-top: 1px solid #33444b;
+  border-bottom: 1px solid #181f23;
+  padding: 10px 5px;
 }
-.nav-sidebar > li > a {
-  padding-right: 20px;
-  padding-left: 20px;
+.page-sidebar .nav-sidebar > li.active > a {
+  border-top-color: #141b1e;
+  border-bottom: 1px solid #1f282d;
 }
-.nav-sidebar > .active > a,
-.nav-sidebar > .active > a:hover,
-.nav-sidebar > .active > a:focus {
-  color: #fff;
-  background-color: #428bca;
+.page-sidebar .nav-sidebar > li.active > a:after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 2px;
+  background: rgba(0,0,0,0.3);
+  z-index: 1;
 }
-.main {
-  padding: 20px;
+.page-sidebar .nav-sidebar > li > a:hover,
+.page-sidebar .nav-sidebar > li > a:focus {
+  background: none;
 }
-@media (min-width: 768px) {
-  .main {
-    padding-right: 40px;
-    padding-left: 40px;
-  }
+.page-sidebar .nav-sidebar > li > a i {
+  font-size: 1.75em;
+  display: block;
+  margin-bottom: 0.15em;
 }
-.main .page-header {
-  margin-top: 0;
+.page-sidebar .nav-sidebar > li > a i img {
+  max-width: 50px;
+}
+.page-content {
+  flex: 1 1 auto;
+}
+.page-content-header .navbar {
+  margin-bottom: 0;
+}
+.page-content-module {
+  padding: 30px;
 }

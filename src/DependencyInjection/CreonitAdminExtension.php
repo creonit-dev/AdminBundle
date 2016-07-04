@@ -19,5 +19,9 @@ class CreonitAdminExtension extends Extension
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
+
+        $manager = $container->getDefinition('creonit_admin');
+        $manager->addMethodCall('setTitle', [$config['title']]);
+        $manager->addMethodCall('setIcon', [$config['icon']]);
     }
 }

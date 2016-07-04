@@ -13,6 +13,9 @@ use Symfony\Component\HttpFoundation\Request;
 
 class Manager {
 
+    protected $title;
+    protected $icon;
+
     /** @var Module[] $modules  */
     protected $modules = [];
 
@@ -109,6 +112,41 @@ class Manager {
 
     }
 
+    /**
+     * @param mixed $title
+     * @return Manager
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * @param mixed $icon
+     * @return Manager
+     */
+    public function setIcon($icon)
+    {
+        $this->icon = $icon;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIcon()
+    {
+        return $this->icon;
+    }
 
 
 } 
