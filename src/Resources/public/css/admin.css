@@ -285,7 +285,7 @@
   border-right: 0;
 }
 .panel .table th {
-  border-bottom: 0;
+  border: 0;
 }
 .panel:last-child {
   margin-bottom: 0;
