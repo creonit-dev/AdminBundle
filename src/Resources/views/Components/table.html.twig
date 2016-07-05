@@ -5,18 +5,22 @@
         </div>
     {% endif %}
 
-    <table class="table table-bordered table-striped table-hover">
-        <thead>
-        <tr>
-            {% for column in component.columns %}
-                {% if column == '.' %}
-                    <th style="width:1%"></th>
-                {% else %}
-                    <th>{{ column }}</th>
-                {% endif %}
-            {% endfor %}
-        </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="panel-body">
+        <table class="table table-bordered table-striped table-hover">
+            <thead>
+            <tr>
+                {% for column in component.columns %}
+                    {% if column == '.' %}
+                        <th style="width:1%"></th>
+                    {% else %}
+                        <th>{{ column }}</th>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+
 </div>

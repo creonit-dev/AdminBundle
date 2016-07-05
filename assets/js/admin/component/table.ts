@@ -57,8 +57,7 @@ module Creonit.Admin.Component{
                             <h4 class="modal-title">${this.parameters.title}</h4> 
                         </div> 
                         
-                        <div class="modal-body">
-                        </div>
+                        <div class="modal-body mod-table"></div>
                    </div>    
                 `));
                 node = node.find('.modal-body');

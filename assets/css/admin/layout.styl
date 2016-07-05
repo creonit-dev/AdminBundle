@@ -1,11 +1,12 @@
 .page{
+   $base-color = #222d32
+
 
    &-wrapper{
       display flex
    }
 
    &-sidebar{
-      $base-color = #222d32
 
       font-size 11px
       min-height 100vh
@@ -76,17 +77,44 @@
       flex 1 1 auto
 
       &-header{
+         background lighten($base-color, 90%)
+         padding 15px 30px
 
-         .navbar{
-            margin-bottom 0
+         h1{
+            margin 0
+            font-size 18px
          }
+
       }
 
       &-module{
-         padding 30px
+         & > div > .panel{
+            border 0
+         }
       }
    }
 
+}
+
+.panel .table{
+   margin -15px 0 0 0
+   border 0
+   td, th{
+      &:first-child{
+         border-left 0
+      }
+      &:last-child{
+         border-right 0
+      }
+   }
+
+   th{
+      border-bottom 0
+   }
+}
+
+.panel:last-child{
+   margin-bottom 0
 }
 
    /*

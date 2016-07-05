@@ -29,9 +29,6 @@
             {{ render(controller('CreonitAdminBundle:Layout:sidebar')) }}
         </div>
         <div class="page-content">
-            {#<div class="page-content-header">
-                {{ render(controller('CreonitAdminBundle:Layout:header')) }}
-            </div>#}
             <div class="page-content-module">
                 {% block content %}{% endblock %}
             </div>
@@ -41,6 +38,8 @@
 
 {% block javascripts %}
     <script src="{{ asset('bundles/creonitadmin/js/vendor.js') }}"></script>
+    <script src="{{ asset('bundles/creonitadmin/js/tinymce/tinymce.js') }}"></script>
+    <script src="{{ asset('bundles/creonitadmin/js/tinymce/jquery.tinymce.js') }}"></script>
     <script src="{{ asset('bundles/creonitadmin/js/admin.js') }}"></script>
     <script src="{{ asset('bundles/creonitadmin/js/common.js') }}"></script>
 {% endblock %}
