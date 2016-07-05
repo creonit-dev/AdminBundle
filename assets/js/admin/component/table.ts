@@ -103,8 +103,7 @@ module Creonit.Admin.Component{
 
 
             if(!this.node.find('tbody').children().length){
-                this.node.find('thead').remove();
-                this.node.find('tbody').html('<tr><td colspan="'+(this.node.find('thead td').length)+'">Список пуст</td></tr>');
+                this.node.find('.table:eq(0)').replaceWith('Список пуст')
             }
 
             this.node.find('[data-toggle="tooltip"]').tooltip({container: 'body', trigger: 'hover'});

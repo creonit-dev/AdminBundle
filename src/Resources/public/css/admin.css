@@ -46,8 +46,6 @@
 .modal-header .close {
   font-size: 25px;
   opacity: 0.6;
-  color: #b3b3b3;
-  text-shadow: 0 1px 0 #000;
 }
 .modal-header .close:hover {
   opacity: 0.9;
@@ -60,6 +58,7 @@
 }
 .modal-body.mod-table .panel {
   margin-bottom: 0;
+  border: 0;
 }
 .modal-footer {
   text-align: left;
@@ -271,9 +270,9 @@
 }
 .page-content-module > div > .panel {
   border: 0;
+  box-shadow: none;
 }
 .panel .table {
-  margin: -15px 0 0 0;
   border: 0;
 }
 .panel .table td:first-child,

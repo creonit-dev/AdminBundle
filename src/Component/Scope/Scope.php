@@ -73,9 +73,11 @@ class Scope
         if(strpos($entity, '\\') === false){
             $entity = 'AppBundle\\Model\\' . $entity;
         }
-        $this->entity = $entity;
-        $tableMap = $entity::TABLE_MAP;
-        $this->tableMap = $tableMap::getTableMap();
+        if(class_exists($entity)){
+            $this->entity = $entity;
+            $tableMap = $entity::TABLE_MAP;
+            $this->tableMap = $tableMap::getTableMap();
+        }
         return $this;
     }
 
