@@ -233,7 +233,21 @@ class Scope
     {
         $createField = function ($match){
             if(!$this->hasField($match[1])){
+                $type = 'default';
+
                 switch($match[2]){
+                    case 'input':
+                        if(preg_match('/^\s*["\'](\w+)["\']/', $match[4], $inputMatch)){
+                            switch ($inputMatch[1]){
+                                case 'date':
+                                case 'datetime':
+                                    $type = 'date';
+                                    break;
+                            }
+                        }
+
+                        break;
+
                     case 'file':
                         $type = 'file';
                         break;
@@ -257,15 +271,13 @@ class Scope
                     case 'checkbox':
                         $type = 'checkbox';
                         break;
-                    default:
-                        $type = 'default';
                 }
                 $this->addField($this->createField($match[1], [], $type));
             }
         };
 
         $this->template = preg_replace_callback(
-            '/\{\{\s*([\w_]+)\s*\|\s*(textarea|textedit|text|gallery|file|image|video|external|select|checkbox|radio)(\(?\)?)(.*?\}\})/usi',
+            '/\{\{\s*([\w_]+)\s*\|\s*(textarea|textedit|text|input|gallery|file|image|video|external|select|checkbox|radio)(\(?\)?)(.*?\}\})/usi',
             function($match) use ($createField){
                 $createField($match);
                 return "{{ {$match[1]} | {$match[2]}" . (($match[3] && $match[3] != '()') ? "('{$match[1]}', " : "('{$match[1]}')") . $match[4];
@@ -274,13 +286,21 @@ class Scope
         );
 
         $this->template = preg_replace_callback(
-            '/\(\s*([\w_]+)\s*\|\s*(textarea|textedit|text|gallery|file|image|video|external|select|checkbox|radio)(\(?\)??)(.*?\))/usi',
+            '/\(\s*([\w_]+)\s*\|\s*(textarea|textedit|text|input|gallery|file|image|video|external|select|checkbox|radio)(\(?\)??)(.*?\))/usi',
             function($match) use ($createField){
                 $createField($match);
                 return "( {$match[1]} | {$match[2]}" . (($match[3] && $match[3] != '()') ? "('{$match[1]}', " : "('{$match[1]}')") . $match[4];
             },
             $this->template
         );
+
+        if(preg_match_all('/\{\{\s*([\w_]+)\s*\|\s*date(?:\(|\s|\}|\))/usi', $this->template, $matches, PREG_SET_ORDER)){
+            foreach($matches as $match){
+                if(!$this->hasField($match[1])){
+                    $this->addField($this->createField($match[1], [], 'date'));
+                }
+            }
+        }
 
         if(preg_match_all('/\{\{\s*([\w_]+)\s*(?:\||\}\})/usi', $this->template, $matches, PREG_SET_ORDER)){
             foreach($matches as $match){

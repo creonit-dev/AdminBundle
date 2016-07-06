@@ -16,9 +16,15 @@
     "bootstrap": "^3.3.6",
     "tinymce": "^4.3.13",
     "tinymce-i18n": "^4.0.0",
-    "twig.js": "0.8.8"
+    "twig.js": "0.8.8",
+    "jquery.inputmask": "^3.3.1"
   },
   "overrides": {
+    "jquery.inputmask": {
+      "main": [
+        "dist/jquery.inputmask.bundle.js"
+      ]
+    },
     "twig.js": {
       "main": [
         "twig.js"

@@ -1,6 +1,7 @@
 parameters:
     creonit_admin.component.field.default.class: Creonit\AdminBundle\Component\Field\Field
     creonit_admin.component.field.external.class: Creonit\AdminBundle\Component\Field\ExternalField
+    creonit_admin.component.field.date.class: Creonit\AdminBundle\Component\Field\DateField
     creonit_admin.component.field.file.class: Creonit\AdminBundle\Component\Field\FileField
     creonit_admin.component.field.image.class: Creonit\AdminBundle\Component\Field\ImageField
     creonit_admin.component.field.video.class: Creonit\AdminBundle\Component\Field\VideoField
@@ -40,6 +41,11 @@ services:
 
     creonit_admin.component.field.external:
         class: '%creonit_admin.component.field.external.class%'
+        parent: creonit_admin.component.field
+        shared: false
+
+    creonit_admin.component.field.date:
+        class: '%creonit_admin.component.field.date.class%'
         parent: creonit_admin.component.field
         shared: false
 

@@ -72,6 +72,9 @@ module Creonit.Admin.Component{
             });
 
 
+            this.node.find('input').inputmask();
+
+
             this.node.find('.editor-save-and-close').on('click', (e) => {
                 $(e.currentTarget).attr('clicked', true);
             });

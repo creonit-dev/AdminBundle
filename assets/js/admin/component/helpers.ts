@@ -233,12 +233,26 @@ module Creonit.Admin.Component.Helpers {
         return `<div class="checkbox"><label><input type="checkbox" name="${name}" ${value ? 'checked' : ''}> ${caption}</label></div>`;
     }
 
-    export function text(value:string, [name, options]){
+    export function input(value:string, [name, type, options]){
         options = options || {};
+        var attributes = [];
+
+        switch(type){
+            case 'date':
+                attributes.push(`data-inputmask='"mask": "d.m.y", "placeholder": "дд.мм.гггг"'`);
+                break;
+            case 'datetime':
+                attributes.push(`data-inputmask='"mask": "d.m.y h:s:s", "placeholder": "дд.мм.гггг чч:мм:сс"'`);
+                break;
+        }
 
         value = value ? Utils.escape(value.toString()) : '';
 
-        return `<input type="text" class="form-control" name="${name}" value="${value}" placeholder="${options.placeholder || ''}">`;
+        return `<input type="${type}" class="form-control" name="${name}" value="${value}" placeholder="${options.placeholder || ''}" ${attributes.join(' ')}>`;
+    }
+
+    export function text(value:string, [name, options]){
+        return input(value, [name, 'text', options]);
     }
 
     export function textarea(value:string, options?:any){
@@ -254,8 +268,11 @@ module Creonit.Admin.Component.Helpers {
 /*        var name = options && options[0] ? options[0] : '';
         var options = options && options[1] ? options[1] : {};
 
-        value = value ? Utils.escape(value.toString()) : '';
+
+
 */
+        value = value ? Utils.escape(value.toString()) : '';
+
         return `<textarea class="text-editor" name="${name}">${value}</textarea>`;
     }
 
@@ -322,6 +339,7 @@ module Creonit.Admin.Component.Helpers {
             'checkbox',
             'radio',
             'text',
+            'input',
             'textarea',
             'textedit',
             'file',

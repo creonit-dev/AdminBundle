@@ -263,6 +263,7 @@ var Creonit;
                         setup: function (editor) {
                         }
                     });
+                    this.node.find('input').inputmask();
                     this.node.find('.editor-save-and-close').on('click', function (e) {
                         $(e.currentTarget).attr('clicked', true);
                     });
@@ -495,11 +496,25 @@ var Creonit;
                     return "<div class=\"checkbox\"><label><input type=\"checkbox\" name=\"" + name + "\" " + (value ? 'checked' : '') + "> " + caption + "</label></div>";
                 }
                 Helpers.checkbox = checkbox;
+                function input(value, _a) {
+                    var name = _a[0], type = _a[1], options = _a[2];
+                    options = options || {};
+                    var attributes = [];
+                    switch (type) {
+                        case 'date':
+                            attributes.push("data-inputmask='\"mask\": \"d.m.y\", \"placeholder\": \"\u0434\u0434.\u043C\u043C.\u0433\u0433\u0433\u0433\"'");
+                            break;
+                        case 'datetime':
+                            attributes.push("data-inputmask='\"mask\": \"d.m.y h:s:s\", \"placeholder\": \"\u0434\u0434.\u043C\u043C.\u0433\u0433\u0433\u0433 \u0447\u0447:\u043C\u043C:\u0441\u0441\"'");
+                            break;
+                    }
+                    value = value ? Component.Utils.escape(value.toString()) : '';
+                    return "<input type=\"" + type + "\" class=\"form-control\" name=\"" + name + "\" value=\"" + value + "\" placeholder=\"" + (options.placeholder || '') + "\" " + attributes.join(' ') + ">";
+                }
+                Helpers.input = input;
                 function text(value, _a) {
                     var name = _a[0], options = _a[1];
-                    options = options || {};
-                    value = value ? Component.Utils.escape(value.toString()) : '';
-                    return "<input type=\"text\" class=\"form-control\" name=\"" + name + "\" value=\"" + value + "\" placeholder=\"" + (options.placeholder || '') + "\">";
+                    return input(value, [name, 'text', options]);
                 }
                 Helpers.text = text;
                 function textarea(value, options) {
@@ -514,8 +529,10 @@ var Creonit;
                     /*        var name = options && options[0] ? options[0] : '';
                             var options = options && options[1] ? options[1] : {};
                     
-                            value = value ? Utils.escape(value.toString()) : '';
+                    
+                    
                     */
+                    value = value ? Component.Utils.escape(value.toString()) : '';
                     return "<textarea class=\"text-editor\" name=\"" + name + "\">" + value + "</textarea>";
                 }
                 Helpers.textedit = textedit;
@@ -577,6 +594,7 @@ var Creonit;
                         'checkbox',
                         'radio',
                         'text',
+                        'input',
                         'textarea',
                         'textedit',
                         'file',
