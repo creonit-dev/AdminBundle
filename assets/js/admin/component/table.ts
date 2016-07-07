@@ -4,6 +4,9 @@ module Creonit.Admin.Component{
         protected expanded:any = {};
         protected pagination:any = {};
 
+        initialize(){
+            this.node.addClass('component component-table');
+        }
 
         getQuery() {
             return $.extend(super.getQuery(), {expanded: this.expanded, pagination: this.pagination});
@@ -103,7 +106,7 @@ module Creonit.Admin.Component{
 
 
             if(!this.node.find('tbody').children().length){
-                this.node.find('.table:eq(0)').replaceWith('Список пуст')
+                this.node.find('.table:eq(0)').replaceWith('<div class="component-table-empty">Список пуст</div>')
             }
 
             this.node.find('[data-toggle="tooltip"]').tooltip({container: 'body', trigger: 'hover'});

@@ -64,8 +64,6 @@
 
 .table tbody tr.nodrop{
    opacity .3
-
-
 }
 
 .list-pagination{
@@ -89,6 +87,48 @@
       & > li.active > a, & > li.active > span {
          background #bbb
          border-color #aaa
+      }
+   }
+}
+
+.component-editor .panel-heading{
+   padding 10px
+}
+
+.component-editor .component-table{
+   .panel-body{
+      padding 0
+
+      .component-table-empty{
+         padding 15px
+      }
+
+      .table{
+         margin 0
+
+
+      }
+   }
+}
+.component-table .modal-body{
+   .panel-body{
+
+      .table{
+         margin 0
+
+
+      }
+   }
+}
+
+.component-table{
+   .table{
+      tbody tr:last-child td {
+         border-bottom none
+      }
+
+      tbody tr:first-child td{
+         border-top none
       }
    }
 }

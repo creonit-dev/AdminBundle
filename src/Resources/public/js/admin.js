@@ -94,8 +94,11 @@ var Creonit;
                     this.node = node;
                     this.parent = parent;
                     this.options = options;
+                    this.initialize();
                     this.loadSchema();
                 }
+                Component.prototype.initialize = function () {
+                };
                 Component.prototype.action = function (name, options) {
                     if (this.actions[name]) {
                         return this.actions[name].apply(this, options);
@@ -224,6 +227,9 @@ var Creonit;
                 function Editor() {
                     _super.apply(this, arguments);
                 }
+                Editor.prototype.initialize = function () {
+                    this.node.addClass('component component-editor');
+                };
                 Editor.prototype.render = function () {
                     var _this = this;
                     this.node.empty();
@@ -499,7 +505,10 @@ var Creonit;
                 function input(value, _a) {
                     var name = _a[0], type = _a[1], options = _a[2];
                     options = options || {};
-                    var attributes = [];
+                    var attributes = [], classes = ['form-control'];
+                    if (options.size) {
+                        classes.push('input-' + options.size);
+                    }
                     switch (type) {
                         case 'date':
                             attributes.push("data-inputmask='\"mask\": \"d.m.y\", \"placeholder\": \"\u0434\u0434.\u043C\u043C.\u0433\u0433\u0433\u0433\"'");
@@ -509,7 +518,7 @@ var Creonit;
                             break;
                     }
                     value = value ? Component.Utils.escape(value.toString()) : '';
-                    return "<input type=\"" + type + "\" class=\"form-control\" name=\"" + name + "\" value=\"" + value + "\" placeholder=\"" + (options.placeholder || '') + "\" " + attributes.join(' ') + ">";
+                    return "<input type=\"" + type + "\" class=\"" + classes.join(' ') + "\" name=\"" + name + "\" value=\"" + value + "\" placeholder=\"" + (options.placeholder || '') + "\" " + attributes.join(' ') + ">";
                 }
                 Helpers.input = input;
                 function text(value, _a) {
@@ -842,6 +851,9 @@ var Creonit;
                     this.expanded = {};
                     this.pagination = {};
                 }
+                Table.prototype.initialize = function () {
+                    this.node.addClass('component component-table');
+                };
                 Table.prototype.getQuery = function () {
                     return $.extend(_super.prototype.getQuery.call(this), { expanded: this.expanded, pagination: this.pagination });
                 };
@@ -908,7 +920,7 @@ var Creonit;
                         _this.action($action.data('name'), $action.data('options'));
                     });
                     if (!this.node.find('tbody').children().length) {
-                        this.node.find('.table:eq(0)').replaceWith('Список пуст');
+                        this.node.find('.table:eq(0)').replaceWith('<div class="component-table-empty">Список пуст</div>');
                     }
                     this.node.find('[data-toggle="tooltip"]').tooltip({ container: 'body', trigger: 'hover' });
                     var sortData, $table = this.node.find('table');

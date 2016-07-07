@@ -235,7 +235,11 @@ module Creonit.Admin.Component.Helpers {
 
     export function input(value:string, [name, type, options]){
         options = options || {};
-        var attributes = [];
+        var attributes = [], classes = ['form-control'];
+
+        if(options.size){
+            classes.push('input-' + options.size);
+        }
 
         switch(type){
             case 'date':
@@ -248,7 +252,9 @@ module Creonit.Admin.Component.Helpers {
 
         value = value ? Utils.escape(value.toString()) : '';
 
-        return `<input type="${type}" class="form-control" name="${name}" value="${value}" placeholder="${options.placeholder || ''}" ${attributes.join(' ')}>`;
+
+
+        return `<input type="${type}" class="${classes.join(' ')}" name="${name}" value="${value}" placeholder="${options.placeholder || ''}" ${attributes.join(' ')}>`;
     }
 
     export function text(value:string, [name, options]){

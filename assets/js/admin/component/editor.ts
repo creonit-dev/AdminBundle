@@ -3,6 +3,11 @@ module Creonit.Admin.Component{
 
         static increment = 0;
 
+        initialize(){
+            this.node.addClass('component component-editor');
+        }
+
+
         render(){
             this.node.empty();
 

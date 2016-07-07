@@ -204,6 +204,27 @@
   background: #bbb;
   border-color: #aaa;
 }
+.component-editor .panel-heading {
+  padding: 10px;
+}
+.component-editor .component-table .panel-body {
+  padding: 0;
+}
+.component-editor .component-table .panel-body .component-table-empty {
+  padding: 15px;
+}
+.component-editor .component-table .panel-body .table {
+  margin: 0;
+}
+.component-table .modal-body .panel-body .table {
+  margin: 0;
+}
+.component-table .table tbody tr:last-child td {
+  border-bottom: none;
+}
+.component-table .table tbody tr:first-child td {
+  border-top: none;
+}
 .page-wrapper {
   display: flex;
 }
@@ -284,7 +305,9 @@
   border-right: 0;
 }
 .panel .table th {
-  border: 0;
+  border-left: none;
+  border-right: none;
+  border-bottom-width: 1px;
 }
 .panel:last-child {
   margin-bottom: 0;

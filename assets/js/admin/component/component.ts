@@ -28,10 +28,13 @@ module Creonit.Admin.Component {
             this.parent = parent;
             this.options = options;
 
+            this.initialize();
+
             this.loadSchema();
 
+        }
 
-
+        initialize(){
         }
 
         action(name, options) {
