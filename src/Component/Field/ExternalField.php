@@ -6,6 +6,7 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 class ExternalField extends Field
 {
+    
     public function load($entity)
     {
         if($data = parent::load($entity)){

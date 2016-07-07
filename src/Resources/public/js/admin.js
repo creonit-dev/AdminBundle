@@ -873,7 +873,7 @@ var Creonit;
                         if (!confirm('Элемент будет удален, продолжить?')) {
                             return;
                         }
-                        _this.findRowById(options.row_id).remove();
+                        //this.findRowById(options.row_id).remove();
                         _this.request('_delete', $.extend(_this.getQuery(), options), null, function (response) {
                             _this.checkResponse(response);
                         });

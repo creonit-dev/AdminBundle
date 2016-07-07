@@ -16,20 +16,23 @@ abstract class Module
     protected $manager;
 
     protected $active;
-    
-    protected $visible = true;
 
+    protected $icon;
+    protected $title;
+    protected $template;
+
+    protected $visible = true;
     /** @var  ContainerInterface */
     protected $container;
 
     abstract public function initialize();
 
     public function getTitle(){
-        return 'Untitled';
+        return $this->title;
     }
 
     public function getIcon(){
-        return 'fa fa-sticky-note-o';
+        return $this->icon;
     }
 
     public function getName(){
@@ -58,7 +61,9 @@ abstract class Module
         return isset($this->components[$name]);
     }
 
-    public function getTemplate(){}
+    public function getTemplate(){
+        return $this->template;
+    }
 
     /**
      * @param Manager $manager

@@ -22,6 +22,7 @@ class GalleryTable extends TableComponent
      * @cols Изображение / Видео, .
      *
      * \GalleryItem
+     * @sortable true
      *
      * @field image_id:image
      * @field video_id:video
@@ -29,9 +30,9 @@ class GalleryTable extends TableComponent
      *
      * @col
      * {% if image_id %}
-     *      {{ image_id.preview | raw | open('CreonitUtils.GalleryImageEditor', {key: _key}) }}
+     *      {{ image_id.preview | raw | open('CreonitUtils.GalleryImageEditor', {key: _key}) | controls }}
      * {% else %}
-     *      {{ video_id.preview | raw | open('CreonitUtils.GalleryVideoEditor', {key: _key}) }}
+     *      {{ video_id.preview | raw | open('CreonitUtils.GalleryVideoEditor', {key: _key}) | controls }}
      * {% endif %}
      *
      * @col {{ _delete() }}

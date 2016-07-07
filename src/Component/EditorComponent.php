@@ -29,7 +29,15 @@ abstract class EditorComponent extends Component
         foreach ($this->fields as $field){
             $response->data->set($field->getName(), $field->load($entity));
         }
+        
+        $this->decorate($request, $response, $entity);
     }
+
+    public function decorate(ComponentRequest $request, ComponentResponse $response, $entity)
+    {
+    }
+
+
 
     public function saveData(ComponentRequest $request, ComponentResponse $response)
     {
@@ -78,8 +86,6 @@ abstract class EditorComponent extends Component
         $response->query->set('key', $key);
 
     }
-    
-
 
     /**
      * @param ComponentRequest $request

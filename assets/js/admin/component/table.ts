@@ -33,7 +33,7 @@ module Creonit.Admin.Component{
                     return;
                 }
 
-                this.findRowById(options.row_id).remove();
+                //this.findRowById(options.row_id).remove();
                 this.request('_delete', $.extend(this.getQuery(), options), null, (response) => {
                     this.checkResponse(response);
                 });
