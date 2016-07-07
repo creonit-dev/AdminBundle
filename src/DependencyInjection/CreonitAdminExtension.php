@@ -22,6 +22,8 @@ class CreonitAdminExtension extends Extension
 
         $manager = $container->getDefinition('creonit_admin');
         $manager->addMethodCall('setTitle', [$config['title']]);
-        $manager->addMethodCall('setIcon', [$config['icon']]);
+        if(isset($config['icon'])){
+            $manager->addMethodCall('setIcon', [$config['icon']]);
+        }
     }
 }
