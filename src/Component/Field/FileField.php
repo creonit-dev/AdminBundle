@@ -81,7 +81,7 @@ class FileField extends Field
     public function decorate($data)
     {
         if(is_array($data)){
-            $data['size'] = $this->container->get('creonit_utils.file_manager')->formatSize($data['size']);
+            $data['size'] = $this->formatSize($data['size']);
         }
         return $data;
     }
@@ -107,5 +107,15 @@ class FileField extends Field
         return $this->container->getParameter('kernel.root_dir') . '/../web';
     }
 
+
+    protected function formatSize($size){
+        if($size > 1048576){
+            return round($size / 1048576, 1) . ' Мб';
+        }else if($size > 1024){
+            return round($size / 1024, 1) . ' Кб';
+        }else{
+            return $size . ' б';
+        }
+    }
 
 }
