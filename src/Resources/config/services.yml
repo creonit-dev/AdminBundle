@@ -16,11 +16,6 @@ services:
             - '@service_container'
             - '@templating'
 
-    creonit_admin.gallery_module:
-        class: Creonit\AdminBundle\UtilsModule\CreonitUtilsModule
-        tags: [{ name: creonit_admin.module }]
-
-
     creonit_admin.component.scope.default:
         class: Creonit\AdminBundle\Component\Scope\Scope
         shared: false
