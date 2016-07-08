@@ -207,19 +207,20 @@ module Creonit.Admin.Component.Helpers {
         return component('Media.GalleryTable', {field_name: name, gallery_id: value}, {}) + `<input type="hidden" name="${name}" value="${value}">`;
     }
 
-    export function select(value:any, options?:any){
-        var name = options && options[0] ? options[0] : '';
-
+    export function select(value:any, [name = '', options = {}]:[string, any] = ['', {}]){
         if(!value){
             value = {options: [], value: ''};
         }
 
-
-        var options = value.options.map((option) => {
+        var selectOptions = value.options.map((option) => {
                 return `<option value="${option.value}" ${value.value == option.value ? 'selected' : ''}>${option.title}</option>`;
-            }).join('');
+            });
 
-        return `<select name="${name}" class="form-control">${options}</select>`;
+        if(options.empty){
+            selectOptions.unshift(`<option value="">${options.empty}</option>`);
+        }
+
+        return `<select name="${name}" class="form-control">${selectOptions.join('')}</select>`;
     }
 
 

@@ -137,6 +137,10 @@ abstract class ListComponent extends Component
         }
     }
 
+    protected function getMask(ListRowScope $scope, $relation, $relationValue){
+        return $scope->getName() . '.' . ($relation ? $relation->getTargetScope()->getName() . '.' . $relationValue : '_');
+    }
+
     /**
      * @param ComponentRequest $request
      * @param ComponentResponse $response
@@ -147,7 +151,7 @@ abstract class ListComponent extends Component
      * @return array
      */
     protected function getData(ComponentRequest $request, ComponentResponse $response, ListRowScope $scope, $relation = null, $relationValue = null, $level = 0){
-        $mask = $scope->getName() . '.' . ($relation ? $relation->getTargetScope()->getName() . '.' . $relationValue : '_');
+        $mask = $this->getMask($scope, $relation, $relationValue);
         $entities = [];
 
         $query = $this->getQuery($request, $response, $scope, $relation, $relationValue, $level);

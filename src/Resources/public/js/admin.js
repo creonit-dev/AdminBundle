@@ -481,15 +481,18 @@ var Creonit;
                     return component('Media.GalleryTable', { field_name: name, gallery_id: value }, {}) + ("<input type=\"hidden\" name=\"" + name + "\" value=\"" + value + "\">");
                 }
                 Helpers.gallery = gallery;
-                function select(value, options) {
-                    var name = options && options[0] ? options[0] : '';
+                function select(value, _a) {
+                    var _b = _a === void 0 ? ['', {}] : _a, _c = _b[0], name = _c === void 0 ? '' : _c, _d = _b[1], options = _d === void 0 ? {} : _d;
                     if (!value) {
                         value = { options: [], value: '' };
                     }
-                    var options = value.options.map(function (option) {
+                    var selectOptions = value.options.map(function (option) {
                         return "<option value=\"" + option.value + "\" " + (value.value == option.value ? 'selected' : '') + ">" + option.title + "</option>";
-                    }).join('');
-                    return "<select name=\"" + name + "\" class=\"form-control\">" + options + "</select>";
+                    });
+                    if (options.empty) {
+                        selectOptions.unshift("<option value=\"\">" + options.empty + "</option>");
+                    }
+                    return "<select name=\"" + name + "\" class=\"form-control\">" + selectOptions.join('') + "</select>";
                 }
                 Helpers.select = select;
                 function radio(value) {
