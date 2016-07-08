@@ -2,8 +2,8 @@
 
 namespace Creonit\AdminBundle\Component\Field;
 
-use AppBundle\Model\Gallery;
-use Creonit\AdminBundle\Component\Storage\Storage;
+use Creonit\MediaBundle\Model\Gallery;
+
 
 class GalleryField extends Field
 {

@@ -2,9 +2,9 @@
 
 namespace Creonit\AdminBundle\Component\Field;
 
-use AppBundle\Model\File;
-use AppBundle\Model\Image;
-use AppBundle\Model\ImageQuery;
+use Creonit\MediaBundle\Model\File;
+use Creonit\MediaBundle\Model\Image;
+use Creonit\MediaBundle\Model\ImageQuery;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Propel\Runtime\Map\TableMap;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
