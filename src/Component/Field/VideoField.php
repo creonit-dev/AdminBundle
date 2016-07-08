@@ -2,8 +2,8 @@
 
 namespace Creonit\AdminBundle\Component\Field;
 
-use AppBundle\Model\Video;
-use AppBundle\Model\VideoQuery;
+use Creonit\MediaBundle\Model\Video;
+use Creonit\MediaBundle\Model\VideoQuery;
 use Symfony\Component\Validator\Constraints\Regex;
 
 class VideoField extends Field

@@ -204,7 +204,7 @@ module Creonit.Admin.Component.Helpers {
         var name = options && options[0] ? options[0] : '',
             output = 'Изображение не загружено';
 
-        return component('CreonitUtils.GalleryTable', {field_name: name, gallery_id: value}, {}) + `<input type="hidden" name="${name}" value="${value}">`;
+        return component('Media.GalleryTable', {field_name: name, gallery_id: value}, {}) + `<input type="hidden" name="${name}" value="${value}">`;
     }
 
     export function select(value:any, options?:any){
