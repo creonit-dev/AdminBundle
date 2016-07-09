@@ -122,6 +122,14 @@
   font-weight: normal;
   color: #999;
   margin-left: 0.75em;
+  display: inline-block;
+}
+.control-label-notice .checkbox {
+  margin: 0 0 0 10px;
+  display: inline-block;
+}
+.control-label-notice .checkbox input {
+  margin-top: 1px;
 }
 .table-row-visible:not(.mod-visible) {
   opacity: 0.3;
