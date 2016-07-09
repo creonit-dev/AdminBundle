@@ -16,18 +16,34 @@ abstract class EditorComponent extends Component
             $response->flushError();
             $this->loadData($request, $response);
         });
+
+        $this->setHandler('reload_data', function (ComponentRequest $request, ComponentResponse $response){
+
+            $entity = $this->retrieveEntity($request, $response);
+
+            foreach ($this->fields as $field){
+                $field->save($entity, $field->extract($request));
+            }
+
+            foreach ($this->fields as $field){
+                dump($field->supportEntity($field));
+                dump($field->supportEntity($entity));
+                $response->data->set($field->getName(), $field->supportEntity($entity) ? $field->load($entity) : $field->decorate($request->data->get($field->getName())));
+            }
+
+            $this->decorate($request, $response, $entity);
+        });
     }
 
     public function loadData(ComponentRequest $request, ComponentResponse $response)
     {
-        $key = $request->query->get('key');
-        if($key){
-            $entity = $this->createQuery()->findPk($key) or $response->flushError('Элемент не найден');
-        }else{
-            $entity = $this->createEntity();
-        }
+        $entity = $this->retrieveEntity($request, $response);
+
         foreach ($this->fields as $field){
-            $response->data->set($field->getName(), $field->load($entity));
+            if($field->parameters->has('load')){
+                
+            }
+            $response->data->set($field->getName(), $field->load($entity) ?: $field->decorate($response->data->get($field->getName())));
         }
         
         $this->decorate($request, $response, $entity);
@@ -39,18 +55,21 @@ abstract class EditorComponent extends Component
 
 
 
-    public function saveData(ComponentRequest $request, ComponentResponse $response)
-    {
+    protected function retrieveEntity(ComponentRequest $request, ComponentResponse $response){
         $key = $request->query->get('key');
         if($key){
             $entity = $this->createQuery()->findPk($key) or $response->flushError('Элемент не найден');
         }else{
             $entity = $this->createEntity();
         }
+        return $entity;
+    }
+
+    public function saveData(ComponentRequest $request, ComponentResponse $response)
+    {
+        $entity = $this->retrieveEntity($request, $response);
 
         $dataMap = [];
-
-
         foreach ($this->fields as $field){
             $dataMap[$field->getName()] = $data = $field->extract($request);
             foreach($field->validate($data) as $error){
@@ -67,7 +86,6 @@ abstract class EditorComponent extends Component
         if($response->hasError()){
             return;
         }
-
 
         foreach ($this->fields as $field){
             $field->save($entity, $dataMap[$field->getName()]);
@@ -97,6 +115,17 @@ abstract class EditorComponent extends Component
     public function preSave(ComponentRequest $request, ComponentResponse $response, $entity){}
 
     public function postSave(ComponentRequest $request, ComponentResponse $response, $entity){}
+
+/*
+    public function dump()
+    {
+        $fields = [];
+        foreach ($this->fields as $field) {
+            $fields[$field->getName()] = $field->dump();
+        }
+        return array_merge(parent::dump(), ['fields' => $fields]);
+    }
+*/
 
 
 }

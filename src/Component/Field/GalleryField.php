@@ -7,6 +7,8 @@ use Creonit\MediaBundle\Model\Gallery;
 
 class GalleryField extends Field
 {
+    protected $type = 'gallery';
+
 
     public function load($entity)
     {

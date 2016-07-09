@@ -2,10 +2,11 @@
 
 namespace Creonit\AdminBundle\Component\Field;
 
-use Creonit\AdminBundle\Component\Request\ComponentRequest;
 
 class DateField extends Field
 {
+    protected $type = 'date';
+
     /**
      * @param \DateTime $data
      * @return mixed

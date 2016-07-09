@@ -12,7 +12,6 @@ module Creonit.Admin.Component {
         protected data:any = {};
         protected node:any;
 
-        protected schema:any;
         protected actions:any = {};
 
         constructor(node:any, name:string, query:any = {}, options:any = {}, parent?:Component) {

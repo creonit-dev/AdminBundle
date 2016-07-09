@@ -6,6 +6,7 @@ use Creonit\AdminBundle\Component\Request\ComponentRequest;
 
 class CheckboxField extends Field
 {
+    protected $type = 'checkbox';
 
     public function extract(ComponentRequest $request)
     {

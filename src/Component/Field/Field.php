@@ -13,11 +13,11 @@ class Field
 {
 
     protected $name;
+    protected $type = 'default';
     protected $default;
-    public $attributes;
+
+
     public $parameters;
-
-
     /** @var ContainerInterface */
     protected $container;
 
@@ -92,16 +92,36 @@ class Field
             $language = new ExpressionLanguage();
             return $this->decorate($language->evaluate($this->parameters->get('load'), ['entity' => $entity]));
 
-        }else if(property_exists($entity, $this->name)){
+        }else if($this->hasProperty($entity)){
             return $this->decorate($entity->getByName($this->name, TableMap::TYPE_FIELDNAME));
 
         }else{
-            return null;
+            return $this->decorate(null);
         }
     }
 
+    public function hasProperty($entity){
+        return property_exists($entity, $this->name);
+    }
+
+    public function supportEntity($entity){
+        return $this->parameters->has('load') or $this->parameters->has('save') or $this->hasProperty($entity);
+    }
+
+
     public function decorate($data){
         return $data;
+    }
+
+    public function dump(){
+        return [
+            'type' => $this->type,
+            'name' => $this->name,
+        ];
+    }
+
+    public function getType(){
+        return $this->type;
     }
 
 

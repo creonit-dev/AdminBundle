@@ -249,6 +249,14 @@ var Creonit;
                     var formId = "form" + ++Editor.increment, $form = $("<form id=\"" + formId + "\"></form>");
                     this.node.append($form);
                     this.node.find('input, textarea, select, button').attr('form', formId).filter('input').eq(0).focus();
+                    this.node.find('select[js-component-select-reload]').change(function () {
+                        var data = $form.serializeObject(), query = _this.getQuery();
+                        _this.request('reload_data', query, data, function (response) {
+                            if (_this.checkResponse(response)) {
+                                _this.applyResponse(response);
+                            }
+                        });
+                    });
                     this.node.find('.text-editor').tinymce({
                         doctype: 'html5',
                         element_format: 'html',
@@ -280,7 +288,7 @@ var Creonit;
                     });
                     $form.on('submit', function (e) {
                         e.preventDefault();
-                        var $form = $(e.currentTarget), data = $form.serializeObject(), query = _this.getQuery(), $buttonCloseAfterSave = _this.node.find('.editor-save-and-close[clicked]'), closeAfterSave = !!$buttonCloseAfterSave.length;
+                        var data = $form.serializeObject(), query = _this.getQuery(), $buttonCloseAfterSave = _this.node.find('.editor-save-and-close[clicked]'), closeAfterSave = !!$buttonCloseAfterSave.length;
                         $buttonCloseAfterSave.removeAttr('clicked');
                         if (closeAfterSave) {
                             query.closeAfterSave = 1;
@@ -370,8 +378,8 @@ var Creonit;
                 }
                 // Twig Functions
                 function button(caption, _a) {
-                    var _b = _a === void 0 ? {} : _a, _c = _b.size, size = _c === void 0 ? '' : _c, _d = _b.type, type = _d === void 0 ? 'default' : _d, _e = _b.icon, icon = _e === void 0 ? '' : _e, _f = _b.className, className = _f === void 0 ? '' : _f;
-                    return ("<button \n                class=\"btn btn-" + type + " " + (size ? "btn-" + size : '') + " " + className + "\" \n                type=\"button\" \n            >\n                ") + (icon ? "<i class=\"" + (caption !== '' ? 'icon' : '') + " " + resolveIconClass(icon) + "\"></i>" : '') + (caption + "\n            </button>");
+                    var _b = _a === void 0 ? {} : _a, _c = _b.size, size = _c === void 0 ? '' : _c, _d = _b.type, type = _d === void 0 ? 'default' : _d, _e = _b.icon, icon = _e === void 0 ? '' : _e, _f = _b.className, className = _f === void 0 ? '' : _f, _g = _b.disabled, disabled = _g === void 0 ? false : _g;
+                    return ("<button \n                class=\"btn btn-" + type + " " + (size ? "btn-" + size : '') + " " + className + "\" \n                type=\"button\" \n                " + (disabled ? 'disabled' : '') + "\n            >\n                ") + (icon ? "<i class=\"" + (caption !== '' ? 'icon' : '') + " " + resolveIconClass(icon) + "\"></i>" : '') + (caption + "\n            </button>");
                 }
                 Helpers.button = button;
                 function submit(caption, _a) {
@@ -492,7 +500,7 @@ var Creonit;
                     if (options.empty) {
                         selectOptions.unshift("<option value=\"\">" + options.empty + "</option>");
                     }
-                    return "<select name=\"" + name + "\" class=\"form-control\">" + selectOptions.join('') + "</select>";
+                    return "<select name=\"" + name + "\" class=\"form-control\" " + (options.reload ? 'js-component-select-reload' : '') + ">" + selectOptions.join('') + "</select>";
                 }
                 Helpers.select = select;
                 function radio(value) {
@@ -560,8 +568,9 @@ var Creonit;
                     }
                 }
                 Helpers.group = group;
-                function panel(body) {
-                    return "<div class=\"panel panel-default\"><div class=\"panel-body\">" + body + "</div></div>";
+                function panel(body, _a) {
+                    var _b = _a === void 0 ? [] : _a, _c = _b[0], type = _c === void 0 ? 'default' : _c, _d = _b[1], heading = _d === void 0 ? '' : _d;
+                    return "<div class=\"panel panel-" + type + "\">" + (heading ? "<div class=\"panel-heading\">" + heading + "</div>" : '') + "<div class=\"panel-body\">" + body + "</div></div>";
                 }
                 Helpers.panel = panel;
                 function col(body, _a) {

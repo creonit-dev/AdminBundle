@@ -34,10 +34,11 @@ module Creonit.Admin.Component.Helpers {
 
     // Twig Functions
 
-    export function button(caption:string, {size = '', type = 'default', icon = '', className = ''} = {}){
+    export function button(caption:string, {size = '', type = 'default', icon = '', className = '', disabled = false} = {}){
         return `<button 
                 class="btn btn-${type} ${size ? `btn-${size}` : ''} ${className}" 
                 type="button" 
+                ${disabled ? 'disabled' : ''}
             >
                 `+ (icon ? `<i class="${caption !== '' ? 'icon' : ''} ${resolveIconClass(icon)}"></i>` : '') +`${caption}
             </button>`;
@@ -220,7 +221,7 @@ module Creonit.Admin.Component.Helpers {
             selectOptions.unshift(`<option value="">${options.empty}</option>`);
         }
 
-        return `<select name="${name}" class="form-control">${selectOptions.join('')}</select>`;
+        return `<select name="${name}" class="form-control" ${options.reload ? 'js-component-select-reload' : ''}>${selectOptions.join('')}</select>`;
     }
 
 
@@ -304,8 +305,8 @@ module Creonit.Admin.Component.Helpers {
 
     }
 
-    export function panel(body:string) {
-        return `<div class="panel panel-default"><div class="panel-body">${body}</div></div>`;
+    export function panel(body:string, [type = 'default', heading = ''] = []) {
+        return `<div class="panel panel-${type}">${heading ? `<div class="panel-heading">${heading}</div>` : ''}<div class="panel-body">${body}</div></div>`;
     }
 
     export function col(body:string, [size = 6] = []) {

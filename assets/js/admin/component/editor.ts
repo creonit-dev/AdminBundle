@@ -49,6 +49,19 @@ module Creonit.Admin.Component{
             this.node.append($form);
             this.node.find('input, textarea, select, button').attr('form', formId).filter('input').eq(0).focus();
 
+            this.node.find('select[js-component-select-reload]').change(() => {
+
+                var data = $form.serializeObject(),
+                    query = this.getQuery();
+
+
+                this.request('reload_data', query, data, (response) => {
+                    if (this.checkResponse(response)) {
+                        this.applyResponse(response);
+                    }
+                });
+
+            });
 
             this.node.find('.text-editor').tinymce({
                 doctype: 'html5',
@@ -92,8 +105,7 @@ module Creonit.Admin.Component{
 
             $form.on('submit', (e) => {
                 e.preventDefault();
-                var $form = $(e.currentTarget),
-                    data = $form.serializeObject(),
+                var data = $form.serializeObject(),
                     query = this.getQuery(),
                     $buttonCloseAfterSave = this.node.find('.editor-save-and-close[clicked]'),
                     closeAfterSave = !!$buttonCloseAfterSave.length;

@@ -8,6 +8,9 @@ use Symfony\Component\Validator\Constraints\Regex;
 
 class VideoField extends Field
 {
+    protected $type = 'video';
+
+
     public function validate($data)
     {
 

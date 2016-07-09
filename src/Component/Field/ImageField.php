@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ImageField extends Field
 {
+    protected $type = 'image';
+
 
     public function extract(ComponentRequest $request)
     {

@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class FileField extends Field
 {
+    protected $type = 'file';
 
     public function extract(ComponentRequest $request)
     {
