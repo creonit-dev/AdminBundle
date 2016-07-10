@@ -15,7 +15,7 @@ class VideoField extends Field
     {
 
         $violations = parent::validate($data);
-        if($violations->count()){
+        if($violations && $violations->count()){
             return $violations;
         }
 
