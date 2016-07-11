@@ -208,7 +208,7 @@ module Creonit.Admin.Component{
             this.data.entities[mask].forEach((entity:any) => {
                 let rowId = Utils.generateId();
                 let className = entity._row_class;
-                let $entity = $(`<tr data-row-id="${rowId}" data-key="${entity._key}" data-scope="${scope.parameters.name}" data-mask="${mask}" ${className ? `class="${className}"` : ''}>` + scope.template.render($.extend({}, entity, {
+                let $entity = $(`<tr data-row-id="${rowId}" data-key="${JSON.stringify(entity._key)}" data-scope="${scope.parameters.name}" data-mask="${mask}" ${className ? `class="${className}"` : ''}>` + scope.template.render($.extend({}, entity, {
                         _query: this.getQuery(),
                         _row_id: rowId,
                         _level: function(){

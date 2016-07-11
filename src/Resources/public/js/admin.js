@@ -999,7 +999,7 @@ var Creonit;
                     this.data.entities[mask].forEach(function (entity) {
                         var rowId = Component.Utils.generateId();
                         var className = entity._row_class;
-                        var $entity = $(("<tr data-row-id=\"" + rowId + "\" data-key=\"" + entity._key + "\" data-scope=\"" + scope.parameters.name + "\" data-mask=\"" + mask + "\" " + (className ? "class=\"" + className + "\"" : '') + ">") + scope.template.render($.extend({}, entity, {
+                        var $entity = $(("<tr data-row-id=\"" + rowId + "\" data-key=\"" + JSON.stringify(entity._key) + "\" data-scope=\"" + scope.parameters.name + "\" data-mask=\"" + mask + "\" " + (className ? "class=\"" + className + "\"" : '') + ">") + scope.template.render($.extend({}, entity, {
                             _query: _this.getQuery(),
                             _row_id: rowId,
                             _level: function () {
