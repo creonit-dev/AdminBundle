@@ -29,7 +29,7 @@ class FileField extends Field
             $extension = $file->guessExtension();
             $size = $file->getSize();
             $mime = $file->getMimeType();
-            $path = '/uploads';
+            $path = 'uploads';
             $name = md5(uniqid()) . '.' . $extension;
             $originalName = $file->getClientOriginalName();
 
