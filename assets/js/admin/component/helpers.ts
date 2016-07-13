@@ -61,7 +61,7 @@ module Creonit.Admin.Component.Helpers {
         }
 
         return `
-            ${textedit(value.text, [name + '__text'])}
+            ${textedit(value.text, [name + '__text', {}])}
             <input type="hidden" name="${name}" value="${value.id}">
 
         `;

@@ -54,11 +54,7 @@ class ContentField extends Field
             $data = $this->process($data);
         }
 
-        if($data['text']){
-            $data['content']->setText($data['text']);
-        }
-
-        $data['content']->setCompleted(true)->save();
+        $data['content']->setText($data['text'])->setCompleted(true)->save();
 
         parent::save($entity, $data['id'], true);
 

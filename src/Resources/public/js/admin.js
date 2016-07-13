@@ -392,7 +392,7 @@ var Creonit;
                     if (!value) {
                         return 'ошибка';
                     }
-                    return "\n            " + textedit(value.text, [name + '__text']) + "\n            <input type=\"hidden\" name=\"" + name + "\" value=\"" + value.id + "\">\n\n        ";
+                    return "\n            " + textedit(value.text, [name + '__text', {}]) + "\n            <input type=\"hidden\" name=\"" + name + "\" value=\"" + value.id + "\">\n\n        ";
                 }
                 Helpers.content = content;
                 function component(name, query, options) {
@@ -783,7 +783,12 @@ var Creonit;
                                 request.passResponse(new Component.Response(response[i]));
                             });
                         },
-                        complete: function () {
+                        complete: function (xhr) {
+                            if (xhr.status == 401 || xhr.status == 403) {
+                                document.location.reload();
+                            }
+                        },
+                        error: function () {
                         }
                     });
                 };

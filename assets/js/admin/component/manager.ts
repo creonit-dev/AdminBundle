@@ -107,7 +107,12 @@ module Creonit.Admin.Component {
                         request.passResponse(new Response(response[i]));
                     });
                 },
-                complete: () => {
+                complete: (xhr:any) => {
+                    if(xhr.status == 401 || xhr.status == 403){
+                        document.location.reload();
+                    }
+                },
+                error: () => {
                 }
             });
         }

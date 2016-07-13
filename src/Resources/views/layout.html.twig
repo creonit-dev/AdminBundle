@@ -11,6 +11,7 @@
         <link rel="stylesheet" href="{{ asset('bundles/creonitadmin/css/vendor.css') }}">
         <link rel="stylesheet" href="{{ asset('bundles/creonitadmin/css/bootstrap.css') }}">
         <link rel="stylesheet" href="{{ asset('bundles/creonitadmin/css/admin.css') }}">
+        {{ render(controller('CreonitAdminBundle:Plugin:stylesheets')) }}
     {% endblock %}
 
     <!-- Font Awesome -->
@@ -42,6 +43,7 @@
     <script src="{{ asset('bundles/creonitadmin/js/tinymce/jquery.tinymce.js') }}"></script>
     <script src="{{ asset('bundles/creonitadmin/js/admin.js') }}"></script>
     <script src="{{ asset('bundles/creonitadmin/js/common.js') }}"></script>
+    {{ render(controller('CreonitAdminBundle:Plugin:javascripts')) }}
 {% endblock %}
 
 </body>

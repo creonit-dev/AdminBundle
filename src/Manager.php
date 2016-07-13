@@ -16,16 +16,19 @@ class Manager {
     protected $title;
     protected $icon;
 
-    /** @var Module[] $modules  */
+    /** @var  Plugin[] */
+    protected $plugins;
+
+    /** @var  Module[] */
     protected $modules = [];
 
-    /** @var ContainerInterface */
+    /** @var  ContainerInterface */
     protected $container;
 
-    /** @var TwigEngine */
+    /** @var  TwigEngine */
     protected $templating;
 
-    /** @var Module */
+    /** @var  Module */
     protected $activeModule;
 
     public function __construct(ContainerInterface $container, TwigEngine $templating)
@@ -46,6 +49,19 @@ class Manager {
         $this->modules[$module->getName()] = $module;
         $module->setManager($this);
         $module->setContainer($this->container);
+    }
+
+    public function addPlugin(Plugin $plugin){
+        $plugin->configure();
+        $this->plugins[] = $plugin;
+    }
+
+    /**
+     * @return Plugin[]
+     */
+    public function getPlugins()
+    {
+        return $this->plugins;
     }
 
     /**
