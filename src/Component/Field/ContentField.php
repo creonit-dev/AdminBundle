@@ -15,7 +15,7 @@ class ContentField extends Field
     public function load($entity)
     {
         if($data = parent::load($entity)){
-            return $this->decorate($data);
+            return $data;
         }else{
             $content = new Content();
             $content->save();
@@ -26,6 +26,7 @@ class ContentField extends Field
     public function decorate($data)
     {
         if($data){
+            dump($data);
             $content = ContentQuery::create()->findPk($data);
 
             return [
@@ -42,7 +43,7 @@ class ContentField extends Field
     {
         return [
             'id' => $id = parent::extract($request),
-            'text' => $request->data->has($this->name . '__text'),
+            'text' => $request->data->get($this->name . '__text'),
             'content' => $id ? ContentQuery::create()->findPk($id) : null
         ];
     }
