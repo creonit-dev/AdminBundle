@@ -55,13 +55,14 @@ module Creonit.Admin.Component.Helpers {
         `;
     }
 
-    export function content(value:string, [name = ''] = ['']){
+    export function content(value:any, [name = ''] = ['']){
+        if(!value){
+            return 'ошибка';
+        }
+
         return `
-            <div class="panel panel-default">
-                <div class="panel-heading">${name}</div>
-                <div class="panel-body">${textedit(value, name)}</div>
-            </div>
-            <input type="hidden" name="${name}" value="${value.value}">
+            ${textedit(value.text, [name + '__text'])}
+            <input type="hidden" name="${name}" value="${value.id}">
 
         `;
     }

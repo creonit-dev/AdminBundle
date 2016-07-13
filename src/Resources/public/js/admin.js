@@ -389,7 +389,10 @@ var Creonit;
                 Helpers.submit = submit;
                 function content(value, _a) {
                     var _b = (_a === void 0 ? [''] : _a)[0], name = _b === void 0 ? '' : _b;
-                    return "\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\">" + name + "</div>\n                <div class=\"panel-body\">" + textedit(value, name) + "</div>\n            </div>\n            <input type=\"hidden\" name=\"" + name + "\" value=\"" + value.value + "\">\n\n        ";
+                    if (!value) {
+                        return 'ошибка';
+                    }
+                    return "\n            " + textedit(value.text, [name + '__text']) + "\n            <input type=\"hidden\" name=\"" + name + "\" value=\"" + value.id + "\">\n\n        ";
                 }
                 Helpers.content = content;
                 function component(name, query, options) {
