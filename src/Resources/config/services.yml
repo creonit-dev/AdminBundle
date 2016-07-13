@@ -8,6 +8,7 @@ parameters:
     creonit_admin.component.field.gallery.class: Creonit\AdminBundle\Component\Field\GalleryField
     creonit_admin.component.field.select.class: Creonit\AdminBundle\Component\Field\SelectField
     creonit_admin.component.field.checkbox.class: Creonit\AdminBundle\Component\Field\CheckboxField
+    creonit_admin.component.field.content.class: Creonit\AdminBundle\Component\Field\ContentField
 
 services:
     creonit_admin:
@@ -71,5 +72,10 @@ services:
 
     creonit_admin.component.field.checkbox:
         class: '%creonit_admin.component.field.checkbox.class%'
+        parent: creonit_admin.component.field
+        shared: false
+
+    creonit_admin.component.field.content:
+        class: '%creonit_admin.component.field.content.class%'
         parent: creonit_admin.component.field
         shared: false

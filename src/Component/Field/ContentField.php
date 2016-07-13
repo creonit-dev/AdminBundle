@@ -15,7 +15,24 @@ class ContentField extends Field
         }else{
             $content = new Content();
             $content->save();
-            return $content->getId();
+            return $content;
+        }
+    }
+
+    /**
+     * @param Content $data
+     * @return array
+     */
+    public function decorate($data)
+    {
+        if($data){
+            return [
+                'value' => $data->getId(),
+                'text' => $data->getText(),
+            ];
+
+        }else{
+            return $data;
         }
     }
 

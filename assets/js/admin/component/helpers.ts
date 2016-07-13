@@ -55,6 +55,17 @@ module Creonit.Admin.Component.Helpers {
         `;
     }
 
+    export function content(value:string, [name = ''] = ['']){
+        return `
+            <div class="panel panel-default">
+                <div class="panel-heading">${name}</div>
+                <div class="panel-body">${textedit(value, name)}</div>
+            </div>
+            <input type="hidden" name="${name}" value="${value.value}">
+
+        `;
+    }
+
     export function component(name:string, query:any, options:any){
         query = JSON.stringify(cleanOptions(query));
         options = JSON.stringify(cleanOptions(options));
@@ -348,6 +359,7 @@ module Creonit.Admin.Component.Helpers {
             'radio',
             'text',
             'input',
+            'content',
             'textarea',
             'textedit',
             'file',
