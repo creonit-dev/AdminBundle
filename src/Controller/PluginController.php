@@ -30,7 +30,24 @@ class PluginController extends Controller
     }
 
     public function stylesheetsAction(){
-        return new Response('');
+        $admin = $this->get('creonit_admin');
+
+        $stylesheets = [];
+
+        foreach ($admin->getPlugins() as $plugin){
+            $stylesheets = array_merge($stylesheets, $plugin->getStylesheets());
+        }
+
+        return new Response(
+            implode("\n",
+                array_map(
+                    function ($stylesheet) {
+                        return "<link rel=\"stylesheet\" href=\"{$stylesheet}\">";
+                    },
+                    $stylesheets
+                )
+            )
+        );
     }
 
 }
