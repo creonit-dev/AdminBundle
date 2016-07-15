@@ -63,9 +63,9 @@ module Creonit.Admin.Component {
         }
 
         loadData() {
-            this.node.stop().delay(300).animate({opacity: .7}, 600);
+            this.node.stop(true).delay(300).animate({opacity: .7}, 600);
             this.request(Request.TYPE_LOAD_DATA, this.getQuery(), null, (response) => {
-                this.node.stop().animate({opacity: 1}, 300);
+                this.node.stop(true).animate({opacity: 1}, 300);
                 this.checkResponse(response) && this.applyResponse(response);
             });
         }

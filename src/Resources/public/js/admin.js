@@ -126,9 +126,9 @@ var Creonit;
                 };
                 Component.prototype.loadData = function () {
                     var _this = this;
-                    this.node.stop().delay(300).animate({ opacity: .7 }, 600);
+                    this.node.stop(true).delay(300).animate({ opacity: .7 }, 600);
                     this.request(Component_1.Request.TYPE_LOAD_DATA, this.getQuery(), null, function (response) {
-                        _this.node.stop().animate({ opacity: 1 }, 300);
+                        _this.node.stop(true).animate({ opacity: 1 }, 300);
                         _this.checkResponse(response) && _this.applyResponse(response);
                     });
                 };
