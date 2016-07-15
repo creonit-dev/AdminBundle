@@ -12,7 +12,7 @@ module Creonit.Admin.Component.Utils{
     }
 
     export function createComponent(node:any, parent?:Component) {
-        var componentData = node.attr(ATTR_HANDLER).match(/^(\w*\.\w+([A-Z][a-z\d]+))\s*(\{\s*.*?\s*\})?(?:\s(\{\s*.*\s*\}))?\s*$/);
+        var componentData = node.attr(ATTR_HANDLER).match(/^((?:\w*\.)?\w+([A-Z][a-z\d]+))\s*(\{\s*.*?\s*\})?(?:\s(\{\s*.*\s*\}))?\s*$/);
 
         if (null === componentData) {
             throw 'Wrong component name format "' + node.attr(ATTR_HANDLER) + '"';

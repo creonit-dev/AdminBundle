@@ -21,7 +21,14 @@ module Creonit.Admin.Component {
 
             this.manager = Manager.getInstance();
 
-            if(name.match(/^\./)){
+
+            if(name.indexOf('.') == -1){
+                if(parent) {
+                    name = parent.getModuleName() + '.' + name;
+                }else{
+                    name = CreonitAdminActiveModule + '.' + name;
+                }
+            }else if(name.indexOf('.') == 0){
                 name = CreonitAdminActiveModule + name;
             }
 
@@ -55,6 +62,10 @@ module Creonit.Admin.Component {
 
         getName() {
             return this.name;
+        }
+
+        getModuleName(){
+            return this.name.substring(0, this.name.indexOf('.'));
         }
 
         getQuery() {
