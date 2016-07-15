@@ -263,6 +263,15 @@
   border: 1px solid #ddd;
   border-radius: 3px;
 }
+.loading.is-error {
+  color: #d9534f;
+}
+.loading.is-error i {
+  margin-right: 10px;
+}
+.loading.is-error:after {
+  display: none;
+}
 .page-wrapper {
   display: flex;
 }

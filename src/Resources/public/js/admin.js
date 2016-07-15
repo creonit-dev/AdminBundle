@@ -121,7 +121,17 @@ var Creonit;
                     var _this = this;
                     this.node.html('<div class="loading"><i class="fa fa-cog fa-spin fa-fw"></i></div>');
                     this.request(Component_1.Request.TYPE_LOAD_SCHEMA, this.getQuery(), null, function (response) {
-                        _this.checkResponse(response) && _this.applyResponse(response);
+                        if (_this.checkResponse(response, false)) {
+                            _this.applyResponse(response);
+                        }
+                        else {
+                            if (_this.options.modal) {
+                                _this.node.arcticmodal('close');
+                            }
+                            else {
+                                _this.node.html("<div class=\"loading is-error\"><i class=\"fa fa-cog fa-spin fa-fw\"></i>" + (response.error['_'] ? response.error['_'].join(", ") : 'Ошибка загрузки компонента') + "</div>");
+                            }
+                        }
                     });
                 };
                 Component.prototype.loadData = function () {
@@ -132,9 +142,10 @@ var Creonit;
                         _this.checkResponse(response) && _this.applyResponse(response);
                     });
                 };
-                Component.prototype.checkResponse = function (response) {
+                Component.prototype.checkResponse = function (response, announce) {
+                    if (announce === void 0) { announce = true; }
                     if (response.error) {
-                        if (response.error['_']) {
+                        if (announce && response.error['_']) {
                             alert(response.error['_'].join("\n"));
                         }
                         return false;

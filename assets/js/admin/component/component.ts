@@ -58,7 +58,15 @@ module Creonit.Admin.Component {
         loadSchema() {
             this.node.html('<div class="loading"><i class="fa fa-cog fa-spin fa-fw"></i></div>');
             this.request(Request.TYPE_LOAD_SCHEMA, this.getQuery(), null, (response) => {
-                this.checkResponse(response) && this.applyResponse(response);
+                if(this.checkResponse(response, false)){
+                    this.applyResponse(response);
+                }else{
+                    if(this.options.modal){
+                        this.node.arcticmodal('close');
+                    }else{
+                        this.node.html(`<div class="loading is-error"><i class="fa fa-cog fa-spin fa-fw"></i>${response.error['_'] ? response.error['_'].join(", ") : 'Ошибка загрузки компонента'}</div>`);
+                    }
+                }
             });
         }
 
@@ -70,9 +78,9 @@ module Creonit.Admin.Component {
             });
         }
 
-        checkResponse(response:any){
+        checkResponse(response:any, announce:boolean = true){
             if (response.error) {
-                if(response.error['_']){
+                if(announce && response.error['_']){
                     alert(response.error['_'].join("\n"));
                 }
                 return false;
