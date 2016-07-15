@@ -58,7 +58,7 @@ module Creonit.Admin.Component {
         loadSchema() {
             this.node.html('<div class="loading"><i class="fa fa-cog fa-spin fa-fw"></i></div>');
             this.request(Request.TYPE_LOAD_SCHEMA, this.getQuery(), null, (response) => {
-                if(this.checkResponse(response, false)){
+                if(this.checkResponse(response, this.options.modal)){
                     this.applyResponse(response);
                 }else{
                     if(this.options.modal){

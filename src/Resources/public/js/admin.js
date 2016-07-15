@@ -121,7 +121,7 @@ var Creonit;
                     var _this = this;
                     this.node.html('<div class="loading"><i class="fa fa-cog fa-spin fa-fw"></i></div>');
                     this.request(Component_1.Request.TYPE_LOAD_SCHEMA, this.getQuery(), null, function (response) {
-                        if (_this.checkResponse(response, false)) {
+                        if (_this.checkResponse(response, _this.options.modal)) {
                             _this.applyResponse(response);
                         }
                         else {
