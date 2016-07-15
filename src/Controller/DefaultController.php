@@ -20,10 +20,19 @@ class DefaultController extends Controller
             return $admin->handleRequest($request);
         }
 
-        $modules = $admin->getModules();
-        $module = array_shift($modules);
+        $moduleToRedirect = null;
+        foreach($admin->getModules() as $module){
+            if($module->isVisible()){
+                $moduleToRedirect = $module;
+                break;
+            }
+        }
 
-        return $this->redirect($this->generateUrl('creonit_admin_module', ['module' => $module->getName()]));
+        if(null === $moduleToRedirect){
+            throw $this->createNotFoundException();
+        }
+
+        return $this->redirect($this->generateUrl('creonit_admin_module', ['module' => lcfirst($module->getName())]));
     }
 
     /**
@@ -36,10 +45,15 @@ class DefaultController extends Controller
         $module = ucfirst($module);
         
         if(!$admin->hasModule($module)){
-            $this->createNotFoundException();
+            throw $this->createNotFoundException();
         }
 
         $module = $admin->getModule($module);
+
+        if(!$module->isVisible()){
+            throw $this->createNotFoundException();
+        }
+
         $admin->setActiveModule($module);
 
         return $this->render('CreonitAdminBundle:Default:module.html.twig', ['admin' => $admin, 'module' => $module]);

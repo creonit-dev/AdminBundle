@@ -20,10 +20,19 @@ abstract class Module
     protected $icon;
     protected $title;
     protected $template;
+    protected $name;
 
     protected $visible = true;
     /** @var  ContainerInterface */
     protected $container;
+
+
+    public function __construct(){
+        $this->configure();
+    }
+
+    protected function configure(){
+    }
 
     abstract public function initialize();
 
@@ -36,12 +45,20 @@ abstract class Module
     }
 
     public function getName(){
-        if(preg_match('/\\\\(\w+)Module$/', get_class($this), $keyMatch)){
+        if($this->name){
+            return $this->name;
+
+        }else if(preg_match('/\\\\(\w+)Module$/', get_class($this), $keyMatch)){
             return $keyMatch[1];
 
         }else{
             throw new ConfigurationException(sprintf('Invalid module name %s', get_class($this)));
         }
+    }
+    
+    public function setName($name){
+        $this->name = $name;
+        return $this;
     }
 
     public function getUri(){
@@ -105,6 +122,46 @@ abstract class Module
     public function isVisible()
     {
         return $this->visible;
+    }
+
+    /**
+     * @param boolean $visible
+     * @return Module
+     */
+    public function setVisible($visible)
+    {
+        $this->visible = $visible;
+        return $this;
+    }
+
+    /**
+     * @param mixed $icon
+     * @return Module
+     */
+    public function setIcon($icon)
+    {
+        $this->icon = $icon;
+        return $this;
+    }
+
+    /**
+     * @param mixed $title
+     * @return Module
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+        return $this;
+    }
+
+    /**
+     * @param mixed $template
+     * @return Module
+     */
+    public function setTemplate($template)
+    {
+        $this->template = $template;
+        return $this;
     }
 
 

@@ -90,6 +90,9 @@ var Creonit;
                     this.actions = {};
                     this.events = {};
                     this.manager = Admin.Manager.getInstance();
+                    if (name.match(/^\./)) {
+                        name = CreonitAdminActiveModule + name;
+                    }
                     this.name = name;
                     this.query = $.extend({}, query);
                     this.node = node;
@@ -136,7 +139,7 @@ var Creonit;
                 };
                 Component.prototype.loadData = function () {
                     var _this = this;
-                    this.node.stop(true).delay(300).animate({ opacity: .7 }, 600);
+                    this.node.stop(true).delay(300).animate({ opacity: .85 }, 600);
                     this.request(Component_1.Request.TYPE_LOAD_DATA, this.getQuery(), null, function (response) {
                         _this.node.stop(true).animate({ opacity: 1 }, 300);
                         _this.checkResponse(response) && _this.applyResponse(response);
@@ -1122,7 +1125,7 @@ var Creonit;
                 }
                 Utils.escape = escape;
                 function createComponent(node, parent) {
-                    var componentData = node.attr(Utils.ATTR_HANDLER).match(/^(\w+\.\w+([A-Z][a-z\d]+))\s*(\{\s*.*?\s*\})?(?:\s(\{\s*.*\s*\}))?\s*$/);
+                    var componentData = node.attr(Utils.ATTR_HANDLER).match(/^(\w*\.\w+([A-Z][a-z\d]+))\s*(\{\s*.*?\s*\})?(?:\s(\{\s*.*\s*\}))?\s*$/);
                     if (null === componentData) {
                         throw 'Wrong component name format "' + node.attr(Utils.ATTR_HANDLER) + '"';
                     }

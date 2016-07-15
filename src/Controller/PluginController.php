@@ -55,10 +55,14 @@ class PluginController extends Controller
 
         $injections = '';
 
+        if($block == 'head_script'){
+            $injections .= "var CreonitAdminActiveModule = '{$admin->getActiveModule()->getName()}';\n";
+        }
+
         foreach ($admin->getPlugins() as $plugin){
             foreach ($plugin->getInjections() as $injection){
                 if($block == $injection[0]){
-                    $injections .= $injection[1];
+                    $injections .= $injection[1] . "\n";
                 }
             }
         }

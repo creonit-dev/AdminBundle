@@ -1,3 +1,4 @@
+declare var CreonitAdminActiveModule:string;
 module Creonit.Admin.Component {
     
 
@@ -19,6 +20,11 @@ module Creonit.Admin.Component {
             super();
 
             this.manager = Manager.getInstance();
+
+            if(name.match(/^\./)){
+                name = CreonitAdminActiveModule + name;
+            }
+
             this.name = name;
 
             this.query = $.extend({}, query);
@@ -71,7 +77,7 @@ module Creonit.Admin.Component {
         }
 
         loadData() {
-            this.node.stop(true).delay(300).animate({opacity: .7}, 600);
+            this.node.stop(true).delay(300).animate({opacity: .85}, 600);
             this.request(Request.TYPE_LOAD_DATA, this.getQuery(), null, (response) => {
                 this.node.stop(true).animate({opacity: 1}, 300);
                 this.checkResponse(response) && this.applyResponse(response);
