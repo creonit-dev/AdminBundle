@@ -88,7 +88,8 @@ var Creonit;
                     this.options = {};
                     this.data = {};
                     this.actions = {};
-                    this.manager = Component_1.Manager.getInstance();
+                    this.events = {};
+                    this.manager = Admin.Manager.getInstance();
                     this.name = name;
                     this.query = $.extend({}, query);
                     this.node = node;
@@ -98,6 +99,9 @@ var Creonit;
                     this.loadSchema();
                 }
                 Component.prototype.initialize = function () {
+                };
+                Component.prototype.getNode = function () {
+                    return this.node;
                 };
                 Component.prototype.action = function (name, options) {
                     if (this.actions[name]) {
@@ -115,13 +119,16 @@ var Creonit;
                 };
                 Component.prototype.loadSchema = function () {
                     var _this = this;
+                    this.node.html('<div class="loading"><i class="fa fa-cog fa-spin fa-fw"></i></div>');
                     this.request(Component_1.Request.TYPE_LOAD_SCHEMA, this.getQuery(), null, function (response) {
                         _this.checkResponse(response) && _this.applyResponse(response);
                     });
                 };
                 Component.prototype.loadData = function () {
                     var _this = this;
+                    this.node.stop().delay(300).animate({ opacity: .7 }, 600);
                     this.request(Component_1.Request.TYPE_LOAD_DATA, this.getQuery(), null, function (response) {
+                        _this.node.stop().animate({ opacity: 1 }, 300);
                         _this.checkResponse(response) && _this.applyResponse(response);
                     });
                 };
@@ -159,6 +166,9 @@ var Creonit;
                     $.each(schema.actions, function (name, action) {
                         _this.actions[name] = eval('(function(){return ' + action + '})()');
                     });
+                    $.each(schema.events, function (name, action) {
+                        _this.on(name, eval('(function(){return ' + action + '})()'));
+                    });
                     $.extend(this.actions, {
                         openComponent: this.openComponent
                     });
@@ -171,6 +181,23 @@ var Creonit;
                     _super.prototype.applySchema.call(this, schema);
                 };
                 Component.prototype.render = function () {
+                };
+                Component.prototype.trigger = function (event, data) {
+                    var _this = this;
+                    if (this.events[event]) {
+                        this.events[event].forEach(function (listener) {
+                            listener.call(_this, data);
+                        });
+                    }
+                    this.manager.trigger('component_' + event, $.extend({}, data, { component: this }));
+                };
+                Component.prototype.on = function (event, callback) {
+                    if (!this.events[event]) {
+                        this.events[event] = [];
+                    }
+                    if (this.events[event].indexOf(callback) == -1) {
+                        this.events[event].push(callback);
+                    }
                 };
                 Component.prototype.request = function (type, query, data, callback) {
                     if (query === void 0) { query = {}; }
@@ -331,6 +358,7 @@ var Creonit;
                             _this.parent.loadData();
                         }
                     });
+                    this.trigger('render', {});
                     Component.Utils.initializeComponents(this.node, this);
                 };
                 Editor.increment = 0;
@@ -387,14 +415,6 @@ var Creonit;
                     return ("\n            <button \n                class=\"btn btn-" + type + " " + (size ? "btn-" + size : '') + " " + className + "\" \n                type=\"submit\" \n            >\n                ") + (icon ? "<i class=\"" + resolveIconClass(icon) + "\"></i>" + (caption ? ' ' : '') : '') + (caption + "\n            </button>\n        ");
                 }
                 Helpers.submit = submit;
-                function content(value, _a) {
-                    var _b = (_a === void 0 ? [''] : _a)[0], name = _b === void 0 ? '' : _b;
-                    if (!value) {
-                        return 'ошибка';
-                    }
-                    return "\n            " + textedit(value.text, [name + '__text', {}]) + "\n            <input type=\"hidden\" name=\"" + name + "\" value=\"" + value.id + "\">\n\n        ";
-                }
-                Helpers.content = content;
                 function component(name, query, options) {
                     query = JSON.stringify(cleanOptions(query));
                     options = JSON.stringify(cleanOptions(options));
@@ -594,29 +614,32 @@ var Creonit;
                     return "<div class=\"btn-group\">" + value + "</div>";
                 }
                 Helpers.buttons = buttons;
-                function registerTwigFunctions() {
-                    [
-                        'button',
-                        'submit',
-                        'buttons',
-                        'component',
-                        'panel',
-                        'group',
-                        'row'
-                    ].forEach(function (name) {
-                        Twig.extendFunction(name, function () {
-                            var args = [];
-                            for (var _i = 0; _i < arguments.length; _i++) {
-                                args[_i - 0] = arguments[_i];
-                            }
-                            var output = new String(Helpers[name].apply(this, args));
-                            output.twig_markup = true;
-                            output.twig_function = name;
-                            return output;
-                        });
+                function registerTwigFunction(name, callable) {
+                    Twig.extendFunction(name, function () {
+                        var args = [];
+                        for (var _i = 0; _i < arguments.length; _i++) {
+                            args[_i - 0] = arguments[_i];
+                        }
+                        var output = new String(callable.apply(this, args));
+                        output.twig_markup = true;
+                        output.twig_filter = name;
+                        return output;
                     });
                 }
-                Helpers.registerTwigFunctions = registerTwigFunctions;
+                Helpers.registerTwigFunction = registerTwigFunction;
+                function registerTwigFilter(name, callable) {
+                    Twig.extendFilter(name, function () {
+                        var args = [];
+                        for (var _i = 0; _i < arguments.length; _i++) {
+                            args[_i - 0] = arguments[_i];
+                        }
+                        var output = new String(callable.apply(this, args));
+                        output.twig_markup = true;
+                        output.twig_filter = name;
+                        return output;
+                    });
+                }
+                Helpers.registerTwigFilter = registerTwigFilter;
                 function registerTwigFilters() {
                     [
                         'controls',
@@ -643,22 +666,22 @@ var Creonit;
                         'row',
                         'col'
                     ].forEach(function (name) {
-                        Twig.extendFilter(name, function () {
-                            var args = [];
-                            for (var _i = 0; _i < arguments.length; _i++) {
-                                args[_i - 0] = arguments[_i];
-                            }
-                            var output = new String(Helpers[name].apply(this, args));
-                            output.twig_markup = true;
-                            output.twig_filter = name;
-                            return output;
-                        });
-                    });
-                    [].forEach(function (name) {
-                        Twig.extendFilter(name, Helpers[name]);
+                        registerTwigFilter(name, Helpers[name]);
                     });
                 }
-                Helpers.registerTwigFilters = registerTwigFilters;
+                function registerTwigFunctions() {
+                    [
+                        'button',
+                        'submit',
+                        'buttons',
+                        'component',
+                        'panel',
+                        'group',
+                        'row'
+                    ].forEach(function (name) {
+                        registerTwigFunction(name, Helpers[name]);
+                    });
+                }
                 registerTwigFilters();
                 registerTwigFunctions();
             })(Helpers = Component.Helpers || (Component.Helpers = {}));
@@ -690,121 +713,136 @@ var Creonit;
 (function (Creonit) {
     var Admin;
     (function (Admin) {
-        var Component;
-        (function (Component) {
-            var Manager = (function () {
-                function Manager() {
-                    this.requestStack = [];
+        var Manager = (function () {
+            function Manager() {
+                this.requestStack = [];
+                this.events = {};
+            }
+            Manager.getInstance = function () {
+                if (!this.instance) {
+                    this.instance = new this;
+                    this.instance.timer();
                 }
-                Manager.getInstance = function () {
-                    if (!this.instance) {
-                        this.instance = new this;
-                        this.instance.timer();
-                    }
-                    return this.instance;
-                };
-                Manager.prototype.request = function (request) {
-                    this.requestStack.push(request);
-                    if (this.requestStack.length > 100) {
-                        this.requestSend();
-                    }
-                };
-                Manager.prototype.requestSend = function () {
-                    var stack = this.requestStack.splice(0, this.requestStack.length), form = new FormData;
-                    function getType(any) {
-                        return Object.prototype.toString.call(any).slice(8, -1);
-                    }
-                    function toName(path) {
-                        var array = path.map(function (part) { return ("[" + part + "]"); });
-                        array[0] = path[0];
-                        return array.join('');
-                    }
-                    stack.forEach(function (request) {
-                        var appendToForm = function (path, node, filename) {
-                            var name = toName(path);
-                            if (typeof filename == 'undefined') {
-                                form.append(name, node);
-                            }
-                            else {
-                                form.append(name, node, filename);
-                            }
-                        };
-                        var check = function (node) {
+                return this.instance;
+            };
+            Manager.prototype.trigger = function (event, data) {
+                var _this = this;
+                if (!this.events[event]) {
+                    return;
+                }
+                this.events[event].forEach(function (listener) {
+                    listener.call(_this, data);
+                });
+            };
+            Manager.prototype.on = function (event, callback) {
+                if (!this.events[event]) {
+                    this.events[event] = [];
+                }
+                if (this.events[event].indexOf(callback) == -1) {
+                    this.events[event].push(callback);
+                }
+            };
+            Manager.prototype.request = function (request) {
+                this.requestStack.push(request);
+                if (this.requestStack.length > 100) {
+                    this.requestSend();
+                }
+            };
+            Manager.prototype.requestSend = function () {
+                var stack = this.requestStack.splice(0, this.requestStack.length), form = new FormData;
+                function getType(any) {
+                    return Object.prototype.toString.call(any).slice(8, -1);
+                }
+                function toName(path) {
+                    var array = path.map(function (part) { return ("[" + part + "]"); });
+                    array[0] = path[0];
+                    return array.join('');
+                }
+                stack.forEach(function (request) {
+                    var appendToForm = function (path, node, filename) {
+                        var name = toName(path);
+                        if (typeof filename == 'undefined') {
+                            form.append(name, node);
+                        }
+                        else {
+                            form.append(name, node, filename);
+                        }
+                    };
+                    var check = function (node) {
+                        var type = getType(node);
+                        switch (type) {
+                            case 'Array':
+                                return true; // step into
+                            case 'Object':
+                                return true; // step into
+                            case 'FileList':
+                                return true; // step into
+                            default:
+                                return false; // prevent step into
+                        }
+                    };
+                    function iterator(object, parentPath) {
+                        $.each(object, function (name, node) {
+                            var path = parentPath.slice();
+                            path.push(name);
                             var type = getType(node);
                             switch (type) {
                                 case 'Array':
-                                    return true; // step into
+                                    break;
                                 case 'Object':
-                                    return true; // step into
+                                    break;
                                 case 'FileList':
-                                    return true; // step into
+                                    break;
+                                case 'File':
+                                    appendToForm(path, node);
+                                    break;
+                                case 'Blob':
+                                    appendToForm(path, node, node.name);
+                                    break;
                                 default:
-                                    return false; // prevent step into
+                                    appendToForm(path, node);
+                                    break;
                             }
-                        };
-                        function iterator(object, parentPath) {
-                            $.each(object, function (name, node) {
-                                var path = parentPath.slice();
-                                path.push(name);
-                                var type = getType(node);
-                                switch (type) {
-                                    case 'Array':
-                                        break;
-                                    case 'Object':
-                                        break;
-                                    case 'FileList':
-                                        break;
-                                    case 'File':
-                                        appendToForm(path, node);
-                                        break;
-                                    case 'Blob':
-                                        appendToForm(path, node, node.name);
-                                        break;
-                                    default:
-                                        appendToForm(path, node);
-                                        break;
-                                }
-                                if (check(node)) {
-                                    iterator(node, path);
-                                }
-                            });
-                        }
-                        iterator(request.getQuery(), ['request[c' + request.getId() + ']']);
-                    });
-                    $.ajax({
-                        url: '/admin/',
-                        type: 'post',
-                        dataType: 'json',
-                        data: form,
-                        processData: false,
-                        contentType: false,
-                        success: function (response) {
-                            stack.forEach(function (request, i) {
-                                request.passResponse(new Component.Response(response[i]));
-                            });
-                        },
-                        complete: function (xhr) {
-                            if (xhr.status == 401 || xhr.status == 403) {
-                                document.location.reload();
+                            if (check(node)) {
+                                iterator(node, path);
                             }
-                        },
-                        error: function () {
+                        });
+                    }
+                    iterator(request.getQuery(), ['request[c' + request.getId() + ']']);
+                });
+                $.ajax({
+                    url: '/admin/',
+                    type: 'post',
+                    dataType: 'json',
+                    data: form,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        stack.forEach(function (request, i) {
+                            request.passResponse(new Admin.Component.Response(response[i]));
+                        });
+                    },
+                    complete: function (xhr) {
+                        if (xhr.status == 401 || xhr.status == 403) {
+                            document.location.reload();
                         }
-                    });
-                };
-                Manager.prototype.timer = function () {
-                    var _this = this;
-                    this.timerInstance = setTimeout(function () {
-                        if (_this.requestStack.length) {
-                            _this.requestSend();
-                        }
-                        _this.timer();
-                    }, 10);
-                };
-                return Manager;
-            }());
-            Component.Manager = Manager;
-        })(Component = Admin.Component || (Admin.Component = {}));
+                    },
+                    error: function () {
+                    }
+                });
+            };
+            Manager.prototype.timer = function () {
+                var _this = this;
+                this.timerInstance = setTimeout(function () {
+                    if (_this.requestStack.length) {
+                        _this.requestSend();
+                    }
+                    _this.timer();
+                }, 10);
+            };
+            return Manager;
+        }());
+        Admin.Manager = Manager;
     })(Admin = Creonit.Admin || (Creonit.Admin = {}));
 })(Creonit || (Creonit = {}));
 var Creonit;

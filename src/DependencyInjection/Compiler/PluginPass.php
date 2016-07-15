@@ -16,6 +16,9 @@ class PluginPass implements CompilerPassInterface {
         foreach ($pluginsIds as $pluginId => $options) {
             $container->getDefinition('creonit_admin')->addMethodCall('addPlugin', [new Reference($pluginId), $options]);
         }
-        
+
+        $container->getDefinition('creonit_admin')->addMethodCall('initialize');
+
+
     }
 } 

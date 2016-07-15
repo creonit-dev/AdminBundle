@@ -132,3 +132,42 @@
       }
    }
 }
+
+.loading{
+   padding 15px
+   font-size 2em
+
+   i{
+      transform-origin 50% 50%
+   }
+
+   &:after{
+      content 'Загрузка'
+      padding-left 10px
+   }
+
+   /.modal-dialog > .component > & {
+      position absolute
+      top 50%
+      left 50%
+      color rgba(white, .1)
+      font-size 20em
+      transform translate(-50%,0)
+
+      i{
+         transform-origin 50% 49%
+      }
+
+      &:after{
+         content ''
+         padding-left 0
+      }
+   }
+
+   /.component-editor .component & {
+      border 1px solid #ddd
+      border-radius 3px
+
+
+   }
+}

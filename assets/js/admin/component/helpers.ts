@@ -55,18 +55,6 @@ module Creonit.Admin.Component.Helpers {
         `;
     }
 
-    export function content(value:any, [name = ''] = ['']){
-        if(!value){
-            return 'ошибка';
-        }
-
-        return `
-            ${textedit(value.text, [name + '__text', {}])}
-            <input type="hidden" name="${name}" value="${value.id}">
-
-        `;
-    }
-
     export function component(name:string, query:any, options:any){
         query = JSON.stringify(cleanOptions(query));
         options = JSON.stringify(cleanOptions(options));
@@ -333,27 +321,26 @@ module Creonit.Admin.Component.Helpers {
         return `<div class="btn-group">${value}</div>`;
     }
 
-    export function registerTwigFunctions(){
-        [
-            'button',
-            'submit',
-            'buttons',
-            'component',
-            'panel',
-            'group',
-            'row'
 
-        ].forEach(function(name:string){
-            Twig.extendFunction(name, function(...args){
-                var output:any = new String(Helpers[name].apply(this, args));
-                output.twig_markup = true;
-                output.twig_function = name;
-                return output;
-            });
+    export function registerTwigFunction(name, callable){
+        Twig.extendFunction(name, function(...args){
+            var output:any = new String(callable.apply(this, args));
+            output.twig_markup = true;
+            output.twig_filter = name;
+            return output;
         });
     }
-
-    export function registerTwigFilters(){
+    
+    export function registerTwigFilter(name, callable){
+        Twig.extendFilter(name, function(...args){
+            var output:any = new String(callable.apply(this, args));
+            output.twig_markup = true;
+            output.twig_filter = name;
+            return output;
+        });
+    }
+    
+    function registerTwigFilters(){
         [
             'controls',
             'checkbox',
@@ -380,16 +367,22 @@ module Creonit.Admin.Component.Helpers {
             'col'
 
         ].forEach(function(name:string){
-            Twig.extendFilter(name, function(...args){
-                var output:any = new String(Helpers[name].apply(this, args));
-                output.twig_markup = true;
-                output.twig_filter = name;
-                return output;
-            });
+            registerTwigFilter(name, Helpers[name]);
         });
+    }
 
-        [].forEach(function(name:string){
-            Twig.extendFilter(name, Helpers[name]);
+    function registerTwigFunctions(){
+        [
+            'button',
+            'submit',
+            'buttons',
+            'component',
+            'panel',
+            'group',
+            'row'
+
+        ].forEach(function(name:string){
+            registerTwigFunction(name, Helpers[name]);
         });
     }
 

@@ -233,6 +233,36 @@
 .component-table .table tbody tr:first-child td {
   border-top: none;
 }
+.loading {
+  padding: 15px;
+  font-size: 2em;
+}
+.loading i {
+  transform-origin: 50% 50%;
+}
+.loading:after {
+  content: 'Загрузка';
+  padding-left: 10px;
+}
+.modal-dialog > .component > .loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  color: rgba(255,255,255,0.1);
+  font-size: 20em;
+  transform: translate(-50%, 0);
+}
+.modal-dialog > .component > .loading i {
+  transform-origin: 50% 49%;
+}
+.modal-dialog > .component > .loading:after {
+  content: '';
+  padding-left: 0;
+}
+.component-editor .component .loading {
+  border: 1px solid #ddd;
+  border-radius: 3px;
+}
 .page-wrapper {
   display: flex;
 }

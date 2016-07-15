@@ -12,8 +12,10 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 class Field
 {
 
+    const TYPE = 'default';
+    const HELPERS = '';
+    
     protected $name;
-    protected $type = 'default';
     protected $default;
 
 
@@ -21,9 +23,16 @@ class Field
     /** @var ContainerInterface */
     protected $container;
 
-    public function __construct(ContainerInterface $container){
-        $this->container = $container;
+    public function __construct(){
         $this->parameters = new ParameterBag;
+    }
+
+    /**
+     * @param ContainerInterface $container
+     */
+    public function setContainer($container)
+    {
+        $this->container = $container;
     }
 
     /**
@@ -36,6 +45,7 @@ class Field
         return $this;
     }
 
+
     /**
      * @return mixed
      */
@@ -43,7 +53,6 @@ class Field
     {
         return $this->name;
     }
-
 
     public function validate($data){
         return ($required = $this->parameters->get('required')) || $this->parameters->has('constraints')
@@ -104,10 +113,10 @@ class Field
         return property_exists($entity, $this->name);
     }
 
+
     public function supportEntity($entity){
         return $this->parameters->has('load') or $this->parameters->has('save') or $this->hasProperty($entity);
     }
-
 
     public function decorate($data){
         return $data;

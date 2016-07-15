@@ -1,10 +1,12 @@
-module Creonit.Admin.Component {
+module Creonit.Admin {
     export class Manager{
         protected static instance:Manager;
 
         protected timerInstance:any;
-        protected requestStack:Request[] = [];
+        protected requestStack:Component.Request[] = [];
 
+        protected events = {};
+        
         static getInstance():Manager{
             if(!this.instance){
                 this.instance = new this;
@@ -13,7 +15,29 @@ module Creonit.Admin.Component {
             return this.instance;
         }
 
-        request(request:Request){
+
+        trigger(event:string, data:any){
+            if(!this.events[event]){
+                return;
+            }
+
+            this.events[event].forEach((listener:(data: any) => void) => {
+                listener.call(this, data);
+            });
+
+        }
+
+        on(event:string, callback: (data: any) => void){
+            if(!this.events[event]){
+                this.events[event] = [];
+            }
+
+            if(this.events[event].indexOf(callback) == -1){
+                this.events[event].push(callback);
+            }
+        }
+        
+        request(request:Component.Request){
             this.requestStack.push(request);
             if(this.requestStack.length > 100){
                 this.requestSend();
@@ -35,7 +59,7 @@ module Creonit.Admin.Component {
             }
 
 
-            stack.forEach((request: Request) => {
+            stack.forEach((request: Component.Request) => {
                 let appendToForm = function(path, node, filename?) {
                     let name = toName(path);
 
@@ -103,8 +127,8 @@ module Creonit.Admin.Component {
                 processData: false,
                 contentType: false,
                 success: (response:any[]) => {
-                    stack.forEach((request: Request, i:number) => {
-                        request.passResponse(new Response(response[i]));
+                    stack.forEach((request: Component.Request, i:number) => {
+                        request.passResponse(new Component.Response(response[i]));
                     });
                 },
                 complete: (xhr:any) => {

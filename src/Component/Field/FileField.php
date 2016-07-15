@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class FileField extends Field
 {
-    protected $type = 'file';
+    const TYPE = 'file';
 
     public function extract(ComponentRequest $request)
     {
@@ -67,12 +67,12 @@ class FileField extends Field
 
             /** @var File $file */
             $file = new File();
-            $file->setPath($data['path']);
-            $file->setName($data['name']);
-            $file->setOriginalName($data['original_name']);
-            $file->setExtension($data['extension']);
-            $file->setMime($data['mime']);
-            $file->setSize($data['size']);
+            $file->setPath($data['file']['path']);
+            $file->setName($data['file']['name']);
+            $file->setOriginalName($data['file']['original_name']);
+            $file->setExtension($data['file']['extension']);
+            $file->setMime($data['file']['mime']);
+            $file->setSize($data['file']['size']);
 
             parent::save($entity, $file->getId(), true);
         }

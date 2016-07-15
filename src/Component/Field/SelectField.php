@@ -4,8 +4,7 @@ namespace Creonit\AdminBundle\Component\Field;
 
 class SelectField extends Field
 {
-    protected $type = 'select';
-
+    const TYPE = 'select';
 
     public function decorate($data)
     {

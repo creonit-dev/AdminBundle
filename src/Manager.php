@@ -2,9 +2,17 @@
 
 namespace Creonit\AdminBundle;
 
+use Creonit\AdminBundle\Component\Field\CheckboxField;
+use Creonit\AdminBundle\Component\Field\DateField;
+use Creonit\AdminBundle\Component\Field\ExternalField;
+use Creonit\AdminBundle\Component\Field\Field;
+use Creonit\AdminBundle\Component\Field\FileField;
+use Creonit\AdminBundle\Component\Field\GalleryField;
+use Creonit\AdminBundle\Component\Field\ImageField;
+use Creonit\AdminBundle\Component\Field\SelectField;
+use Creonit\AdminBundle\Component\Field\VideoField;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Response\ComponentResponse;
-use Creonit\AdminBundle\Component\Storage\Storage;
 use Creonit\AdminBundle\Exception\RequestException;
 use Symfony\Bundle\TwigBundle\TwigEngine;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -31,10 +39,48 @@ class Manager {
     /** @var  Module */
     protected $activeModule;
 
+    protected $fieldTypes = [];
+    protected $fieldHelpers = [];
+
     public function __construct(ContainerInterface $container, TwigEngine $templating)
     {
         $this->container = $container;
         $this->templating = $templating;
+    }
+
+
+    public function configure(){
+
+        $this->addFieldTypes([
+            Field::class,
+            CheckboxField::class,
+            DateField::class,
+            ExternalField::class,
+            FileField::class,
+            ImageField::class,
+            VideoField::class,
+            GalleryField::class,
+            SelectField::class,
+        ]);
+
+    }
+
+    public function initialize(){
+        $this->configure();
+
+        foreach ($this->plugins as $plugin){
+            $this->addFieldTypes($plugin->getFieldTypes());
+        }
+    }
+    
+    public function addFieldType($className){
+        $this->fieldTypes[$className::TYPE] = $className;
+    }
+
+    public function addFieldTypes(array $classNames){
+        foreach($classNames as $className){
+            $this->addFieldType($className);
+        }
     }
 
     public function hasModule($moduleName){
@@ -163,6 +209,18 @@ class Manager {
     {
         return $this->icon;
     }
+
+    public function createField($name, $parameters, $type = null)
+    {
+        /** @var Field $field */
+        $field = new $this->fieldTypes[$type ?: 'default'];
+        dump($field);
+        $field->setContainer($this->container);
+        $field->setName($name);
+        $field->parameters->add($parameters);
+        return $field;
+    }
+
 
 
 } 

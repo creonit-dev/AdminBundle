@@ -5,7 +5,7 @@ namespace Creonit\AdminBundle\Component\Field;
 
 class DateField extends Field
 {
-    protected $type = 'date';
+    const TYPE = 'date';
 
     /**
      * @param \DateTime $data

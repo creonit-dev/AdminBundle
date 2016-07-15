@@ -163,6 +163,8 @@ module Creonit.Admin.Component{
                 }
             });
 
+            this.trigger('render', {});
+
             Utils.initializeComponents(this.node, this);
         }
     }

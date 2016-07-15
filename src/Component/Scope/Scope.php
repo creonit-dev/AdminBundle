@@ -26,7 +26,7 @@ class Scope
 
     /** @var Scope[] */
     protected $scopes = [];
-    protected $scopesType = 'default';
+    protected $scopesType = Scope::class;
 
 
     /** @var ContainerInterface */
@@ -124,7 +124,7 @@ class Scope
         if(array_key_exists('scopes', $annotations)) {
             foreach ($annotations['scopes'] as $scopeName => $scopeAnnotations){
                 /** @var Scope $scope */
-                $scope = $this->container->get('creonit_admin.component.scope.' . $this->scopesType);
+                $scope = new $this->scopesType;
                 $scope->setContainer($this->container);
                 $scope->setName($scopeName);
                 $scope->applySchemaAnnotations($scopeAnnotations);
@@ -180,11 +180,7 @@ class Scope
 
 
     public function createField($name, $parameters = [], $type = null){
-        /** @var Field $field */
-        $field = $this->container->get('creonit_admin.component.field.' . ($type ?: 'default'));
-        $field->setName($name);
-        $field->parameters->add($parameters);
-        return $field;
+        return $this->container->get('creonit_admin')->createField($name, $parameters, $type);
     }
 
     public function getFields(){

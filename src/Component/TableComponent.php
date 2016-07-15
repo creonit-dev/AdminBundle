@@ -6,12 +6,13 @@ use AppBundle\Model\Base\ProductCategory;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Response\ComponentResponse;
 use Creonit\AdminBundle\Component\Scope\ListRowScopeRelation;
+use Creonit\AdminBundle\Component\Scope\TableRowScope;
 use Propel\Runtime\Map\TableMap;
 
 abstract class TableComponent extends ListComponent
 {
 
-    protected $scopesType = 'table_row';
+    protected $scopesType = TableRowScope::class;
     protected $columns = [];
 
     /**

@@ -13,10 +13,10 @@ module Creonit.Admin.Component {
         protected node:any;
 
         protected actions:any = {};
+        protected events:any = {};
 
         constructor(node:any, name:string, query:any = {}, options:any = {}, parent?:Component) {
             super();
-
 
             this.manager = Manager.getInstance();
             this.name = name;
@@ -28,12 +28,15 @@ module Creonit.Admin.Component {
             this.options = options;
 
             this.initialize();
-
             this.loadSchema();
-
         }
 
         initialize(){
+
+        }
+
+        getNode(){
+            return this.node;
         }
 
         action(name, options) {
@@ -53,13 +56,16 @@ module Creonit.Admin.Component {
         }
 
         loadSchema() {
+            this.node.html('<div class="loading"><i class="fa fa-cog fa-spin fa-fw"></i></div>');
             this.request(Request.TYPE_LOAD_SCHEMA, this.getQuery(), null, (response) => {
                 this.checkResponse(response) && this.applyResponse(response);
             });
         }
 
         loadData() {
+            this.node.stop().delay(300).animate({opacity: .7}, 600);
             this.request(Request.TYPE_LOAD_DATA, this.getQuery(), null, (response) => {
+                this.node.stop().animate({opacity: 1}, 300);
                 this.checkResponse(response) && this.applyResponse(response);
             });
         }
@@ -103,6 +109,10 @@ module Creonit.Admin.Component {
                 this.actions[name] = eval('(function(){return ' + action + '})()');
             });
 
+            $.each(schema.events, (name, action) => {
+                this.on(name, eval('(function(){return ' + action + '})()'));
+            });
+
             $.extend(this.actions, {
                 openComponent: this.openComponent
             });
@@ -120,6 +130,26 @@ module Creonit.Admin.Component {
         render() {
 
 
+        }
+
+        trigger(event:string, data:any){
+            if(this.events[event]){
+                this.events[event].forEach((listener:(data: any) => void) => {
+                    listener.call(this, data);
+                });
+            }
+
+            this.manager.trigger('component_' + event, $.extend({}, data, {component: this}));
+        }
+
+        on(event:string, callback: (data: any) => void){
+            if(!this.events[event]){
+                this.events[event] = [];
+            }
+
+            if(this.events[event].indexOf(callback) == -1){
+                this.events[event].push(callback);
+            }
         }
 
 

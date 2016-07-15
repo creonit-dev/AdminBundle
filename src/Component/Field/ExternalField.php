@@ -6,7 +6,7 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 class ExternalField extends Field
 {
-    protected $type = 'external';
+    const TYPE = 'external';
 
     public function load($entity)
     {

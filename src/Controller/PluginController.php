@@ -50,4 +50,20 @@ class PluginController extends Controller
         );
     }
 
+    public function injectionAction($block){
+        $admin = $this->get('creonit_admin');
+
+        $injections = '';
+
+        foreach ($admin->getPlugins() as $plugin){
+            foreach ($plugin->getInjections() as $injection){
+                if($block == $injection[0]){
+                    $injections .= $injection[1];
+                }
+            }
+        }
+
+        return new Response($injections);
+    }
+
 }
