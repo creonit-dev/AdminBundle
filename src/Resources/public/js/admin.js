@@ -1077,6 +1077,7 @@ var Creonit;
                         var rowId = Component.Utils.generateId();
                         var className = entity._row_class;
                         var $entity = $(("<tr data-row-id=\"" + rowId + "\" data-key=\"" + JSON.stringify(entity._key) + "\" data-scope=\"" + scope.parameters.name + "\" data-mask=\"" + mask + "\" " + (className ? "class=\"" + className + "\"" : '') + ">") + scope.template.render($.extend({}, entity, {
+                            _data: _this.data,
                             _query: _this.getQuery(),
                             _row_id: rowId,
                             _level: function () {

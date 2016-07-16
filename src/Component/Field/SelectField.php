@@ -23,4 +23,10 @@ class SelectField extends Field
     }
 
 
+    public function setOptions($options){
+        $this->parameters->set('options', $options);
+        return $this;
+    }
+
+
 }

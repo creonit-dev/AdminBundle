@@ -209,6 +209,7 @@ module Creonit.Admin.Component{
                 let rowId = Utils.generateId();
                 let className = entity._row_class;
                 let $entity = $(`<tr data-row-id="${rowId}" data-key="${JSON.stringify(entity._key)}" data-scope="${scope.parameters.name}" data-mask="${mask}" ${className ? `class="${className}"` : ''}>` + scope.template.render($.extend({}, entity, {
+                        _data: this.data,
                         _query: this.getQuery(),
                         _row_id: rowId,
                         _level: function(){

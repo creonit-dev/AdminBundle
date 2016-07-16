@@ -214,7 +214,6 @@ class Manager {
     {
         /** @var Field $field */
         $field = new $this->fieldTypes[$type ?: 'default'];
-        dump($field);
         $field->setContainer($this->container);
         $field->setName($name);
         $field->parameters->add($parameters);
