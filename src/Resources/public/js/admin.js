@@ -207,6 +207,11 @@ var Creonit;
                 };
                 Component.prototype.render = function () {
                 };
+                Component.prototype.close = function () {
+                    if (this.options.modal) {
+                        this.node.arcticmodal('close');
+                    }
+                };
                 Component.prototype.trigger = function (event, data) {
                     var _this = this;
                     if (this.events[event]) {

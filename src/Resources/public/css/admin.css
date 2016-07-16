@@ -189,7 +189,8 @@
 .table:not(.sorting) tr:hover .list-controls-options {
   visibility: visible;
 }
-.table tbody tr.nodrop {
+.table tbody tr.nodrop,
+.table tbody tr.deactive {
   opacity: 0.3;
 }
 .list-pagination > td {

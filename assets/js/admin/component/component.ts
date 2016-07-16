@@ -157,6 +157,12 @@ module Creonit.Admin.Component {
 
         }
 
+        close(){
+            if(this.options.modal){
+                this.node.arcticmodal('close');
+            }
+        }
+
         trigger(event:string, data:any){
             if(this.events[event]){
                 this.events[event].forEach((listener:(data: any) => void) => {
@@ -181,6 +187,7 @@ module Creonit.Admin.Component {
         protected request(type:string, query:any = {}, data?:any, callback?:(response:any)=>void) {
             this.manager.request(new Request(this, type, query, data, callback));
         }
+
 
         openComponent(name:string, query:any = {}, options:any = {}) {
             options.modal = true;
