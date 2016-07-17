@@ -15,8 +15,7 @@ class CreonitAdminBundle extends Bundle
 
         $container->addCompilerPass(new ModulePass());
         $container->addCompilerPass(new PluginPass());
-        
-
+       
     }
 
 
