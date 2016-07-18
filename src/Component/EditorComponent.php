@@ -26,8 +26,6 @@ abstract class EditorComponent extends Component
             }
 
             foreach ($this->fields as $field){
-                dump($field->supportEntity($field));
-                dump($field->supportEntity($entity));
                 $response->data->set($field->getName(), $field->supportEntity($entity) ? $field->load($entity) : $field->decorate($request->data->get($field->getName())));
             }
 
