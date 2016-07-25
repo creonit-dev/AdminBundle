@@ -21,6 +21,7 @@ abstract class Module
     protected $title;
     protected $template;
     protected $name;
+    protected $position = 0;
 
     protected $visible = true;
     /** @var  ContainerInterface */
@@ -160,8 +161,30 @@ abstract class Module
      */
     public function setTemplate($template)
     {
+        if(preg_match('/^((?:\w+\.)?\w+)$/i', $template, $match)){
+            $template = "<div js-component=\"{$match[1]}\"></div>";
+        }
+
         $this->template = $template;
         return $this;
+    }
+
+    /**
+     * @param int $position
+     * @return Module
+     */
+    public function setPosition($position)
+    {
+        $this->position = $position;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPosition()
+    {
+        return $this->position;
     }
 
 
