@@ -167,6 +167,11 @@ class Manager {
                 $componentResponse = new ComponentResponse();
                 $componentResponse->error($e->getMessage());
                 $componentResponses[] = $componentResponse->dump();
+            }catch(\Exception $e){
+                $componentResponse = new ComponentResponse();
+                //$componentResponse->error('Произошла системная ошибка');
+                $componentResponse->error($e->getMessage());
+                $componentResponses[] = $componentResponse->dump();
             }
         }
 
