@@ -169,7 +169,7 @@
 .list-controls-sort {
   visibility: hidden;
   flex: 0 0 auto;
-  margin: 0 5px;
+  margin: 0 0 0 5px;
   padding: 0 5px;
   cursor: move;
   color: #ccc;
@@ -185,6 +185,7 @@
 .list-controls-options {
   flex: 1 0 auto;
   visibility: hidden;
+  margin: 0 0 0 5px;
 }
 .table:not(.sorting) tr:hover .list-controls-options {
   visibility: visible;

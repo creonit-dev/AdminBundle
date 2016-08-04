@@ -169,7 +169,6 @@ var Creonit;
                     }
                 };
                 Component.prototype.applyResponse = function (response) {
-                    console.log(response);
                     if (response.schema) {
                         this.applySchema(response.schema);
                     }
@@ -903,6 +902,7 @@ var Creonit;
                     };
                 };
                 Request.prototype.passResponse = function (response) {
+                    console.log(response);
                     if (this.callback) {
                         this.callback(response);
                     }

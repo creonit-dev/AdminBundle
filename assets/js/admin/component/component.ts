@@ -107,8 +107,6 @@ module Creonit.Admin.Component {
         }
 
         applyResponse(response:Response) {
-            console.log(response);
-
             if (response.schema) {
                 this.applySchema(response.schema);
             }

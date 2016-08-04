@@ -39,6 +39,8 @@ module Creonit.Admin.Component {
         }
 
         passResponse(response:Response){
+            console.log(response);
+
             if(this.callback){
                 this.callback(response);
             }
