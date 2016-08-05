@@ -22,7 +22,7 @@ class DefaultController extends Controller
 
         $moduleToRedirect = null;
         foreach($admin->getModules() as $module){
-            if($module->isVisible()){
+            if($module->isVisible() and $module->checkPermission($this->getUser())){
                 $moduleToRedirect = $module;
                 break;
             }
@@ -50,7 +50,7 @@ class DefaultController extends Controller
 
         $module = $admin->getModule($module);
 
-        if(!$module->isVisible()){
+        if(!$module->isVisible() or !$module->checkPermission($this->getUser())){
             throw $this->createNotFoundException();
         }
 

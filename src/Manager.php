@@ -153,6 +153,10 @@ class Manager {
                 }
 
                 $module = $this->getModule($componentMatch[1]);
+                if(!$module->checkPermission($this->container->get('security.token_storage')->getToken()->getUser())){
+                    throw new RequestException(sprintf('You are not allowed to appeal to the module "%s"', $componentMatch[2], $componentMatch[1]));
+                }
+
                 $module->initialize();
 
                 if(!$module->hasComponent($componentMatch[2])){

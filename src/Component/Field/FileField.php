@@ -23,6 +23,8 @@ class FileField extends Field
 
     public function process($data)
     {
+        dump('PROCESS');
+        dump($data);
         /** @var UploadedFile $file */
         if($file = $data['file'] and !$file instanceof NoData){
 
@@ -73,6 +75,7 @@ class FileField extends Field
             $file->setExtension($data['file']['extension']);
             $file->setMime($data['file']['mime']);
             $file->setSize($data['file']['size']);
+            $file->save();
 
             parent::save($entity, $file->getId(), true);
         }

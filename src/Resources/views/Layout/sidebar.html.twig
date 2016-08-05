@@ -13,7 +13,7 @@
     </li>
 
     {% for module in admin.getModules %}
-        {% if module.isVisible %}
+        {% if module.isVisible and module.checkPermission(app.user) %}
             <li {{ module.isActive ? 'class="active"' }}>
                 <a href="{{ url('creonit_admin_module', {module: module.getUri}) }}">
                     <i class="fa fa-{{ module.getIcon }}"></i>

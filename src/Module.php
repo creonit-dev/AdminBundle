@@ -5,6 +5,7 @@ namespace Creonit\AdminBundle;
 use Creonit\AdminBundle\Component\Component;
 use Creonit\AdminBundle\Exception\ConfigurationException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 abstract class Module
 {
@@ -21,9 +22,10 @@ abstract class Module
     protected $title;
     protected $template;
     protected $name;
+    protected $permission;
     protected $position = 0;
-
     protected $visible = true;
+
     /** @var  ContainerInterface */
     protected $container;
 
@@ -185,6 +187,24 @@ abstract class Module
     public function getPosition()
     {
         return $this->position;
+    }
+
+    public function setPermission($permission)
+    {
+        $this->permission = $permission;
+        return $this;
+    }
+    
+    public function getPermission()
+    {
+        return $this->permission;
+    }
+
+    public function checkPermission($user){
+        if($this->permission){
+            return $this->container->get('security.authorization_checker')->isGranted($this->permission);
+        }
+        return true;
     }
 
 
