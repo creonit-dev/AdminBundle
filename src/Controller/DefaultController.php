@@ -29,7 +29,7 @@ class DefaultController extends Controller
         }
 
         if(null === $moduleToRedirect){
-            throw $this->createNotFoundException();
+            throw $this->createAccessDeniedException();
         }
 
         return $this->redirect($this->generateUrl('creonit_admin_module', ['module' => lcfirst($module->getName())]));
