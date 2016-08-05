@@ -92,9 +92,10 @@ class Manager {
     }
 
     public function addModule(Module $module){
-        $this->modules[$module->getName()] = $module;
         $module->setManager($this);
         $module->setContainer($this->container);
+        $module->join($this);
+        $this->modules[$module->getName()] = $module;
     }
 
     public function addPlugin(Plugin $plugin){

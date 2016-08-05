@@ -31,10 +31,13 @@ abstract class Module
 
 
     public function __construct(){
-        $this->configure();
     }
 
     protected function configure(){
+    }
+
+    public function join(Manager $manager){
+        $this->configure();
     }
 
     abstract public function initialize();
