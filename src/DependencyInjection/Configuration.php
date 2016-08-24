@@ -18,6 +18,7 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->scalarNode('title')->isRequired()->end()
                 ->scalarNode('icon')->end()
+                ->variableNode('modules')->end()
             ->end()
         ;
 

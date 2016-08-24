@@ -39,6 +39,8 @@ class Manager {
     /** @var  Module */
     protected $activeModule;
 
+    protected $modulesConfig = [];
+
     protected $fieldTypes = [];
     protected $fieldHelpers = [];
 
@@ -71,6 +73,12 @@ class Manager {
         foreach ($this->plugins as $plugin){
             $this->addFieldTypes($plugin->getFieldTypes());
         }
+
+        uasort($this->modules, function(Module $a, Module $b){
+            if($a->getSort() > $b->getSort()) return 1;
+            if($a->getSort() < $b->getSort()) return -1;
+            return 0;
+        });
     }
     
     public function addFieldType($className){
@@ -95,6 +103,7 @@ class Manager {
         $module->setManager($this);
         $module->setContainer($this->container);
         $module->join($this);
+        $this->configureModule($module);
         $this->modules[$module->getName()] = $module;
     }
 
@@ -231,6 +240,46 @@ class Manager {
         return $field;
     }
 
+    /**
+     * @param array $modulesConfig
+     * @return Manager
+     */
+    public function setModulesConfig(array $modulesConfig)
+    {
+        $this->modulesConfig = $modulesConfig;
+        return $this;
+    }
+
+    /**
+     * @param Module $module
+     */
+    public function configureModule(Module $module){
+        if(!isset($this->modulesConfig[$module->getName()])) {
+            return;
+        }
+
+        $config = $this->modulesConfig[$module->getName()];
+
+        foreach ($config as $key => $value){
+            switch($key){
+                case 'title':
+                    $module->setTitle($value);
+                    break;
+                case 'icon':
+                    $module->setIcon($value);
+                    break;
+                case 'permission':
+                    $module->setPermission($value);
+                    break;
+                case 'template':
+                    $module->setTemplate($value);
+                    break;
+                case 'sort':
+                    $module->setSort($value);
+                    break;
+            }
+        }
+    }
 
 
 } 

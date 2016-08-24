@@ -25,5 +25,10 @@ class CreonitAdminExtension extends Extension
         if(isset($config['icon'])){
             $manager->addMethodCall('setIcon', [$config['icon']]);
         }
+        if(isset($config['modules']) and is_array($config['modules'])){
+            $manager->addMethodCall('setModulesConfig', [$config['modules']]);
+        }
+        
+        
     }
 }

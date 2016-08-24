@@ -23,7 +23,7 @@ abstract class Module
     protected $template;
     protected $name;
     protected $permission;
-    protected $position = 0;
+    protected $sort = 0;
     protected $visible = true;
 
     /** @var  ContainerInterface */
@@ -174,24 +174,6 @@ abstract class Module
         return $this;
     }
 
-    /**
-     * @param int $position
-     * @return Module
-     */
-    public function setPosition($position)
-    {
-        $this->position = $position;
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getPosition()
-    {
-        return $this->position;
-    }
-
     public function setPermission($permission)
     {
         $this->permission = $permission;
@@ -208,6 +190,24 @@ abstract class Module
             return $this->container->get('security.authorization_checker')->isGranted($this->permission);
         }
         return true;
+    }
+
+    /**
+     * @param int $sort
+     * @return Module
+     */
+    public function setSort($sort)
+    {
+        $this->sort = $sort;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSort()
+    {
+        return $this->sort;
     }
 
 
