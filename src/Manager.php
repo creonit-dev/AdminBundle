@@ -25,7 +25,7 @@ class Manager {
     protected $icon;
 
     /** @var  Plugin[] */
-    protected $plugins;
+    protected $plugins = [];
 
     /** @var  Module[] */
     protected $modules = [];
