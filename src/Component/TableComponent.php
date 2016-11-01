@@ -24,7 +24,15 @@ abstract class TableComponent extends ListComponent
         if(preg_match_all('/\s*([\'\"].+?[\'\"]|.+?)\s*(?:,|$)/usi', $columns, $matches, PREG_SET_ORDER)){
             $columns = [];
             foreach ($matches as $match){
-                $columns[] = trim($match[1], "'\"");
+                $width = 'auto';
+                $value = $match[1];
+
+                if($value[0] == '.'){
+                    $width = '1%';
+                    $value = ltrim($value, '.');
+                }
+
+                $columns[] = ['value' => trim($value, "'\""), 'width' => $width];
             }
             $this->columns = $columns;
         }

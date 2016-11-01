@@ -80,15 +80,22 @@ module Creonit.Admin.Component.Helpers {
         return value.toString().replace(/<(a|div|button)/, `<$1 ${injection}`)
     }
 
-    export function icon(value:any, [icon = ''] = ['']){
+    export function icon(value:any, [icon = '', options = {}]:[string, any] = ['', {}]){
         if(!icon){
             return value;
         }
-        return `<i class="icon ${resolveIconClass(icon)}"></i>${value}`;
+
+        if(options.nobr){
+            return `<nobr><i class="icon ${resolveIconClass(icon)}"></i>${value}</nobr>`;
+
+        }else{
+            return `<i class="icon ${resolveIconClass(icon)}"></i>${value}`;
+        }
+
     }
 
     export function action(value:any, [name, ...options] : [string, any]){
-        if(!value){
+        if(!value && value !== 0){
             return '';
         }
 
