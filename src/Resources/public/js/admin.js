@@ -589,6 +589,9 @@ var Creonit;
                             break;
                     }
                     value = value ? Component.Utils.escape(value.toString()) : '';
+                    if (options.placeholder) {
+                        options.placeholder = Component.Utils.escape(options.placeholder);
+                    }
                     return "<input type=\"" + type + "\" class=\"" + classes.join(' ') + "\" name=\"" + name + "\" value=\"" + value + "\" placeholder=\"" + (options.placeholder || '') + "\" " + attributes.join(' ') + ">";
                 }
                 Helpers.input = input;

@@ -254,6 +254,9 @@ module Creonit.Admin.Component.Helpers {
 
         value = value ? Utils.escape(value.toString()) : '';
 
+        if(options.placeholder){
+            options.placeholder = Utils.escape(options.placeholder);
+        }
 
 
         return `<input type="${type}" class="${classes.join(' ')}" name="${name}" value="${value}" placeholder="${options.placeholder || ''}" ${attributes.join(' ')}>`;
