@@ -277,6 +277,9 @@ class Manager {
                 case 'sort':
                     $module->setSort($value);
                     break;
+                case 'visible':
+                    $module->setVisible((bool) $value);
+                    break;
             }
         }
     }
