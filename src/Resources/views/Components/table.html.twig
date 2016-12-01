@@ -11,11 +11,7 @@
                 <thead>
                 <tr>
                     {% for column in component.columns %}
-                        {% if column == '.' %}
-                            <th style="width:1%"></th>
-                        {% else %}
-                            <th>{{ column }}</th>
-                        {% endif %}
+                        <th {{ column.width != 'auto' ? ('style="width:'~column.width~'"') | raw }}>{{ column.value }}</th>
                     {% endfor %}
                 </tr>
                 </thead>

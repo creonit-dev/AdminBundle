@@ -220,7 +220,9 @@ abstract class ListComponent extends Component
         $query = $scope->createQuery();
 
         if(null !== $relation){
-            $query->add($relation->getSourceField()->getName(), $relationValue);
+            if($query->getTableMap()->hasColumn($relation->getSourceField()->getName())){
+                $query->add($relation->getSourceField()->getName(), $relationValue);
+            }
         }
 
         if($scope->getTableMap()->hasColumn('sortable_rank')){

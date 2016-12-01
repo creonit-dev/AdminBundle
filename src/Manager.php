@@ -25,7 +25,7 @@ class Manager {
     protected $icon;
 
     /** @var  Plugin[] */
-    protected $plugins;
+    protected $plugins = [];
 
     /** @var  Module[] */
     protected $modules = [];
@@ -276,6 +276,9 @@ class Manager {
                     break;
                 case 'sort':
                     $module->setSort($value);
+                    break;
+                case 'visible':
+                    $module->setVisible((bool) $value);
                     break;
             }
         }

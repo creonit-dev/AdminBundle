@@ -479,16 +479,21 @@ var Creonit;
                 }
                 Helpers.tooltip = tooltip;
                 function icon(value, _a) {
-                    var _b = (_a === void 0 ? [''] : _a)[0], icon = _b === void 0 ? '' : _b;
+                    var _b = _a === void 0 ? ['', {}] : _a, _c = _b[0], icon = _c === void 0 ? '' : _c, _d = _b[1], options = _d === void 0 ? {} : _d;
                     if (!icon) {
                         return value;
                     }
-                    return "<i class=\"icon " + resolveIconClass(icon) + "\"></i>" + value;
+                    if (options.nobr) {
+                        return "<nobr><i class=\"icon " + resolveIconClass(icon) + "\"></i>" + value + "</nobr>";
+                    }
+                    else {
+                        return "<i class=\"icon " + resolveIconClass(icon) + "\"></i>" + value;
+                    }
                 }
                 Helpers.icon = icon;
                 function action(value, _a) {
                     var name = _a[0], options = _a.slice(1);
-                    if (!value) {
+                    if (!value && value !== 0) {
                         return '';
                     }
                     var injection = "js-component-action data-name=\"" + name + "\" data-options='" + JSON.stringify(cleanOptions(options)) + "'";
@@ -595,6 +600,9 @@ var Creonit;
                             break;
                     }
                     value = value ? Component.Utils.escape(value.toString()) : '';
+                    if (options.placeholder) {
+                        options.placeholder = Component.Utils.escape(options.placeholder);
+                    }
                     return "<input type=\"" + type + "\" class=\"" + classes.join(' ') + "\" name=\"" + name + "\" value=\"" + value + "\" placeholder=\"" + (options.placeholder || '') + "\" " + attributes.join(' ') + ">";
                 }
                 Helpers.input = input;

@@ -2,6 +2,9 @@
 
 namespace Creonit\AdminBundle\Component\Field;
 
+use Creonit\AdminBundle\Component\Request\ComponentRequest;
+use Symfony\Component\Validator\Constraints\NotBlank;
+
 class SelectField extends Field
 {
     const TYPE = 'select';
@@ -20,6 +23,12 @@ class SelectField extends Field
             'title' => isset($parameterOptions[$data]) ? $parameterOptions[$data] : '',
             'options' => $options
         ];
+    }
+
+    public function extract(ComponentRequest $request)
+    {
+        $value = parent::extract($request);
+        return (is_string($value) && $value == '') ? null : $value;
     }
 
 
