@@ -1,7 +1,10 @@
 module Creonit.Admin.Component{
     export class Editor extends Component{
 
+        protected locked = false;
+
         static increment = 0;
+
 
         initialize(){
             this.node.addClass('component component-editor');
@@ -108,6 +111,14 @@ module Creonit.Admin.Component{
 
             $form.on('submit', (e) => {
                 e.preventDefault();
+
+                if(this.locked){
+                    return;
+                }
+
+                this.locked = true;
+
+
                 var data = $form.serializeObject(),
                     query = this.getQuery(),
                     $buttonCloseAfterSave = this.node.find('.editor-save-and-close[clicked]'),
@@ -136,6 +147,7 @@ module Creonit.Admin.Component{
 
 
                 this.request('send_data', query, data, (response) => {
+                    this.locked = false;
                     if(this.checkResponse(response)){
                         if(closeAfterSave){
                             this.node.arcticmodal('close');

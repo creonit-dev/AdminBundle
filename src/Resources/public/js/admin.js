@@ -282,6 +282,7 @@ var Creonit;
                 __extends(Editor, _super);
                 function Editor() {
                     _super.apply(this, arguments);
+                    this.locked = false;
                 }
                 Editor.prototype.initialize = function () {
                     this.node.addClass('component component-editor');
@@ -347,6 +348,10 @@ var Creonit;
                     });
                     $form.on('submit', function (e) {
                         e.preventDefault();
+                        if (_this.locked) {
+                            return;
+                        }
+                        _this.locked = true;
                         var data = $form.serializeObject(), query = _this.getQuery(), $buttonCloseAfterSave = _this.node.find('.editor-save-and-close[clicked]'), closeAfterSave = !!$buttonCloseAfterSave.length;
                         $buttonCloseAfterSave.removeAttr('clicked');
                         if (closeAfterSave) {
@@ -364,6 +369,7 @@ var Creonit;
                             $group.removeClass('has-error');
                         });
                         _this.request('send_data', query, data, function (response) {
+                            _this.locked = false;
                             if (_this.checkResponse(response)) {
                                 if (closeAfterSave) {
                                     _this.node.arcticmodal('close');
