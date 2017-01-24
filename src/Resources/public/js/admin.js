@@ -593,10 +593,10 @@ var Creonit;
                     }
                     switch (type) {
                         case 'date':
-                            attributes.push("data-inputmask='\"mask\": \"d.m.y\", \"placeholder\": \"\u0434\u0434.\u043C\u043C.\u0433\u0433\u0433\u0433\"'");
+                            attributes.push("data-inputmask='\"alias\": \"dd/mm/yyyy\", \"mask\": \"1.2.y\", \"separator\": \".\", \"placeholder\": \"\u0434\u0434.\u043C\u043C.\u0433\u0433\u0433\u0433\"'");
                             break;
                         case 'datetime':
-                            attributes.push("data-inputmask='\"mask\": \"d.m.y h:s:s\", \"placeholder\": \"\u0434\u0434.\u043C\u043C.\u0433\u0433\u0433\u0433 \u0447\u0447:\u043C\u043C:\u0441\u0441\"'");
+                            attributes.push("data-inputmask='\"alias\": \"datetime\", \"mask\": \"1.2.y h:s:s\", \"separator\": \".\", \"placeholder\": \"\u0434\u0434.\u043C\u043C.\u0433\u0433\u0433\u0433 \u0447\u0447:\u043C\u043C:\u0441\u0441\"'");
                             break;
                     }
                     value = value ? Component.Utils.escape(value.toString()) : '';

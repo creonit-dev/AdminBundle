@@ -252,10 +252,10 @@ module Creonit.Admin.Component.Helpers {
 
         switch(type){
             case 'date':
-                attributes.push(`data-inputmask='"mask": "d.m.y", "placeholder": "дд.мм.гггг"'`);
+                attributes.push(`data-inputmask='"alias": "dd/mm/yyyy", "mask": "1.2.y", "separator": ".", "placeholder": "дд.мм.гггг"'`);
                 break;
             case 'datetime':
-                attributes.push(`data-inputmask='"mask": "d.m.y h:s:s", "placeholder": "дд.мм.гггг чч:мм:сс"'`);
+                attributes.push(`data-inputmask='"alias": "datetime", "mask": "1.2.y h:s:s", "separator": ".", "placeholder": "дд.мм.гггг чч:мм:сс"'`);
                 break;
         }
 
