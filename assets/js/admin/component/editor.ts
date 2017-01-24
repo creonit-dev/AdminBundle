@@ -69,24 +69,20 @@ module Creonit.Admin.Component{
             this.node.find('.text-editor').tinymce({
                 doctype: 'html5',
                 element_format: 'html',
-                plugins: ['anchor autolink code image fullscreen hr link media paste nonbreaking visualblocks table'],
-
+                plugins: ['anchor autolink code colorpicker contextmenu image fullscreen hr link media paste nonbreaking  visualblocks table searchreplace charmap'],
                 resize: true,
                 height: 150,
-
-
                 visualblocks_default_state: true,
                 relative_urls : false,
                 paste_data_images: true,
-
                 paste_as_text: true,
                 keep_styles: false,
                 language: 'ru',
                 statusbar: false,
-                //toolbar: 'undo redo | bold italic | styleselect | link image code fullscreen hr link media nonbreaking visualblocks table',
-                toolbar: 'styleselect | bold italic removeformat | link unlink | bullist numlist | table | image media | code fullscreen',
+                toolbar: 'styleselect | bold italic removeformat | link unlink | bullist numlist | image media | code fullscreen',
                 image_advtab: true,
-                menubar: false,
+                menubar: 'edit insert view format table tools',
+                browser_spellcheck: true,
                 setup: function(editor) {
 
                 }
