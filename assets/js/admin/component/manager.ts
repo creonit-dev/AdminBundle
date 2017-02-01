@@ -1,3 +1,5 @@
+declare var baseUrl:string;
+
 module Creonit.Admin {
     export class Manager{
         protected static instance:Manager;
@@ -120,7 +122,7 @@ module Creonit.Admin {
 
 
             $.ajax({
-                url: '/admin/',
+                url: baseUrl + '/admin/',
                 type: 'post',
                 dataType: 'json',
                 data: form,

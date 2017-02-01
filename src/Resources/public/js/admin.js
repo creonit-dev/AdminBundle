@@ -317,7 +317,7 @@ var Creonit;
                     this.node.find('.text-editor').tinymce({
                         doctype: 'html5',
                         element_format: 'html',
-                        plugins: ['anchor autolink code colorpicker contextmenu image fullscreen hr link lists media paste nonbreaking  visualblocks table searchreplace charmap'],
+                        plugins: ['anchor autolink code colorpicker contextmenu image fullscreen hr link media paste nonbreaking  visualblocks table searchreplace charmap'],
                         resize: true,
                         height: 150,
                         visualblocks_default_state: true,
@@ -327,7 +327,7 @@ var Creonit;
                         keep_styles: false,
                         language: 'ru',
                         statusbar: false,
-                        toolbar: 'formatselect | bold italic removeformat | link unlink | bullist numlist | image media | code fullscreen',
+                        toolbar: 'styleselect | bold italic removeformat | link unlink | bullist numlist | image media | code fullscreen',
                         image_advtab: true,
                         menubar: 'edit insert view format table tools',
                         browser_spellcheck: true,
@@ -857,7 +857,7 @@ var Creonit;
                     iterator(request.getQuery(), ['request[c' + request.getId() + ']']);
                 });
                 $.ajax({
-                    url: '/admin/',
+                    url: baseUrl + '/admin/',
                     type: 'post',
                     dataType: 'json',
                     data: form,

@@ -24,6 +24,7 @@
     {{ render(controller('CreonitAdminBundle:Plugin:injection', {block: 'head'})) }}
 
     <script>
+	    var baseUrl = '{{ app.request.baseUrl }}';
         {{ render(controller('CreonitAdminBundle:Plugin:injection', {block: 'head_script'})) }}
     </script>
 
