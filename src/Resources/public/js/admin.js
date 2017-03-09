@@ -317,7 +317,7 @@ var Creonit;
                     this.node.find('.text-editor').tinymce({
                         doctype: 'html5',
                         element_format: 'html',
-                        plugins: ['anchor autolink code colorpicker contextmenu image fullscreen hr link media paste nonbreaking  visualblocks table searchreplace charmap'],
+                        plugins: ['anchor autolink code colorpicker contextmenu image fullscreen hr link lists media paste nonbreaking  visualblocks table searchreplace charmap'],
                         resize: true,
                         height: 150,
                         visualblocks_default_state: true,
@@ -327,7 +327,7 @@ var Creonit;
                         keep_styles: false,
                         language: 'ru',
                         statusbar: false,
-                        toolbar: 'styleselect | bold italic removeformat | link unlink | bullist numlist | image media | code fullscreen',
+                        toolbar: 'formatselect | bold italic removeformat | link unlink | bullist numlist | image media | code fullscreen',
                         image_advtab: true,
                         menubar: 'edit insert view format table tools',
                         browser_spellcheck: true,
@@ -335,8 +335,7 @@ var Creonit;
                         }
                     });
                     this.node.find('input')
-                        .filter('[type="date"]').attr('type', 'text')
-                        .end()
+                        .filter('[data-inputmask]')
                         .inputmask();
                     this.node.find('.editor-save-and-close').on('click', function (e) {
                         $(e.currentTarget).attr('clicked', true);
@@ -593,9 +592,11 @@ var Creonit;
                     }
                     switch (type) {
                         case 'date':
+                            type = 'text';
                             attributes.push("data-inputmask='\"alias\": \"dd/mm/yyyy\", \"mask\": \"1.2.y\", \"separator\": \".\", \"placeholder\": \"\u0434\u0434.\u043C\u043C.\u0433\u0433\u0433\u0433\"'");
                             break;
                         case 'datetime':
+                            type = 'text';
                             attributes.push("data-inputmask='\"alias\": \"datetime\", \"mask\": \"1.2.y h:s:s\", \"separator\": \".\", \"placeholder\": \"\u0434\u0434.\u043C\u043C.\u0433\u0433\u0433\u0433 \u0447\u0447:\u043C\u043C:\u0441\u0441\"'");
                             break;
                     }

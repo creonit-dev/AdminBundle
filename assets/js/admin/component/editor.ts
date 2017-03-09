@@ -90,8 +90,7 @@ module Creonit.Admin.Component{
 
 
             this.node.find('input')
-                .filter('[type="date"]').attr('type', 'text')
-                .end()
+                .filter('[data-inputmask]')
                 .inputmask();
 
 
