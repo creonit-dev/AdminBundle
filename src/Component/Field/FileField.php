@@ -23,8 +23,6 @@ class FileField extends Field
 
     public function process($data)
     {
-        dump('PROCESS');
-        dump($data);
         /** @var UploadedFile $file */
         if($file = $data['file'] and !$file instanceof NoData){
 
