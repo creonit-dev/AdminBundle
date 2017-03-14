@@ -81,6 +81,11 @@ class Scope
         return $this;
     }
 
+    public function getEntity()
+    {
+        return $this->entity;
+    }
+
     /**
      * @return mixed
      */
@@ -88,7 +93,6 @@ class Scope
     {
         return $this->name;
     }
-
 
     /**
      * @param $entity
@@ -99,11 +103,11 @@ class Scope
         return new $queryClass;
     }
 
+
     public function createEntity(){
         $entityClass = $this->entity;
         return new $entityClass;
     }
-
 
     /**
      * @return TableMap
@@ -141,11 +145,12 @@ class Scope
         return $this;
     }
 
+
+
     public function getTemplate()
     {
         return $this->template;
     }
-
 
 
     public function applySchemaAnnotation($annotation){
@@ -178,7 +183,6 @@ class Scope
         return $this;
     }
 
-
     public function createField($name, $parameters = [], $type = null){
         return $this->container->get('creonit_admin')->createField($name, $parameters, $type);
     }
@@ -206,10 +210,10 @@ class Scope
         return $this->scopes[$scopeName];
     }
 
+
     public function setParentScope(Scope $scope){
         $this->parentScope = $scope;
     }
-
 
     public function dump(){
         $schema = [
