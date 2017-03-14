@@ -44,7 +44,7 @@ abstract class Component extends Scope
         }
 
         if(null !== $schema = $this->parseSchemaAnnotations()){
-            $this->applySchemaAnnotations($schema['\\']);
+            $this->applySchemaAnnotations($schema['__']);
         }
         $this->prepareSchema();
         $this->schema();
@@ -171,6 +171,7 @@ abstract class Component extends Scope
             $path = preg_replace('/^\\\\$/', '[\]', $path);
             $path = preg_replace('/^\\\\/', '[\]\\', $path);
             $path = preg_replace('/\\\\([\w_-]+)/', '[scopes][$1]', $path);
+            $path = str_replace('\\', '__', $path);
             $accessor->setValue($result, $path . '[parameters]', $parameters);
         }
 
