@@ -13,11 +13,12 @@ module Creonit.Admin.Component {
             schema = $.extend({}, schema);
             
             if(schema.template){
-                this.template = twig({autoescape: true, data: schema.template, options: {asdas: 'vertal'}});
+                this.template = twig({autoescape: true, data: schema.template});
                 delete schema.template;
             }
 
             if(schema.scopes){
+                this.scopes = [];
                 schema.scopes.forEach((scope) => {
                     let child = new Scope();
                     child.applySchema(scope);

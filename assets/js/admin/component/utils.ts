@@ -39,8 +39,9 @@ module Creonit.Admin.Component.Utils{
         $('['+ ATTR_HANDLER +']', context).each(function(){
             var node = $(this);
             if(true == node.data('creonit-component-initialized')) return;
-            createComponent(node, parent);
+            var component = createComponent(node, parent);
             node.data('creonit-component-initialized', true);
+            node.data('creonit-component', component);
         });
     }
 

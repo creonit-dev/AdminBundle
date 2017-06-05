@@ -24,6 +24,7 @@ module Creonit.Admin.Component{
                 this.request('_visible', $.extend(this.getQuery(), {key: options.key, scope: options.scope}), {visible: visible}, (response) => {
                     if(this.checkResponse(response)){
                         $button.toggleClass('mod-visible', response.data.visible);
+                        this.trigger('visible', {options: options, visible: visible});
                     }
                 })
             };
@@ -35,7 +36,9 @@ module Creonit.Admin.Component{
 
                 //this.findRowById(options.row_id).remove();
                 this.request('_delete', $.extend(this.getQuery(), options), null, (response) => {
-                    this.checkResponse(response);
+                    if(this.checkResponse(response)){
+                        this.trigger('delete', {options: options});
+                    }
                 });
                 this.loadData();
             };
@@ -66,7 +69,7 @@ module Creonit.Admin.Component{
                 node = node.find('.modal-body');
 
                 this.node.find('.modal-header .close').on('click', () => {
-                    this.node.arcticmodal('close');
+                    this.close();
                 });
             }
 
@@ -195,6 +198,12 @@ module Creonit.Admin.Component{
                 this.loadData();
             });
 
+
+            this.node.find('input')
+                .filter('[data-inputmask]')
+                .inputmask();
+
+            this.trigger('render', {});
 
             Utils.initializeComponents(this.node, this);
         }

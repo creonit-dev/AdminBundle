@@ -41,10 +41,11 @@ var Creonit;
                     var _this = this;
                     schema = $.extend({}, schema);
                     if (schema.template) {
-                        this.template = twig({ autoescape: true, data: schema.template, options: { asdas: 'vertal' } });
+                        this.template = twig({ autoescape: true, data: schema.template });
                         delete schema.template;
                     }
                     if (schema.scopes) {
+                        this.scopes = [];
                         schema.scopes.forEach(function (scope) {
                             var child = new Scope();
                             child.applySchema(scope);
@@ -140,7 +141,7 @@ var Creonit;
                         }
                         else {
                             if (_this.options.modal) {
-                                _this.node.arcticmodal('close');
+                                _this.close();
                             }
                             else {
                                 _this.node.html("<div class=\"loading is-error\"><i class=\"fa fa-cog fa-spin fa-fw\"></i>" + (response.error['_'] ? response.error['_'].join(", ") : 'Ошибка загрузки компонента') + "</div>");
@@ -150,11 +151,16 @@ var Creonit;
                 };
                 Component.prototype.loadData = function () {
                     var _this = this;
-                    this.node.stop(true).delay(300).animate({ opacity: .85 }, 600);
-                    this.request(Component_1.Request.TYPE_LOAD_DATA, this.getQuery(), null, function (response) {
-                        _this.node.stop(true).animate({ opacity: 1 }, 300);
-                        _this.checkResponse(response) && _this.applyResponse(response);
-                    });
+                    if (this.parameters.reloadSchema) {
+                        this.loadSchema();
+                    }
+                    else {
+                        this.node.stop(true).delay(300).animate({ opacity: .85 }, 600);
+                        this.request(Component_1.Request.TYPE_LOAD_DATA, this.getQuery(), null, function (response) {
+                            _this.node.stop(true).animate({ opacity: 1 }, 300);
+                            _this.checkResponse(response) && _this.applyResponse(response);
+                        });
+                    }
                 };
                 Component.prototype.checkResponse = function (response, announce) {
                     if (announce === void 0) { announce = true; }
@@ -199,7 +205,7 @@ var Creonit;
                     if (this.options.external) {
                         this.actions['external'] = function (value, title) {
                             _this.parent.node.find("[js-component-external-field=" + _this.options.external + "]").text(title).parent().parent().next('input').val(value);
-                            _this.node.arcticmodal('close');
+                            _this.close();
                         };
                     }
                     _super.prototype.applySchema.call(this, schema);
@@ -238,7 +244,8 @@ var Creonit;
                     if (options === void 0) { options = {}; }
                     options.modal = true;
                     var interval;
-                    $("\n                <div class=\"modal-dialog modal-lg\">\n                    " + Component_1.Helpers.component(name, query, options) + "\n                </div>\n            ").arcticmodal({
+                    var $modal = $("\n                <div class=\"modal-dialog modal-lg\">\n                    " + Component_1.Helpers.component(name, query, options) + "\n                </div>\n            ");
+                    $modal.arcticmodal({
                         beforeOpen: function (modal, $modal) {
                             Component_1.Utils.initializeComponents($modal, _this);
                         },
@@ -260,6 +267,9 @@ var Creonit;
                                 fix();
                                 $container.on('scroll', fix);
                             }, 10);
+                        },
+                        beforeClose: function () {
+                            $modal.find('[js-component]').data('creonit-component').trigger('close', {});
                         },
                         afterClose: function () {
                             clearInterval(interval);
@@ -296,7 +306,7 @@ var Creonit;
                         node = node.find('.modal-body');
                         this.node.find('.modal-content').append("<div class=\"modal-footer\">" + Component.Helpers.submit('Сохранить и закрыть', { className: 'editor-save-and-close' }) + " " + Component.Helpers.submit('Сохранить') + " " + Component.Helpers.button('Закрыть') + "</div>");
                         this.node.find('.modal-footer button[type=button], .modal-header .close').on('click', function () {
-                            _this.node.arcticmodal('close');
+                            _this.close();
                         });
                     }
                     node.append(this.template.render($.extend({}, this.data, { _query: this.query, _key: this.query.key || null })));
@@ -371,13 +381,12 @@ var Creonit;
                             _this.locked = false;
                             if (_this.checkResponse(response)) {
                                 if (closeAfterSave) {
-                                    _this.node.arcticmodal('close');
+                                    _this.close();
                                 }
                                 else {
                                     _this.applyResponse(response);
                                 }
-                                if (_this.parent) {
-                                }
+                                _this.trigger('save', { response: response });
                             }
                             else {
                                 $.each(response.error, function (scope, messages) {
@@ -978,6 +987,7 @@ var Creonit;
                         _this.request('_visible', $.extend(_this.getQuery(), { key: options.key, scope: options.scope }), { visible: visible }, function (response) {
                             if (_this.checkResponse(response)) {
                                 $button.toggleClass('mod-visible', response.data.visible);
+                                _this.trigger('visible', { options: options, visible: visible });
                             }
                         });
                     };
@@ -987,7 +997,9 @@ var Creonit;
                         }
                         //this.findRowById(options.row_id).remove();
                         _this.request('_delete', $.extend(_this.getQuery(), options), null, function (response) {
-                            _this.checkResponse(response);
+                            if (_this.checkResponse(response)) {
+                                _this.trigger('delete', { options: options });
+                            }
                         });
                         _this.loadData();
                     };
@@ -1004,7 +1016,7 @@ var Creonit;
                         this.node.append(node = $("\n                    <div class=\"modal-content\"> \n                        <div class=\"modal-header\"> \n                            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">\u00D7</span></button> \n                            <h4 class=\"modal-title\">" + this.parameters.title + "</h4> \n                        </div> \n                        \n                        <div class=\"modal-body mod-table\"></div>\n                   </div>    \n                "));
                         node = node.find('.modal-body');
                         this.node.find('.modal-header .close').on('click', function () {
-                            _this.node.arcticmodal('close');
+                            _this.close();
                         });
                     }
                     node.html(this.template.render($.extend({}, this.data, { _query: this.query })));
@@ -1085,6 +1097,10 @@ var Creonit;
                         $.extend(_this.query, $form.serializeObject());
                         _this.loadData();
                     });
+                    this.node.find('input')
+                        .filter('[data-inputmask]')
+                        .inputmask();
+                    this.trigger('render', {});
                     Component.Utils.initializeComponents(this.node, this);
                 };
                 Table.prototype.renderScope = function (scope, relation, relationValue, level) {
@@ -1182,8 +1198,9 @@ var Creonit;
                         var node = $(this);
                         if (true == node.data('creonit-component-initialized'))
                             return;
-                        createComponent(node, parent);
+                        var component = createComponent(node, parent);
                         node.data('creonit-component-initialized', true);
+                        node.data('creonit-component', component);
                     });
                 }
                 Utils.initializeComponents = initializeComponents;

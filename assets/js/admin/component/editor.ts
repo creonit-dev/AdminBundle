@@ -33,7 +33,7 @@ module Creonit.Admin.Component{
                 this.node.find('.modal-content').append(`<div class="modal-footer">${Helpers.submit('Сохранить и закрыть', {className: 'editor-save-and-close'})} ${Helpers.submit('Сохранить')} ${Helpers.button('Закрыть')}</div>`);
 
                 this.node.find('.modal-footer button[type=button], .modal-header .close').on('click', () => {
-                    this.node.arcticmodal('close');
+                    this.close();
                 });
             }
 
@@ -145,15 +145,12 @@ module Creonit.Admin.Component{
                     this.locked = false;
                     if(this.checkResponse(response)){
                         if(closeAfterSave){
-                            this.node.arcticmodal('close');
+                            this.close();
                         }else{
                             this.applyResponse(response);
                         }
+                        this.trigger('save', {response: response});
 
-                        if (this.parent) {
-                            //this.parent.loadData();
-                        }
-                        
                     }else{
                         $.each(response.error, (scope, messages) => {
                             if('_' == scope) return;

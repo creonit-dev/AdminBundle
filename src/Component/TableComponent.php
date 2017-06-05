@@ -47,16 +47,15 @@ abstract class TableComponent extends ListComponent
         return $this->columns;
     }
 
+    public function prepareTemplate()
+    {
+        $this->setTemplate($this->container->get('templating')->render('CreonitAdminBundle:Components:table.html.twig', ['component' => $this]));
+        return parent::prepareTemplate();
+    }
+
     protected function prepareSchema()
     {
         $this->initializeRelations();
-
-
-
-        $this->setTemplate($this->container->get('templating')->render('CreonitAdminBundle:Components:table.html.twig', ['component' => $this]));
-
-
-
         $this->setHandler('_delete', function (ComponentRequest $request, ComponentResponse $response){
             $query = $request->query;
             if($query->has('key') and $query->has('scope') and $this->hasScope($query->get('scope'))){

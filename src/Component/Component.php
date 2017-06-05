@@ -22,7 +22,8 @@ abstract class Component extends Scope
 
     protected $title = '';
     protected $actions = [];
-
+    protected $events = [];
+    protected $reloadSchema = false;
 
 
     /** @var callable[] */
@@ -116,6 +117,12 @@ abstract class Component extends Scope
         return $this;
     }
 
+    /**
+     * @param bool $value
+     */
+    public function setReloadSchema($value){
+        $this->reloadSchema = $value;
+    }
 
     public function parseSchemaAnnotations(){
         if(!$docComment = (new \ReflectionClass($this))->getMethod('schema')->getDocComment()){
@@ -180,9 +187,17 @@ abstract class Component extends Scope
 
     public function applySchemaAnnotation($annotation){
         switch($annotation['key']){
+            case 'reloadSchema':
+                $this->setReloadSchema($annotation['key']);
+                break;
             case 'action':
                 if(preg_match('/^([\w_-]+)\s*?(\(.*?\)\{.*\}\s*)$/usi', $annotation['value'], $match)){
                     $this->setAction($match[1], 'function' . $match[2]);
+                }
+                break;
+            case 'event':
+                if(preg_match('/^([\w_-]+)\s*?(\(.*?\)\{.*\}\s*)$/usi', $annotation['value'], $match)){
+                    $this->setEvent($match[1], 'function' . $match[2]);
                 }
                 break;
             case 'title':
@@ -223,6 +238,12 @@ abstract class Component extends Scope
 
 
 
+    public function setEvent($name, $script)
+    {
+        $this->events[$name] = $script;
+        return $this;
+    }
+
     public function setAction($name, $script)
     {
         $this->actions[$name] = $script;
@@ -239,6 +260,8 @@ abstract class Component extends Scope
         return  array_merge(parent::dump(), [
             'title' => $this->title,
             'actions' => $this->actions,
+            'events' => $this->events,
+            'reloadSchema' => (bool) $this->reloadSchema,
         ]);
     }
 

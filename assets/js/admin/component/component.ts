@@ -79,7 +79,7 @@ module Creonit.Admin.Component {
                     this.applyResponse(response);
                 }else{
                     if(this.options.modal){
-                        this.node.arcticmodal('close');
+                        this.close();
                     }else{
                         this.node.html(`<div class="loading is-error"><i class="fa fa-cog fa-spin fa-fw"></i>${response.error['_'] ? response.error['_'].join(", ") : 'Ошибка загрузки компонента'}</div>`);
                     }
@@ -88,11 +88,15 @@ module Creonit.Admin.Component {
         }
 
         loadData() {
-            this.node.stop(true).delay(300).animate({opacity: .85}, 600);
-            this.request(Request.TYPE_LOAD_DATA, this.getQuery(), null, (response) => {
-                this.node.stop(true).animate({opacity: 1}, 300);
-                this.checkResponse(response) && this.applyResponse(response);
-            });
+            if(this.parameters.reloadSchema){
+                this.loadSchema();
+            }else{
+                this.node.stop(true).delay(300).animate({opacity: .85}, 600);
+                this.request(Request.TYPE_LOAD_DATA, this.getQuery(), null, (response) => {
+                    this.node.stop(true).animate({opacity: 1}, 300);
+                    this.checkResponse(response) && this.applyResponse(response);
+                });
+            }
         }
 
         checkResponse(response:any, announce:boolean = true){
@@ -143,7 +147,7 @@ module Creonit.Admin.Component {
             if(this.options.external){
                 this.actions['external'] = (value, title) => {
                     this.parent.node.find(`[js-component-external-field=${this.options.external}]`).text(title).parent().parent().next('input').val(value);
-                    this.node.arcticmodal('close');
+                    this.close();
                 }
             }
 
@@ -190,13 +194,14 @@ module Creonit.Admin.Component {
         openComponent(name:string, query:any = {}, options:any = {}) {
             options.modal = true;
             var interval;
-
-            $(`
+            var $modal = $(`
                 <div class="modal-dialog modal-lg">
                     ${Helpers.component(name, query, options)}
                 </div>
             `
-            ).arcticmodal({
+            );
+
+            $modal.arcticmodal({
                 beforeOpen: (modal, $modal) => {
                     Utils.initializeComponents($modal, this);
                 },
@@ -227,6 +232,9 @@ module Creonit.Admin.Component {
                     }, 10);
 
 
+                },
+                beforeClose: () => {
+                    $modal.find('[js-component]').data('creonit-component').trigger('close', {});
                 },
                 afterClose: () => {
                     clearInterval(interval);
