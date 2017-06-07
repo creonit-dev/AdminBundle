@@ -13,7 +13,10 @@ class DateField extends Field
      */
     public function decorate($data)
     {
-        return $data ? $data->format('d.m.Y H:i:s') : '';
+        if ($data instanceof \DateTime) {
+            return $data->format('d.m.Y H:i:s');
+        }
+        return $data ? date('d.m.Y H:i:s', is_int($data) ? $data : strtotime($data)) : '';
     }
 
 
