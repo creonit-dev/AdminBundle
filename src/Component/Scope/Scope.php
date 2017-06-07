@@ -314,7 +314,6 @@ class Scope
 
         foreach ($this->scopes as $scope) {
             $scope->prepareTemplate();
-            $scope->prepareTemplate();
         }
 
         return $this;

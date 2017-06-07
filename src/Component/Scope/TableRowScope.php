@@ -32,7 +32,9 @@ class TableRowScope extends ListRowScope
 
     public function prepareTemplate()
     {
-        $this->setTemplate(implode('', array_map(function($column){return "<td>{$column}</td>";}, $this->columns)));
+        if(!$this->template){
+            $this->setTemplate(implode('', array_map(function($column){return "<td>{$column}</td>";}, $this->columns)));
+        }
 
         if(preg_match('/_visible()/usi', $this->template)){
             if(!$this->hasField('visible')){

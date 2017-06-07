@@ -16,7 +16,7 @@ abstract class TableComponent extends ListComponent
     protected $columns = [];
 
     /**
-     * @param array $columns
+     * @param string $columns
      * @return TableComponent
      */
     public function setColumns($columns)
@@ -49,7 +49,9 @@ abstract class TableComponent extends ListComponent
 
     public function prepareTemplate()
     {
-        $this->setTemplate($this->container->get('templating')->render('CreonitAdminBundle:Components:table.html.twig', ['component' => $this]));
+        if(!$this->template){
+            $this->setTemplate($this->container->get('templating')->render('CreonitAdminBundle:Components:table.html.twig', ['component' => $this]));
+        }
         return parent::prepareTemplate();
     }
 

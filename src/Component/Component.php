@@ -49,15 +49,7 @@ abstract class Component extends Scope
         }
         $this->prepareSchema();
         $this->schema();
-
         $this->prepareTemplate();
-
-        /*
-        foreach($this->patterns as $pattern){
-            $pattern->prepareTemplate();
-        }
-        */
-
         $this->initialized = true;
     }
 
