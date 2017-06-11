@@ -12,6 +12,8 @@
         </a>
     </li>
 
+    {{ render(controller('CreonitAdminBundle:Plugin:injection', {block: 'sidebar_before_menu'})) }}
+
     {% for module in admin.getModules %}
         {% if module.isVisible and module.checkPermission(app.user) %}
             <li {{ module.isActive ? 'class="active"' }}>
@@ -23,4 +25,7 @@
         {% endif %}
 
     {% endfor %}
+
+    {{ render(controller('CreonitAdminBundle:Plugin:injection', {block: 'sidebar_after_menu'})) }}
+
 </ul>
