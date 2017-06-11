@@ -1,12 +1,21 @@
-include-font('Proxima Nova', proxima_nova_regular)
-include-font('Proxima Nova', proxima_nova_regular_italic, 400, italic)
-include-font('Proxima Nova', 'ProximaNova-Bold', 700)
-include-font('Proxima Nova', proxima_nova_bold_italic, 700, italic)
-include-font('Proxima Nova', 'hinted-ProximaNova-Semibold', 600)
-include-font('Proxima Nova', proxima_nova_light, 300)
-include-font('Proxima Nova', proxima_nova_light_italic, 300, italic)
+include-font(font-name, file-name, font-weight = normal, font-style = normal, local = false) {
+   @font-face {
+      font-family font-name
+      src url('../fonts/'+file-name+'.woff') format('woff')
+      font-weight font-weight
+      font-style font-style
+   }
+}
 
+include-font('Noto Sans', 'NotoSans', normal, normal)
+include-font('Noto Sans', 'NotoSans-Bold', bold, normal)
+include-font('Noto Sans', 'NotoSans-Italic', normal, italic)
+include-font('Noto Sans', 'NotoSans-BoldItalic', bold, italic)
 
+include-font('Noto Serif', 'NotoSerif', normal, normal)
+include-font('Noto Serif', 'NotoSerif-Bold', bold, normal)
+include-font('Noto Serif', 'NotoSerif-Italic', normal, italic)
+include-font('Noto Serif', 'NotoSerif-BoldItalic', bold, italic)
 
 .mce-panel{
    border-color #ccc !important
