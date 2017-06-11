@@ -104,9 +104,35 @@ abstract class Component extends Scope
         $handler($request, $response);
     }
 
+    /**
+     * @param $handler
+     * @param callable $callable
+     * @return Component
+     * @deprecated Используйте addHandler вместо этого метода
+     */
     public function setHandler($handler, callable $callable){
+        return $this->addHandler($handler, $callable);
+    }
+
+    /**
+     * @param $handler
+     * @param callable $callable
+     * @return $this
+     */
+    public function addHandler($handler, callable $callable){
         $this->handlers[$handler] = $callable;
         return $this;
+    }
+
+    public function removeHandler($handler){
+        if($this->hasHandler($handler)){
+            unset($this->handlers[$handler]);
+        }
+        return $this;
+    }
+
+    public function hasHandler($handler){
+        return isset($this->handlers[$handler]);
     }
 
     /**

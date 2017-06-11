@@ -30,6 +30,24 @@ class TableRowScope extends ListRowScope
         return $this;
     }
 
+    /**
+     * @return array
+     */
+    public function getColumns()
+    {
+        return $this->columns;
+    }
+
+    /**
+     * @param array $columns
+     * @return TableRowScope
+     */
+    public function setColumns($columns)
+    {
+        $this->columns = $columns;
+        return $this;
+    }
+
     public function prepareTemplate()
     {
         if(!$this->template){
