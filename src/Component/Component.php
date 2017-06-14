@@ -209,12 +209,12 @@ abstract class Component extends Scope
                 $this->setReloadSchema($annotation['key']);
                 break;
             case 'action':
-                if(preg_match('/^([\w_-]+)\s*?(\(.*?\)\{.*\}\s*)$/usi', $annotation['value'], $match)){
+                if(preg_match('/^([\w_-]+)\s*?(\(.*?\)\s*\{.*\}\s*)$/usi', $annotation['value'], $match)){
                     $this->setAction($match[1], 'function' . $match[2]);
                 }
                 break;
             case 'event':
-                if(preg_match('/^([\w_-]+)\s*?(\(.*?\)\{.*\}\s*)$/usi', $annotation['value'], $match)){
+                if(preg_match('/^([\w_-]+)\s*?(\(.*?\)\s*\{.*\}\s*)$/usi', $annotation['value'], $match)){
                     $this->setEvent($match[1], 'function' . $match[2]);
                 }
                 break;
