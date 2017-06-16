@@ -161,7 +161,7 @@ abstract class ListComponent extends Component
             $queryResult = $query->paginate(isset($queryPagination[$mask]) ? $queryPagination[$mask] : 1, $pagination);
 
             $responsePagination = $response->data->get('pagination', []);
-            $responsePagination[$mask] = ['last_page' => $queryResult->getLastPage(), 'page' => $queryResult->getPage()];
+            $responsePagination[$mask] = ['last_page' => $queryResult->getLastPage(), 'page' => $queryResult->getPage(), 'total' => $queryResult->getNbResults()];
             $response->data->set('pagination', $responsePagination);
 
         }else{
