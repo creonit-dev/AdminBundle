@@ -2,7 +2,15 @@
 
 namespace Creonit\AdminBundle\Component\Scope;
 
+use Creonit\AdminBundle\Component\Field\CheckboxField;
+use Creonit\AdminBundle\Component\Field\DateField;
+use Creonit\AdminBundle\Component\Field\ExternalField;
 use Creonit\AdminBundle\Component\Field\Field;
+use Creonit\AdminBundle\Component\Field\FileField;
+use Creonit\AdminBundle\Component\Field\GalleryField;
+use Creonit\AdminBundle\Component\Field\ImageField;
+use Creonit\AdminBundle\Component\Field\SelectField;
+use Creonit\AdminBundle\Component\Field\VideoField;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\Map\TableMap;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -95,14 +103,12 @@ class Scope
     }
 
     /**
-     * @param $entity
      * @return ModelCriteria
      */
     public function createQuery(){
         $queryClass = $this->entity . 'Query';
         return new $queryClass;
     }
-
 
     public function createEntity(){
         $entityClass = $this->entity;
@@ -191,6 +197,11 @@ class Scope
         return $this->fields;
     }
 
+
+    /**
+     * @param $name
+     * @return Field|CheckboxField|DateField|ExternalField|FileField|GalleryField|ImageField|SelectField|VideoField
+     */
     public function getField($name){
         return $this->fields[$name];
     }
@@ -206,6 +217,11 @@ class Scope
         return array_key_exists($scopeName, $this->scopes);
     }
 
+
+    /**
+     * @param $scopeName
+     * @return Scope|ListRowScope|TableRowScope
+     */
     public function getScope($scopeName){
         return $this->scopes[$scopeName];
     }

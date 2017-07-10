@@ -148,7 +148,6 @@ abstract class ListComponent extends Component
      * @param null|ListRowScopeRelation $relation
      * @param null $relationValue
      * @param int $level
-     * @return array
      */
     protected function getData(ComponentRequest $request, ComponentResponse $response, ListRowScope $scope, $relation = null, $relationValue = null, $level = 0){
         $mask = $this->getMask($scope, $relation, $relationValue);
@@ -202,8 +201,17 @@ abstract class ListComponent extends Component
             }
         }
 
+        $this->pushDataEntities($response, $mask, $entities);
+    }
+
+    /**
+     * @param ComponentResponse $response
+     * @param string $mask
+     * @param ParameterBag[]|array $entities
+     */
+    protected function pushDataEntities(ComponentResponse $response, $mask, $entities){
         $responseEntities = $response->data->get('entities', []);
-        $responseEntities[$mask] = array_map(function($entityData){return $entityData->all();} , $entities);
+        $responseEntities[$mask] = array_map(function(ParameterBag $entityData){return $entityData->all();} , $entities);
         $response->data->set('entities', $responseEntities);
     }
 
