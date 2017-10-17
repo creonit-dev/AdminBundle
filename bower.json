@@ -17,7 +17,8 @@
     "tinymce": "^4.3.13",
     "tinymce-i18n": "^4.0.0",
     "twig.js": "0.8.8",
-    "jquery.inputmask": "^3.3.1"
+    "jquery.inputmask": "^3.3.1",
+    "eonasdan-bootstrap-datetimepicker": "^4.17.47"
   },
   "overrides": {
     "jquery.inputmask": {
@@ -39,7 +40,14 @@
         "dist/fonts/glyphicons-halflings-regular.eot",
         "dist/fonts/glyphicons-halflings-regular.svg",
         "dist/fonts/glyphicons-halflings-regular.ttf",
-        "dist/fonts/glyphicons-halflings-regular.woff"
+        "dist/fonts/glyphicons-halflings-regular.woff",
+        "dist/fonts/glyphicons-halflings-regular.woff2"
+      ]
+    },
+    "moment": {
+      "main": [
+        "moment.js",
+        "locale/ru.js"
       ]
     }
   }

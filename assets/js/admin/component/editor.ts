@@ -91,7 +91,19 @@ module Creonit.Admin.Component{
 
             this.node.find('input')
                 .filter('[data-inputmask]')
-                .inputmask();
+                .inputmask()
+                .end()
+                .filter('[data-datetimepicker]')
+                .each(function(i, input){
+                    const $input = $(input);
+                    $input.datetimepicker($.extend({
+                        locale: 'ru',
+                        showClear: true,
+                        showTodayButton: true,
+                        showClose: true,
+                        useCurrent: false
+                    }, $input.data('datetimepicker')));
+                });
 
 
             this.node.find('.editor-save-and-close').on('click', (e) => {

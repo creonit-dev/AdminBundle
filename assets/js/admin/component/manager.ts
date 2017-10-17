@@ -122,7 +122,7 @@ module Creonit.Admin {
 
 
             $.ajax({
-                url: baseUrl + '/admin/',
+                url: baseUrl,
                 type: 'post',
                 dataType: 'json',
                 data: form,

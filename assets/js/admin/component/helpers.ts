@@ -253,11 +253,18 @@ module Creonit.Admin.Component.Helpers {
         switch(type){
             case 'date':
                 type = 'text';
-                attributes.push(`data-inputmask='"alias": "dd/mm/yyyy", "mask": "1.2.y", "separator": ".", "placeholder": "дд.мм.гггг"'`);
+                attributes.push(`data-datetimepicker='${JSON.stringify(cleanOptions($.extend({
+                    format: 'DD.MM.YYYY'
+                }, options.date || {})))}'`);
+                // attributes.push(`data-inputmask='"alias": "dd/mm/yyyy", "mask": "1.2.y", "separator": ".", "placeholder": "дд.мм.гггг"'`);
                 break;
             case 'datetime':
                 type = 'text';
-                attributes.push(`data-inputmask='"alias": "datetime", "mask": "1.2.y h:s:s", "separator": ".", "placeholder": "дд.мм.гггг чч:мм:сс"'`);
+                attributes.push(`data-datetimepicker='${JSON.stringify(cleanOptions($.extend({
+                    format: 'DD.MM.YYYY HH:mm',
+                    sideBySide: true
+                }, options.date || {})))}'`);
+                // attributes.push(`data-inputmask='"alias": "datetime", "mask": "1.2.y h:s:s", "separator": ".", "placeholder": "дд.мм.гггг чч:мм:сс"'`);
                 break;
         }
 

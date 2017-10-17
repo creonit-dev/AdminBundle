@@ -20,7 +20,7 @@
     {{ render(controller('CreonitAdminBundle:Plugin:injection', {block: 'head'})) }}
 
     <script>
-	    var baseUrl = '{{ app.request.baseUrl }}';
+	    var baseUrl = '{{ path('creonit_admin_index') }}';
         {{ render(controller('CreonitAdminBundle:Plugin:injection', {block: 'head_script'})) }}
     </script>
 

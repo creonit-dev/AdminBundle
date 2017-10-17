@@ -201,7 +201,19 @@ module Creonit.Admin.Component{
 
             this.node.find('input')
                 .filter('[data-inputmask]')
-                .inputmask();
+                .inputmask()
+                .end()
+                .filter('[data-datetimepicker]')
+                .each(function(i, input){
+                    const $input = $(input);
+                    $input.datetimepicker($.extend({
+                        locale: 'ru',
+                        showClear: true,
+                        showTodayButton: true,
+                        showClose: true,
+                        useCurrent: false
+                    }, $input.data('datetimepicker')));
+                });
 
             this.trigger('render', {});
 
@@ -217,7 +229,7 @@ module Creonit.Admin.Component{
             this.data.entities[mask].forEach((entity:any) => {
                 let rowId = Utils.generateId();
                 let className = entity._row_class;
-                let $entity = $(`<tr data-row-id="${rowId}" data-key="${JSON.stringify(entity._key)}" data-scope="${scope.parameters.name}" data-mask="${mask}" ${className ? `class="${className}"` : ''}>` + scope.template.render($.extend({}, entity, {
+                let $entity = $(`<tr data-row-id="${rowId}" data-key="${JSON.stringify(entity._key).replace(/(^"|"$)/g, '')}" data-scope="${scope.parameters.name}" data-mask="${mask}" ${className ? `class="${className}"` : ''}>` + scope.template.render($.extend({}, entity, {
                         _data: this.data,
                         _query: this.getQuery(),
                         _row_id: rowId,
@@ -251,8 +263,9 @@ module Creonit.Admin.Component{
 
                 $.each(this.parameters.relations, (i, rel) => {
                     if(rel.target.scope == scope.parameters.name){
-                        this.renderScope(this.getScope(rel.source.scope), rel, entity[rel.target.field], level+1);
-                        //return false;
+                        if(!scope.parameters.collapsed || (this.expanded[mask] && this.expanded[mask].indexOf(entity._key) >= 0)){
+                            this.renderScope(this.getScope(rel.source.scope), rel, entity[rel.target.field], level+1);
+                        }
                     }
                 });
 

@@ -209,7 +209,20 @@ gulp.task('js:tinymce.ru', function(){
  * Copy font files to /web/fonts/*
  */
 gulp.task('fonts', function(){
-    return gulp.src('./assets/fonts/**/*').pipe(gulp.dest(outputDir + '/fonts'));
+    var stream = gulp.src('./assets/fonts/**/*');
+    if(fs.existsSync('./bower.json')){
+        stream = streamqueue(
+            {objectMode: true},
+            gulp.src(bower({includeDev: true, filter: '**/fonts/*.*'})),
+            stream
+        );
+    }
+
+    if(browserSync){
+        stream.pipe(browserSync.reload({stream: true}));
+    }
+
+    return stream.pipe(gulp.dest(outputDir + '/fonts'));
 });
 
 
