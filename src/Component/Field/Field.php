@@ -2,8 +2,6 @@
 
 namespace Creonit\AdminBundle\Component\Field;
 
-use AppBundle\Model\Currency;
-use AppBundle\Model\Map\CurrencyI18nTableMap;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Propel\Runtime\Map\TableMap;
 use Symfony\Component\DependencyInjection\ContainerInterface;
