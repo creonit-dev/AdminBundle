@@ -56,7 +56,7 @@ class FileField extends Field
         }
 
         if($data['delete']){
-            $fileId = $entity->getByName($this->name, TableMap::TYPE_FIELDNAME);
+            $fileId = parent::load($entity);
             parent::save($entity, null, true);
 
             if($file = FileQuery::create()->findPk($fileId)){

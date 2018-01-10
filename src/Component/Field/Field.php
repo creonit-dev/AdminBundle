@@ -2,6 +2,8 @@
 
 namespace Creonit\AdminBundle\Component\Field;
 
+use AppBundle\Model\Currency;
+use AppBundle\Model\Map\CurrencyI18nTableMap;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Propel\Runtime\Map\TableMap;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -14,7 +16,7 @@ class Field
 
     const TYPE = 'default';
     const HELPERS = '';
-    
+
     protected $name;
     protected $default;
 
@@ -82,6 +84,21 @@ class Field
 
             }else if(property_exists($entity, $this->name)){
                 $entity->setByName($this->name, $data, TableMap::TYPE_FIELDNAME);
+
+            }else if(class_exists($i18n = get_class($entity) . 'I18n') and preg_match('/([\s\S]+)_(\w+)$/', $this->getName(), $match)){
+                $tableMap = constant($i18n . '::TABLE_MAP');
+                $tableMap = $tableMap::getTableMap();
+                list(, $fieldName, $locale) = $match;
+
+                if($tableMap->hasColumn($fieldName)) {
+                    $methodName = 'set' . $tableMap::translateFieldName($fieldName, TableMap::TYPE_FIELDNAME, TableMap::TYPE_PHPNAME);
+                    if (method_exists($entity, $methodName)) {
+                        $entity->$methodName($data, $locale);
+                    } else {
+                        $translation = $entity->getTranslation($locale);
+                        $translation->setByName($fieldName, $data, TableMap::TYPE_FIELDNAME);
+                    }
+                }
             }
         }
 
@@ -101,8 +118,28 @@ class Field
             $language = new ExpressionLanguage();
             return $this->decorate($language->evaluate($this->parameters->get('load'), ['entity' => $entity]));
 
-        }else if($this->hasProperty($entity)){
+        }else if($this->hasProperty($entity)) {
             return $this->decorate($entity->getByName($this->name, TableMap::TYPE_FIELDNAME));
+
+        }else if(class_exists($i18n = get_class($entity) . 'I18n') and preg_match('/^([\s\S]+)_(\w+)$/', $this->getName(), $match)){
+            $tableMap = constant($i18n . '::TABLE_MAP');
+            $tableMap = $tableMap::getTableMap();
+            list(, $fieldName, $locale) = $match;
+
+            if($tableMap->hasColumn($fieldName)){
+                $methodName = 'get' . $tableMap::translateFieldName($fieldName, TableMap::TYPE_FIELDNAME, TableMap::TYPE_PHPNAME);
+                if(method_exists($entity, $methodName)){
+                    $data = $entity->$methodName($locale);
+                }else{
+                    $translation = $entity->getTranslation($locale);
+                    $data = $translation->getByName($fieldName, TableMap::TYPE_FIELDNAME);
+                }
+
+            }else{
+                $data = null;
+            }
+
+            return $this->decorate($data);
 
         }else{
             return $this->decorate(null);
