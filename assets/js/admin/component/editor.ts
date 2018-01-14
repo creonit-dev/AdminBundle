@@ -2,6 +2,7 @@ module Creonit.Admin.Component{
     export class Editor extends Component{
 
         protected locked = false;
+        protected reloading = false;
 
         static increment = 0;
 
@@ -50,9 +51,12 @@ module Creonit.Admin.Component{
                 $form = $(`<form id="${formId}"></form>`);
 
             this.node.append($form);
-            this.node.find('input, textarea, select, button').attr('form', formId).filter('input').eq(0).focus();
+            var controls = this.node.find('input, textarea, select, button').attr('form', formId);
+            if(!this.reloading){
+                controls.filter('input').eq(0).focus();
+            }
 
-            this.node.find('select[js-component-select-reload]').change(() => {
+            this.node.find('select[js-component-select-reload], input[js-component-checkbox-reload]').change(() => {
 
                 var data = $form.serializeObject(),
                     query = this.getQuery();
@@ -60,7 +64,9 @@ module Creonit.Admin.Component{
 
                 this.request('reload_data', query, data, (response) => {
                     if (this.checkResponse(response)) {
+                        this.reloading = true;
                         this.applyResponse(response);
+                        this.reloading = false;
                     }
                 });
 
@@ -125,6 +131,7 @@ module Creonit.Admin.Component{
 
                 this.locked = true;
 
+                this.node.find('.modal-footer button[type="submit"]').prop('disabled', true);
 
                 var data = $form.serializeObject(),
                     query = this.getQuery(),
@@ -155,6 +162,8 @@ module Creonit.Admin.Component{
 
                 this.request('send_data', query, data, (response) => {
                     this.locked = false;
+                    this.node.find('.modal-footer button[type="submit"]').prop('disabled', false);
+
                     if(this.checkResponse(response)){
                         if(closeAfterSave){
                             this.close();

@@ -293,6 +293,7 @@ var Creonit;
                 function Editor() {
                     _super.apply(this, arguments);
                     this.locked = false;
+                    this.reloading = false;
                 }
                 Editor.prototype.initialize = function () {
                     this.node.addClass('component component-editor');
@@ -315,12 +316,17 @@ var Creonit;
                     }
                     var formId = "form" + ++Editor.increment, $form = $("<form id=\"" + formId + "\"></form>");
                     this.node.append($form);
-                    this.node.find('input, textarea, select, button').attr('form', formId).filter('input').eq(0).focus();
-                    this.node.find('select[js-component-select-reload]').change(function () {
+                    var controls = this.node.find('input, textarea, select, button').attr('form', formId);
+                    if (!this.reloading) {
+                        controls.filter('input').eq(0).focus();
+                    }
+                    this.node.find('select[js-component-select-reload], input[js-component-checkbox-reload]').change(function () {
                         var data = $form.serializeObject(), query = _this.getQuery();
                         _this.request('reload_data', query, data, function (response) {
                             if (_this.checkResponse(response)) {
+                                _this.reloading = true;
                                 _this.applyResponse(response);
+                                _this.reloading = false;
                             }
                         });
                     });
@@ -373,6 +379,7 @@ var Creonit;
                             return;
                         }
                         _this.locked = true;
+                        _this.node.find('.modal-footer button[type="submit"]').prop('disabled', true);
                         var data = $form.serializeObject(), query = _this.getQuery(), $buttonCloseAfterSave = _this.node.find('.editor-save-and-close[clicked]'), closeAfterSave = !!$buttonCloseAfterSave.length;
                         $buttonCloseAfterSave.removeAttr('clicked');
                         if (closeAfterSave) {
@@ -391,6 +398,7 @@ var Creonit;
                         });
                         _this.request('send_data', query, data, function (response) {
                             _this.locked = false;
+                            _this.node.find('.modal-footer button[type="submit"]').prop('disabled', false);
                             if (_this.checkResponse(response)) {
                                 if (closeAfterSave) {
                                     _this.close();
@@ -599,9 +607,10 @@ var Creonit;
                 }
                 Helpers.radio = radio;
                 function checkbox(value, _a) {
-                    var _b = _a === void 0 ? [] : _a, _c = _b[0], name = _c === void 0 ? '' : _c, _d = _b[1], caption = _d === void 0 ? '' : _d;
+                    var _b = _a === void 0 ? [] : _a, _c = _b[0], name = _c === void 0 ? '' : _c, _d = _b[1], caption = _d === void 0 ? '' : _d, options = _b[2];
+                    options = options || {};
                     value = value ? Component.Utils.escape(value.toString()) : '';
-                    return "<div class=\"checkbox\"><label><input type=\"checkbox\" name=\"" + name + "\" " + (value ? 'checked' : '') + "> " + caption + "</label></div>";
+                    return "<div class=\"checkbox\"><label><input type=\"checkbox\" name=\"" + name + "\" " + (value ? 'checked' : '') + " " + (options.reload ? 'js-component-checkbox-reload' : '') + "> " + caption + "</label></div>";
                 }
                 Helpers.checkbox = checkbox;
                 function input(value, _a) {

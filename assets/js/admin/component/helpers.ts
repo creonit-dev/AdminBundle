@@ -236,10 +236,11 @@ module Creonit.Admin.Component.Helpers {
         return value;
     }
 
-    export function checkbox(value:string, [name = '', caption = ''] = []){
+    export function checkbox(value:string, [name = '', caption = '', options] = []){
+        options = options || {};
         value = value ? Utils.escape(value.toString()) : '';
 
-        return `<div class="checkbox"><label><input type="checkbox" name="${name}" ${value ? 'checked' : ''}> ${caption}</label></div>`;
+        return `<div class="checkbox"><label><input type="checkbox" name="${name}" ${value ? 'checked' : ''} ${options.reload ? 'js-component-checkbox-reload' : ''}> ${caption}</label></div>`;
     }
 
     export function input(value:string, [name, type, options]){
