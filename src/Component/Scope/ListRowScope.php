@@ -3,6 +3,7 @@
 namespace Creonit\AdminBundle\Component\Scope;
 
 use Creonit\AdminBundle\Component\ListComponent;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 class ListRowScope extends Scope
 {
@@ -12,6 +13,7 @@ class ListRowScope extends Scope
     protected $sortable = false;
     protected $collapsed = false;
     protected $pagination;
+    protected $data = null;
 
     public $relations = [];
     
@@ -21,6 +23,12 @@ class ListRowScope extends Scope
     public function applySchemaAnnotation($annotation){
 
         switch($annotation['key']){
+            case 'data':
+                $language = new ExpressionLanguage();
+                $data = $language->evaluate($annotation['value']);
+                $this->setData($data);
+                $this->entity = null;
+                break;
             case 'sortable':
                 $this->setSortable((boolean) $annotation['value']);
                 break;
@@ -33,6 +41,8 @@ class ListRowScope extends Scope
             case 'relation':
                 if(preg_match('/^\s*([\w_]+)\s*>\s*([\w_-]+)\.([\w_]+)\s*$/ui', $annotation['value'], $match)){
                     $this->relations[] = [$match[1], $match[2], $match[3]];
+                }else if(preg_match('/^\s*([\w_-]+)(?:\.([\w_]+))?\s*$/ui', $annotation['value'], $match)){
+                    $this->relations[] = ['_relation', $match[1], isset($match[2]) ? $match[2] : '_key'];
                 }
                 break;
             default:
@@ -120,6 +130,17 @@ class ListRowScope extends Scope
     public function getPagination()
     {
         return $this->pagination;
+    }
+
+    public function setData($data)
+    {
+        $this->data = $data;
+        return $this;
+    }
+
+    public function getData()
+    {
+        return $this->data;
     }
 
 

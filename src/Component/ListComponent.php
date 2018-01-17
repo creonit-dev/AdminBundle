@@ -153,25 +153,20 @@ abstract class ListComponent extends Component
         $mask = $this->getMask($scope, $relation, $relationValue);
         $entities = [];
 
-        $query = $this->getQuery($request, $response, $scope, $relation, $relationValue, $level);
+        $data = $this->load($request, $response, $scope, $relation, $relationValue, $level);
 
-        if($pagination = $scope->getPagination()){
-            $queryPagination = $request->query->get('pagination');
-            $queryResult = $query->paginate(isset($queryPagination[$mask]) ? $queryPagination[$mask] : 1, $pagination);
-
-            $responsePagination = $response->data->get('pagination', []);
-            $responsePagination[$mask] = ['last_page' => $queryResult->getLastPage(), 'page' => $queryResult->getPage(), 'total' => $queryResult->getNbResults()];
-            $response->data->set('pagination', $responsePagination);
-
-        }else{
-            $queryResult = $query->find();
-        }
-
-        foreach($queryResult as $entity){
+        foreach($data as $i => $entity){
             $entityData = new ParameterBag();
-            foreach($scope->getFields() as $field){
-                $entityData->set($field->getName(), $field->load($entity));
-                $entityData->set('_key', $entity->getPrimaryKey());
+            if($scope->getEntity()){
+                foreach($scope->getFields() as $field){
+                    $entityData->set($field->getName(), $field->load($entity));
+                    $entityData->set('_key', $entity->getPrimaryKey());
+                }
+            }else{
+                $entityData->add($entity);
+                if(!$entityData->has('_key')){
+                    $entityData->set('_key', $i + 1);
+                }
             }
             $this->decorate($request, $response, $entityData, $entity, $scope, $relation, $relationValue, $level);
             $entities[] = $entityData;
@@ -184,9 +179,13 @@ abstract class ListComponent extends Component
                 /** @var ParameterBag $entityData */
                 foreach($entities as $entityData) {
                     if($scope->isCollapsed()){
-                        $relQuery = $this->getQuery($request, $response, $rel->getSourceScope(), $rel, $entityData->get($rel->getTargetField()->getName()), $level+1);
-                        if($hasChildren = $relQuery->count()){
-                            $entityData->set('_has_children', true);
+                        if($rel->getSourceScope()->getEntity()){
+                            $relQuery = $this->getQuery($request, $response, $rel->getSourceScope(), $rel, $entityData->get($rel->getTargetField()->getName()), $level+1);
+                            if($hasChildren = $relQuery->count()){
+                                $entityData->set('_has_children', true);
+                            }
+                        }else{
+                            $hasChildren = true;
                         }
 
                         if(empty($expanded[$mask]) || !in_array($entityData->get('_key'), $expanded[$mask])){
@@ -202,6 +201,43 @@ abstract class ListComponent extends Component
         }
 
         $this->pushDataEntities($response, $mask, $entities);
+    }
+
+    /**
+     * @param ComponentRequest $request
+     * @param ComponentResponse $response
+     * @param ListRowScope $scope
+     * @param null $relation
+     * @param null $relationValue
+     * @param int $level
+     * @return array|mixed|\Propel\Runtime\ActiveRecord\ActiveRecordInterface[]|\Propel\Runtime\Collection\ObjectCollection|\Propel\Runtime\Util\PropelModelPager
+     */
+    protected function load(ComponentRequest $request, ComponentResponse $response, ListRowScope $scope, $relation = null, $relationValue = null, $level = 0){
+        if(null !== ($data = $scope->getData())){
+            return $data;
+        }
+
+        if(!$scope->getEntity()){
+            return [];
+        }
+
+        $query = $this->getQuery($request, $response, $scope, $relation, $relationValue, $level);
+
+        if($pagination = $scope->getPagination()){
+            $mask = $this->getMask($scope, $relation, $relationValue);
+
+            $queryPagination = $request->query->get('pagination');
+            $queryResult = $query->paginate(isset($queryPagination[$mask]) ? $queryPagination[$mask] : 1, $pagination);
+
+            $responsePagination = $response->data->get('pagination', []);
+            $responsePagination[$mask] = ['last_page' => $queryResult->getLastPage(), 'page' => $queryResult->getPage(), 'total' => $queryResult->getNbResults()];
+            $response->data->set('pagination', $responsePagination);
+
+        }else{
+            $queryResult = $query->find();
+        }
+
+        return $queryResult;
     }
 
     /**
