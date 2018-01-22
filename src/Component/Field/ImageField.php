@@ -8,6 +8,8 @@ use Creonit\MediaBundle\Model\ImageQuery;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Propel\Runtime\Map\TableMap;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Image as ImageConstraint;
 
 class ImageField extends Field
 {
@@ -127,6 +129,50 @@ class ImageField extends Field
         }else{
             return $size . ' б';
         }
+    }
+
+
+    private function findImageConstraint($constraints)
+    {
+        foreach ($constraints as $constraint) {
+            if($constraint instanceof ImageConstraint) {
+                return $constraint;
+            }
+        }
+        return null;
+    }
+
+    public function validate($data){
+        if($data['file'] instanceof NoData){
+            return [];
+        }
+
+        $constraints = $this->parameters->get('constraints', []);
+        $required = $this->parameters->get('required');
+
+        if($required) {
+            $constraints[] = new NotBlank(true === $required ? [] : ['message' => $required]);
+        }
+
+        if(!$imageConstraint = $this->findImageConstraint($constraints)){
+            $constraints[] = $imageConstraint = new ImageConstraint;
+        }
+
+        if(!$imageConstraint->maxWidth){
+            $imageConstraint->maxWidth = 3000;
+        }
+
+        if(!$imageConstraint->maxHeight){
+            $imageConstraint->maxHeight = 3000;
+        }
+
+        if(!$imageConstraint->maxSize){
+            $imageConstraint->maxSize = '5M';
+        }
+
+        $imageConstraint->detectCorrupted = true;
+
+        return $constraints ? $this->container->get('validator')->validate($data['file'], $constraints) : [];
     }
 
 
