@@ -26,7 +26,7 @@ class FileField extends Field
         /** @var UploadedFile $file */
         if($file = $data['file'] and !$file instanceof NoData){
 
-            $extension = $file->guessExtension();
+            $extension = $file->getClientOriginalExtension();
             $size = $file->getSize();
             $mime = $file->getMimeType();
             $path = '/uploads';
