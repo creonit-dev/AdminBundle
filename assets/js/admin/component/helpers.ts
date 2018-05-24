@@ -236,7 +236,7 @@ module Creonit.Admin.Component.Helpers {
         return value;
     }
 
-    export function checkbox(value:string, [name = '', caption = '', options] = []){
+    export function checkbox(value:string, [name = '', caption = '', options = null] = []){
         options = options || {};
         value = value ? Utils.escape(value.toString()) : '';
 

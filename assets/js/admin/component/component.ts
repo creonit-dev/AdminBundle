@@ -120,6 +120,7 @@ module Creonit.Admin.Component {
             }
             
             this.data = response.data || {};
+            this.trigger('load', {});
             this.render();
 
             this.node.find('[js-component-external-field-reset]')

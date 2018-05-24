@@ -182,6 +182,7 @@ var Creonit;
                         $.extend(this.query, response.query);
                     }
                     this.data = response.data || {};
+                    this.trigger('load', {});
                     this.render();
                     this.node.find('[js-component-external-field-reset]')
                         .off('.component')
@@ -607,7 +608,7 @@ var Creonit;
                 }
                 Helpers.radio = radio;
                 function checkbox(value, _a) {
-                    var _b = _a === void 0 ? [] : _a, _c = _b[0], name = _c === void 0 ? '' : _c, _d = _b[1], caption = _d === void 0 ? '' : _d, options = _b[2];
+                    var _b = _a === void 0 ? [] : _a, _c = _b[0], name = _c === void 0 ? '' : _c, _d = _b[1], caption = _d === void 0 ? '' : _d, _e = _b[2], options = _e === void 0 ? null : _e;
                     options = options || {};
                     value = value ? Component.Utils.escape(value.toString()) : '';
                     return "<div class=\"checkbox\"><label><input type=\"checkbox\" name=\"" + name + "\" " + (value ? 'checked' : '') + " " + (options.reload ? 'js-component-checkbox-reload' : '') + "> " + caption + "</label></div>";
