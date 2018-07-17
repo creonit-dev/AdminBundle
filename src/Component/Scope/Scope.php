@@ -15,10 +15,6 @@ use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\Map\TableMap;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
-use Symfony\Component\Validator\Constraints\Email;
-use Symfony\Component\Validator\Constraints\File;
-use Symfony\Component\Validator\Constraints\Image;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 class Scope
 {
@@ -167,10 +163,12 @@ class Scope
                     $name = $match[1];
                     if(isset($match[3])){
                         $language = new ExpressionLanguage();
-                        $language->register('NotBlank', function(){}, function ($arguments, $options = []) {return new NotBlank($options);});
-                        $language->register('Email', function(){}, function ($arguments, $options = []) {return new Email($options);});
-                        $language->register('Image', function(){}, function ($arguments, $options = []) {return new Image($options);});
-                        $language->register('File', function(){}, function ($arguments, $options = []) {return new File($options);});
+                        $constraints = ['NotBlank', 'Blank', 'NotNull', 'IsNull', 'IsTrue', 'IsFalse', 'Type', 'Email', 'Length', 'Url', 'Regex', 'Ip', 'Uuid', 'Range', 'EqualTo', 'NotEqualTo', 'IdenticalTo', 'NotIdenticalTo', 'LessThan', 'LessThanOrEqual', 'GreaterThan', 'GreaterThanOrEqual', 'Date', 'DateTime', 'Time', 'Choice', 'Collection', 'Count', 'UniqueEntity', 'Language', 'Locale', 'Country', 'File', 'Image', 'Bic', 'CardScheme', 'Currency', 'Luhn', 'Iban', 'Isbn', 'Issn', 'Callback', 'Expression', 'All', 'UserPassword', 'Valid'];
+                        foreach($constraints as $constraint){
+                            $language->register($constraint, function(){}, function ($arguments, $options = []) use ($constraint) {
+                                $constraint = 'Symfony\\Component\\Validator\\Constraints\\' . $constraint; return new $constraint($options);
+                            });
+                        }
 
                         $options = $language->evaluate($match[3]);
                     }else{
