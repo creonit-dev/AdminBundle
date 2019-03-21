@@ -90,7 +90,8 @@ module Creonit.Admin.Component{
                 image_advtab: true,
                 menubar: 'edit insert view format table tools',
                 browser_spellcheck: true,
-                extended_valid_elements: 'div[*],a[*],span[*],button[*],form[*],input[*]',
+                custom_elements: 'script,style',
+                extended_valid_elements: 'div[*],a[*],span[*],button[*],form[*],input[*],script[*],style[*],iframe[*]',
                 setup: function(editor) {
 
                 }
