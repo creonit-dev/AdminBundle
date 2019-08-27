@@ -212,7 +212,18 @@ module Creonit.Admin.Component.Helpers {
         var name = options && options[0] ? options[0] : '',
             output = 'Изображение не загружено';
 
-        return component('Media.GalleryTable', {field_name: name, gallery_id: value}, {}) + `<input type="hidden" name="${name}" value="${value}">`;
+        if (options[1] && options[1].video == false) {
+            var video = false;
+        } else {
+            var video = true;
+        }
+        if (options[1] && options[1].image == false) {
+            var image = false;
+        } else {
+            var image = true;
+        }
+
+        return component('Media.GalleryTable', {field_name: name, gallery_id: value, image: image, video: video}, {}) + `<input type="hidden" name="${name}" value="${value}">`;
     }
 
     export function select(value:any, [name = '', options = {}]:[string, any] = ['', {}]){
