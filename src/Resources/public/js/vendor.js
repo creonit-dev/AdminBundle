@@ -9887,6 +9887,15 @@ return jQuery;
 
     var utils = {
         isMouseInside: false,
+        // Определяет произошло ли событие e вне блока block
+        isEventOut: function(blocks, e) {
+            var r = true;
+            $(blocks).each(function() {
+                if ($(e.target).get(0)==$(this).get(0)) r = false;
+                if ($(e.target).closest('HTML', $(this).get(0)).length==0) r = false;
+            });
+            return r;
+        }
     };
 
 
@@ -9961,16 +9970,15 @@ return jQuery;
             // Закрытие при клике на overlay
             if (D.closeOnOverlayClick) {
                 D.overlay.block.add(D.container.block).unbind('.arcticmodal-close').bind('mouseup.arcticmodal-close', function(e) {
-                    if (!utils.isMouseInside) {
+                    if (!utils.isMouseInside && utils.isEventOut($('>*', D.body), e)) {
                         $this.arcticmodal('close');
                     }
                     utils.isMouseInside = false;
                 });
+                D.body.unbind('.arcticmodal-close').bind('mousedown.arcticmodal-close', function(e) {
+                    utils.isMouseInside = true;
+                });
             }
-
-            D.body.unbind('.arcticmodal-close').bind('mousedown.arcticmodal-close', function(e) {
-                utils.isMouseInside = true;
-            });
 
             // Запомним настройки
             D.container.block.data('arcticmodalParentEl', $this);
