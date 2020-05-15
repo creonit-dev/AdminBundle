@@ -116,47 +116,6 @@ module Creonit.Admin.Component.Helpers {
         return action(value, ['openComponent', name, query, options]);
     }
 
-
-    export function file(value:any, [name, options = {}]){
-        var output = 'Файл не загружен';
-
-        if(value){
-            output = `
-                <a href="${value.path}/${value.name}" target="_blank">${value.original_name}</a> (${value.size})
-                <div class="checkbox">
-                    <label class="small">
-                        <input type="checkbox" name="${name}__delete"> Удалить файл
-                    </label>
-                </div>
-            `;
-        }
-
-
-        return `
-            <div class="panel panel-default">
-                <div class="panel-heading"><input type="file" name="${name}"></div>
-                <div class="panel-body">${output}</div>
-            </div>
-        `;
-    }
-
-    export function video(value:any, [name, options = {}]:[string, any] = ['', {}]){
-        var output = 'Видео не загружено',
-            url = '';
-
-        if(value){
-            url = value.url;
-            output = `<a href="${value.url}" target="_blank">${value.preview}</a>`;
-        }
-
-        return `
-            <div class="panel panel-default">
-                <div class="panel-heading"><input type="text" class="form-control" name="${name}" value="${url}" placeholder="Ссылка на YouTube"></div>
-                <div class="panel-body">${output}</div>
-            </div>
-        `;
-    }
-
     export function external(value:any, [name, component, options = {}]:[string, string, any] = ['', '', {}]){
         var id = Utils.generateId(),
             empty = options.empty || 'Значение не выбрано';
@@ -180,50 +139,6 @@ module Creonit.Admin.Component.Helpers {
            
             <input type="hidden" name="${name}" value="${value.value}">
         `;
-    }
-    export function image(value:any, [name, options = {}]:[string, any] = ['', {}]){
-        options = $.extend({deletable: true}, options);
-
-        var output = 'Изображение не загружено';
-
-        if(value){
-            output = `<a href="${value.path}/${value.name}" target="_blank">${value.preview}</a>`;
-
-            if(options.deletable){
-                output += `   
-                    <div class="checkbox">
-                        <label class="small">
-                            <input type="checkbox" name="${name}__delete"> Удалить изображение
-                        </label>
-                    </div>
-                `;
-            }
-        }
-
-        return `
-            <div class="panel panel-default">
-                <div class="panel-heading"><input type="file" name="${name}"></div>
-                <div class="panel-body">${output}</div>
-            </div>
-        `;
-    }
-
-    export function gallery(value:any, options?:any){
-        var name = options && options[0] ? options[0] : '',
-            output = 'Изображение не загружено';
-
-        if (options[1] && options[1].video == false) {
-            var video = false;
-        } else {
-            var video = true;
-        }
-        if (options[1] && options[1].image == false) {
-            var image = false;
-        } else {
-            var image = true;
-        }
-
-        return component('Media.GalleryTable', {field_name: name, gallery_id: value, image: image, video: video}, {}) + `<input type="hidden" name="${name}" value="${value}">`;
     }
 
     export function select(value:any, [name = '', options = {}]:[string, any] = ['', {}]){
@@ -361,7 +276,7 @@ module Creonit.Admin.Component.Helpers {
             return output;
         });
     }
-    
+
     export function registerTwigFilter(name, callable){
         Twig.extendFilter(name, function(...args){
             var output:any = new String(callable.apply(this, args));
@@ -370,7 +285,7 @@ module Creonit.Admin.Component.Helpers {
             return output;
         });
     }
-    
+
     function registerTwigFilters(){
         [
             'controls',

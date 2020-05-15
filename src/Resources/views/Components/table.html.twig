@@ -11,7 +11,23 @@
                 <thead>
                 <tr>
                     {% for column in component.columns %}
-                        <th {{ column.width != 'auto' ? ('style="width:'~column.width~'"') | raw }}>{{ column.value }}</th>
+                        <th {{ column.width != 'auto' ? ('style="width:'~column.width~'"') | raw }}>
+                            {% if column.sortable_column_name %}
+                                <a
+                                    href="#"
+                                    class="sortable-column"
+                                    js-sortable-column
+                                    data-sortable-column-name="{{ column.sortable_column_name }}"
+                                    data-sortable-column-direction="{{ column.sortable_column_direction }}"
+                                    data-sortable-column-direction-mode="{{ column.sortable_column_direction_mode }}"
+                                    data-sortable-column-default="{{ column.sortable_column_default ? 1 : 0 }}"
+                                >
+                                    {{ column.value }}
+                                </a>
+                            {% else %}
+                                {{ column.value }}
+                            {% endif %}
+                        </th>
                     {% endfor %}
                 </tr>
                 </thead>

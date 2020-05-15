@@ -23,6 +23,33 @@ $.fn.serializeObject = function () {
     });
     return json;
 };
+tinymce.PluginManager.add('typograf', function (editor, url) {
+    'use strict';
+    var scriptLoader = new tinymce.dom.ScriptLoader(), tp, typo = function () {
+        if (tp) {
+            editor.setContent(tp.execute(editor.getContent()));
+            editor.undoManager.add();
+        }
+    };
+    scriptLoader.add(url + '/../../../typograf/typograf.min.js');
+    scriptLoader.loadQueue(function () {
+        tp = new Typograf({
+            locale: 'ru',
+            mode: 'name'
+        });
+    });
+    editor.addButton('typograf', {
+        title: 'Типографика',
+        icon: 'blockquote',
+        onclick: typo
+    });
+    editor.addMenuItem('typograf', {
+        context: 'format',
+        text: 'Типографика',
+        icon: 'blockquote',
+        onclick: typo
+    });
+});
 $(function () {
     Creonit.Admin.Component.Utils.initializeComponents();
 });
@@ -115,9 +142,20 @@ var Creonit;
                 Component.prototype.getNode = function () {
                     return this.node;
                 };
-                Component.prototype.action = function (name, options) {
+                Component.prototype.action = function (name, options, event) {
                     if (this.actions[name]) {
-                        return this.actions[name].apply(this, options);
+                        var functionArgs = Component_1.Utils.functionArguments(this.actions[name]);
+                        var args = [];
+                        if (event && functionArgs.indexOf('$event') >= 0) {
+                            for (var i = 0; i < functionArgs.length - 1; i++) {
+                                args.push(options[i]);
+                            }
+                            args.push(event);
+                        }
+                        else {
+                            args = options;
+                        }
+                        return this.actions[name].apply(this, args);
                     }
                     else {
                         throw new Error("Undefined method " + name + " in component " + this.name);
@@ -138,6 +176,7 @@ var Creonit;
                     this.request(Component_1.Request.TYPE_LOAD_SCHEMA, this.getQuery(), null, function (response) {
                         if (_this.checkResponse(response, _this.options.modal)) {
                             _this.applyResponse(response);
+                            _this.node.trigger('component-schema-loaded', _this);
                         }
                         else {
                             if (_this.options.modal) {
@@ -151,6 +190,7 @@ var Creonit;
                 };
                 Component.prototype.loadData = function () {
                     var _this = this;
+                    this.node.find('[data-toggle="tooltip"]').tooltip('destroy');
                     if (this.parameters.reloadSchema) {
                         this.loadSchema();
                     }
@@ -244,37 +284,19 @@ var Creonit;
                     if (query === void 0) { query = {}; }
                     if (options === void 0) { options = {}; }
                     options.modal = true;
-                    var interval;
                     var $modal = $("\n                <div class=\"modal-dialog modal-lg\">\n                    " + Component_1.Helpers.component(name, query, options) + "\n                </div>\n            ");
                     $modal.arcticmodal({
-                        beforeOpen: function (modal, $modal) {
+                        closeOnOverlayClick: false,
+                        closeOnEsc: false,
+                        beforeOpen: function () {
                             Component_1.Utils.initializeComponents($modal, _this);
-                        },
-                        afterOpen: function (modal, $modal) {
-                            var $container = $modal.closest('.arcticmodal-container');
-                            interval = setInterval(function () {
-                                var $footer = $modal.find('.modal-footer');
-                                if (!$footer.length) {
-                                    return;
-                                }
-                                clearInterval(interval);
-                                var fix = function () {
-                                    $footer.offset({ top: $container.height() + $(window).scrollTop() - $footer.outerHeight() });
-                                    if (parseInt($footer.css('top')) > 0) {
-                                        $footer.removeAttr('style');
-                                    }
-                                };
-                                interval = setInterval(fix, 1000);
-                                fix();
-                                $container.on('scroll', fix);
-                            }, 10);
+                            $modal.find('[js-component]').one('component-schema-loaded', function (e, component) {
+                                component.trigger('open', {});
+                            });
                         },
                         beforeClose: function () {
                             $modal.find('[js-component]').data('creonit-component').trigger('close', {});
                         },
-                        afterClose: function () {
-                            clearInterval(interval);
-                        }
                     });
                 };
                 return Component;
@@ -307,7 +329,8 @@ var Creonit;
                         this.node.append(node = $("\n                    <div class=\"modal-content\"> \n                        <div class=\"modal-header\"> \n                            <button type=\"button\" class=\"close\"><span>\u00D7</span></button> \n                            <h4 class=\"modal-title\">" + this.parameters.title + "</h4> \n                        </div> \n                        \n                        <div class=\"modal-body\">\n                        </div>\n                   </div>    \n                "));
                         node = node.find('.modal-body');
                         this.node.find('.modal-content').append("<div class=\"modal-footer\">" + Component.Helpers.submit('Сохранить и закрыть', { className: 'editor-save-and-close' }) + " " + Component.Helpers.submit('Сохранить') + " " + Component.Helpers.button('Закрыть') + "</div>");
-                        this.node.find('.modal-footer button[type=button], .modal-header .close').on('click', function () {
+                        this.node.find('.modal-footer button[type=button], .modal-header .close').on('click', function (e) {
+                            e.preventDefault();
                             _this.close();
                         });
                     }
@@ -331,10 +354,10 @@ var Creonit;
                             }
                         });
                     });
-                    this.node.find('.text-editor').tinymce({
+                    this.node.find('.text-editor').tinymce($.extend({}, {
                         doctype: 'html5',
                         element_format: 'html',
-                        plugins: ['anchor autolink code colorpicker contextmenu image fullscreen hr link lists media paste nonbreaking  visualblocks table searchreplace charmap'],
+                        plugins: ['anchor autolink code advcode colorpicker contextmenu image fullscreen hr link lists media paste nonbreaking  visualblocks table searchreplace charmap typograf'],
                         resize: true,
                         height: 150,
                         visualblocks_default_state: true,
@@ -345,7 +368,7 @@ var Creonit;
                         language: 'ru',
                         statusbar: true,
                         branding: false,
-                        toolbar: 'formatselect | bold italic removeformat | link unlink | bullist numlist | image media | code fullscreen',
+                        toolbar: 'formatselect | bold italic removeformat | link unlink | bullist numlist | image media | typograf | code fullscreen',
                         image_advtab: true,
                         menubar: 'edit insert view format table tools',
                         browser_spellcheck: true,
@@ -370,8 +393,8 @@ var Creonit;
                                     }
                                 }
                             });
-                        }
-                    });
+                        },
+                    }, 'getTinyMceConfig' in Creonit.Admin.Component.Utils ? Creonit.Admin.Component.Utils['getTinyMceConfig'](this) : {}));
                     this.node.find('input')
                         .filter('[data-inputmask]')
                         .inputmask()
@@ -393,7 +416,7 @@ var Creonit;
                     this.node.find('[js-component-action]').on('click', function (e) {
                         e.preventDefault();
                         var $action = $(e.currentTarget);
-                        _this.action($action.data('name'), $action.data('options'));
+                        _this.action($action.data('name'), $action.data('options'), e);
                     });
                     $form.on('submit', function (e) {
                         e.preventDefault();
@@ -561,25 +584,6 @@ var Creonit;
                     return action(value, ['openComponent', name, query, options]);
                 }
                 Helpers.open = open;
-                function file(value, _a) {
-                    var name = _a[0], _b = _a[1], options = _b === void 0 ? {} : _b;
-                    var output = 'Файл не загружен';
-                    if (value) {
-                        output = "\n                <a href=\"" + value.path + "/" + value.name + "\" target=\"_blank\">" + value.original_name + "</a> (" + value.size + ")\n                <div class=\"checkbox\">\n                    <label class=\"small\">\n                        <input type=\"checkbox\" name=\"" + name + "__delete\"> \u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0444\u0430\u0439\u043B\n                    </label>\n                </div>\n            ";
-                    }
-                    return "\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\"><input type=\"file\" name=\"" + name + "\"></div>\n                <div class=\"panel-body\">" + output + "</div>\n            </div>\n        ";
-                }
-                Helpers.file = file;
-                function video(value, _a) {
-                    var _b = _a === void 0 ? ['', {}] : _a, name = _b[0], _c = _b[1], options = _c === void 0 ? {} : _c;
-                    var output = 'Видео не загружено', url = '';
-                    if (value) {
-                        url = value.url;
-                        output = "<a href=\"" + value.url + "\" target=\"_blank\">" + value.preview + "</a>";
-                    }
-                    return "\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\"><input type=\"text\" class=\"form-control\" name=\"" + name + "\" value=\"" + url + "\" placeholder=\"\u0421\u0441\u044B\u043B\u043A\u0430 \u043D\u0430 YouTube\"></div>\n                <div class=\"panel-body\">" + output + "</div>\n            </div>\n        ";
-                }
-                Helpers.video = video;
                 function external(value, _a) {
                     var _b = _a === void 0 ? ['', '', {}] : _a, name = _b[0], component = _b[1], _c = _b[2], options = _c === void 0 ? {} : _c;
                     var id = Component.Utils.generateId(), empty = options.empty || 'Значение не выбрано';
@@ -592,36 +596,6 @@ var Creonit;
                     return "\n            <div class=\"input-group\">\n                <div class=\"input-group-addon\"><i class=\"fa fa-arrow-right\"></i></div>\n                " + open(Component.Utils.raw("\n                        <div class=\"form-control\" js-component-external-field=\"" + id + "\" data-empty=\"" + empty + "\">" + value.title + "</div>\n                    "), [component, $.extend(options.query || {}, { value: value.value }), { external: id }]) + "\n                <div class=\"input-group-addon\" js-component-external-field-reset><i class=\"fa fa-remove\"></i></div>\n            </div>\n           \n            <input type=\"hidden\" name=\"" + name + "\" value=\"" + value.value + "\">\n        ";
                 }
                 Helpers.external = external;
-                function image(value, _a) {
-                    var _b = _a === void 0 ? ['', {}] : _a, name = _b[0], _c = _b[1], options = _c === void 0 ? {} : _c;
-                    options = $.extend({ deletable: true }, options);
-                    var output = 'Изображение не загружено';
-                    if (value) {
-                        output = "<a href=\"" + value.path + "/" + value.name + "\" target=\"_blank\">" + value.preview + "</a>";
-                        if (options.deletable) {
-                            output += "   \n                    <div class=\"checkbox\">\n                        <label class=\"small\">\n                            <input type=\"checkbox\" name=\"" + name + "__delete\"> \u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435\n                        </label>\n                    </div>\n                ";
-                        }
-                    }
-                    return "\n            <div class=\"panel panel-default\">\n                <div class=\"panel-heading\"><input type=\"file\" name=\"" + name + "\"></div>\n                <div class=\"panel-body\">" + output + "</div>\n            </div>\n        ";
-                }
-                Helpers.image = image;
-                function gallery(value, options) {
-                    var name = options && options[0] ? options[0] : '', output = 'Изображение не загружено';
-                    if (options[1] && options[1].video == false) {
-                        var video = false;
-                    }
-                    else {
-                        var video = true;
-                    }
-                    if (options[1] && options[1].image == false) {
-                        var image = false;
-                    }
-                    else {
-                        var image = true;
-                    }
-                    return component('Media.GalleryTable', { field_name: name, gallery_id: value, image: image, video: video }, {}) + ("<input type=\"hidden\" name=\"" + name + "\" value=\"" + value + "\">");
-                }
-                Helpers.gallery = gallery;
                 function select(value, _a) {
                     var _b = _a === void 0 ? ['', {}] : _a, _c = _b[0], name = _c === void 0 ? '' : _c, _d = _b[1], options = _d === void 0 ? {} : _d;
                     if (!value) {
@@ -1103,13 +1077,74 @@ var Creonit;
                     this.node.find('[js-component-action]').on('click', function (e) {
                         e.preventDefault();
                         var $action = $(e.currentTarget);
-                        _this.action($action.data('name'), $action.data('options'));
+                        _this.action($action.data('name'), $action.data('options'), e);
                     });
                     if (!this.node.find('tbody').children().length) {
                         this.node.find('.table:eq(0)').replaceWith('<div class="component-table-empty">Список пуст</div>');
                     }
                     this.node.find('[data-toggle="tooltip"]').tooltip({ container: 'body', trigger: 'hover' });
                     var sortData, $table = this.node.find('table');
+                    var $sortableColumns = $table.find('[js-sortable-column]');
+                    if ($sortableColumns.length) {
+                        var sortableColumnTimer;
+                        $sortableColumns.on('click.sortable-column', function (e) {
+                            e.preventDefault();
+                            var $sortableColumn = $(e.currentTarget);
+                            var columnName = $sortableColumn.data('sortable-column-name');
+                            var columnDirection = $sortableColumn.data('sortable-column-direction');
+                            var columnDirectionMode = $sortableColumn.data('sortable-column-direction-mode');
+                            var currentDirection = $sortableColumn.hasClass('is-asc') ? 'asc' : ($sortableColumn.hasClass('is-desc') ? 'desc' : null);
+                            var direction = null;
+                            if (columnDirectionMode === 'strict') {
+                                if (!currentDirection) {
+                                    direction = columnDirection;
+                                }
+                            }
+                            else if (columnDirectionMode === 'default') {
+                                if (!currentDirection) {
+                                    direction = columnDirection;
+                                }
+                                else if (currentDirection === 'asc' && columnDirection === 'asc') {
+                                    direction = 'desc';
+                                }
+                                else if (currentDirection === 'desc' && columnDirection === 'desc') {
+                                    direction = 'asc';
+                                }
+                            }
+                            else {
+                                return;
+                            }
+                            $sortableColumns.trigger('state.sortable-column', null);
+                            if (direction) {
+                                $sortableColumn.trigger('state.sortable-column', direction);
+                                _this.query[Table.SORTABLE_COLUMN_NAME_QUERY] = columnName;
+                                _this.query[Table.SORTABLE_COLUMN_DIRECTION_QUERY] = direction;
+                            }
+                            else {
+                                delete _this.query[Table.SORTABLE_COLUMN_NAME_QUERY];
+                                delete _this.query[Table.SORTABLE_COLUMN_DIRECTION_QUERY];
+                                var $defaultColumn = $sortableColumns.filter('[data-sortable-column-default="1"]').eq(0);
+                                if ($defaultColumn.length) {
+                                    $defaultColumn.click();
+                                    return;
+                                }
+                            }
+                            clearTimeout(sortableColumnTimer);
+                            sortableColumnTimer = setTimeout(function () { return _this.loadData(); }, 200);
+                        });
+                        $sortableColumns.on('state.sortable-column', function (e, direction) {
+                            var $sortableColumn = $(e.currentTarget);
+                            $sortableColumn.removeClass('is-asc is-desc');
+                            if (direction) {
+                                $sortableColumn.addClass("is-" + direction);
+                            }
+                        });
+                        if (this.query[Table.SORTABLE_COLUMN_NAME_QUERY]) {
+                            var $sortableColumn = $sortableColumns.filter("[data-sortable-column-name=\"" + this.query[Table.SORTABLE_COLUMN_NAME_QUERY] + "\"]");
+                            $sortableColumn.trigger('state.sortable-column', this.query[Table.SORTABLE_COLUMN_DIRECTION_QUERY]);
+                            $table.find('.list-controls-sort').remove();
+                        }
+                    }
                     $table.find('.list-controls-flex.has-children').on('click', function (e) {
                         var $row = $(e.currentTarget).closest('tr'), mask = $row.data('mask'), key = $row.data('key'), index;
                         if (!_this.expanded[mask]) {
@@ -1124,8 +1159,11 @@ var Creonit;
                         _this.loadData();
                     });
                     $table.find('.list-pagination li:not(.active) span').on('click', function (e) {
-                        var $button = $(e.currentTarget), $row = $button.closest('tr');
-                        _this.pagination[$row.data('mask')] = $button.data('page');
+                        var $button = $(e.currentTarget), $row = $button.closest('tr'), page = $button.data('page');
+                        if (!page) {
+                            return;
+                        }
+                        _this.pagination[$row.data('mask')] = page;
                         _this.loadData();
                     });
                     $table.tableDnD({
@@ -1218,15 +1256,38 @@ var Creonit;
                     });
                     if (this.data.pagination && this.data.pagination[mask]) {
                         var pagination = this.data.pagination[mask];
+                        var pagesLimit = 20;
+                        var halfPagesLimit = Math.floor(pagesLimit / 2);
+                        var startPage = pagination.page - halfPagesLimit + 1 - pagesLimit % 2;
+                        var endPage = pagination.page + halfPagesLimit;
+                        if (startPage <= 0) {
+                            startPage = 1;
+                            endPage = pagesLimit;
+                        }
+                        if (endPage > pagination.last_page) {
+                            startPage = pagination.last_page - pagesLimit + 1;
+                            endPage = pagination.last_page;
+                        }
                         if (pagination.last_page > 1) {
-                            var paginationNumbers = '';
+                            var paginationNumbers = [];
                             for (var i = 1; i <= pagination.last_page; i++) {
-                                paginationNumbers += "<li " + (i == pagination.page ? 'class="active"' : '') + "><span data-page=\"" + i + "\">" + i + "</span></li>";
+                                if (i !== 1 && i !== pagination.last_page && (i < startPage || i > endPage)) {
+                                    continue;
+                                }
+                                if (i === pagination.last_page && i > endPage + 1) {
+                                    paginationNumbers.push("<li><span data-page=\"" + Math.floor((pagination.last_page + endPage) / 2) + "\">...</span></li>");
+                                }
+                                paginationNumbers.push("<li " + (i == pagination.page ? 'class="active"' : '') + "><span data-page=\"" + i + "\">" + i + "</span></li>");
+                                if (i === 1 && i < startPage - 1) {
+                                    paginationNumbers.push("<li><span data-page=\"" + Math.floor((1 + startPage) / 2) + "\">...</span></li>");
+                                }
                             }
-                            this.node.find('tbody').append($("<tr class=\"list-pagination\" data-mask=\"" + mask + "\"><td colspan=\"15\">" + (new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')) + "<ul class=\"pagination pagination-info\">" + paginationNumbers + "</ul></td></tr>"));
+                            this.node.find('tbody').append($("<tr class=\"list-pagination\" data-mask=\"" + mask + "\"><td colspan=\"15\">" + (new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')) + "<ul class=\"pagination pagination-info\">" + paginationNumbers.join('') + "</ul></td></tr>"));
                         }
                     }
                 };
+                Table.SORTABLE_COLUMN_NAME_QUERY = '_sortable_column_name';
+                Table.SORTABLE_COLUMN_DIRECTION_QUERY = '_sortable_column_direction';
                 return Table;
             }(Component.Component));
             Component.Table = Table;
@@ -1290,6 +1351,16 @@ var Creonit;
                     return ++increment;
                 }
                 Utils.generateId = generateId;
+                function functionArguments(func) {
+                    return (func + '')
+                        .replace(/[/][/].*$/mg, '')
+                        .replace(/\s+/g, '')
+                        .replace(/[/][*][^/*]*[*][/]/g, '')
+                        .split('){', 1)[0].replace(/^[^(]*[(]/, '')
+                        .replace(/=[^,]+/g, '')
+                        .split(',').filter(Boolean);
+                }
+                Utils.functionArguments = functionArguments;
             })(Utils = Component.Utils || (Component.Utils = {}));
         })(Component = Admin.Component || (Admin.Component = {}));
     })(Admin = Creonit.Admin || (Creonit.Admin = {}));

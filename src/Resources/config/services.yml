@@ -1,6 +1,7 @@
 services:
     creonit_admin:
+        public: true
         class: Creonit\AdminBundle\Manager
         arguments:
             - '@service_container'
-            - '@templating'
+            - '@twig'

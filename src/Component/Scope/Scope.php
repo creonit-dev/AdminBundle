@@ -40,10 +40,6 @@ class Scope
     /** @var Field[] */
     protected $fields = [];
 
-    public function __construct(){
-    }
-
-
     /**
      * @param ContainerInterface $container
      * @return $this
@@ -75,7 +71,7 @@ class Scope
     protected function setEntity($entity)
     {
         if(strpos($entity, '\\') === false){
-            $entity = 'AppBundle\\Model\\' . $entity;
+            $entity = 'App\\Model\\' . $entity;
         }
         if(class_exists($entity)){
             $this->entity = $entity;
@@ -198,7 +194,7 @@ class Scope
 
     /**
      * @param $name
-     * @return Field|CheckboxField|DateField|ExternalField|FileField|GalleryField|ImageField|SelectField|VideoField
+     * @return Field|CheckboxField|DateField|ExternalField|SelectField
      */
     public function getField($name){
         return $this->fields[$name];
@@ -293,7 +289,7 @@ class Scope
         };
 
         $this->template = preg_replace_callback(
-            '/\{\{\s*([\w_]+)\s*\|\s*(textarea|textedit|content|text|input|gallery|file|image|video|external|select|checkbox|radio)(\(?\)?)(.*?\}\})/usi',
+            '/\{\{\s*([\w_]+)\s*\|\s*(textarea|textedit|content|text|input|gallery|file|image|video|external|select|checkbox|radio)(?!_)(\(?\)?)(.*?\}\})/usi',
             function($match) use ($createField){
                 $createField($match);
                 return "{{ {$match[1]} | {$match[2]}" . (($match[3] && $match[3] != '()') ? "('{$match[1]}', " : "('{$match[1]}')") . $match[4];
@@ -302,7 +298,7 @@ class Scope
         );
 
         $this->template = preg_replace_callback(
-            '/\(\s*([\w_]+)\s*\|\s*(textarea|textedit|content|text|input|gallery|file|image|video|external|select|checkbox|radio)(\(?\)??)(.*?\))/usi',
+            '/\(\s*([\w_]+)\s*\|\s*(textarea|textedit|content|text|input|gallery|file|image|video|external|select|checkbox|radio)(?!_)(\(?\)??)(.*?\))/usi',
             function($match) use ($createField){
                 $createField($match);
                 return "( {$match[1]} | {$match[2]}" . (($match[3] && $match[3] != '()') ? "('{$match[1]}', " : "('{$match[1]}')") . $match[4];

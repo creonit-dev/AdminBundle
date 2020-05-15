@@ -6,18 +6,14 @@ use Creonit\AdminBundle\Component\Field\CheckboxField;
 use Creonit\AdminBundle\Component\Field\DateField;
 use Creonit\AdminBundle\Component\Field\ExternalField;
 use Creonit\AdminBundle\Component\Field\Field;
-use Creonit\AdminBundle\Component\Field\FileField;
-use Creonit\AdminBundle\Component\Field\GalleryField;
-use Creonit\AdminBundle\Component\Field\ImageField;
 use Creonit\AdminBundle\Component\Field\SelectField;
-use Creonit\AdminBundle\Component\Field\VideoField;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Response\ComponentResponse;
 use Creonit\AdminBundle\Exception\RequestException;
-use Symfony\Bundle\TwigBundle\TwigEngine;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Twig\Environment;
 
 class Manager {
 
@@ -33,7 +29,7 @@ class Manager {
     /** @var  ContainerInterface */
     protected $container;
 
-    /** @var  TwigEngine */
+    /** @var  Environment */
     protected $templating;
 
     /** @var  Module */
@@ -44,7 +40,7 @@ class Manager {
     protected $fieldTypes = [];
     protected $fieldHelpers = [];
 
-    public function __construct(ContainerInterface $container, TwigEngine $templating)
+    public function __construct(ContainerInterface $container, Environment $templating)
     {
         $this->container = $container;
         $this->templating = $templating;
@@ -58,10 +54,6 @@ class Manager {
             CheckboxField::class,
             DateField::class,
             ExternalField::class,
-            FileField::class,
-            ImageField::class,
-            VideoField::class,
-            GalleryField::class,
             SelectField::class,
         ]);
 
@@ -80,7 +72,7 @@ class Manager {
             return 0;
         });
     }
-    
+
     public function addFieldType($className){
         $this->fieldTypes[$className::TYPE] = $className;
     }
@@ -283,6 +275,4 @@ class Manager {
             }
         }
     }
-
-
-} 
+}

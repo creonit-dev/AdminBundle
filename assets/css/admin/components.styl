@@ -60,6 +60,9 @@
       }
    }
 
+   .media-heading > & {
+      display inline-flex
+   }
 }
 
 
@@ -107,8 +110,6 @@
 
       .table{
          margin 0
-
-
       }
    }
 }
@@ -117,13 +118,15 @@
 
       .table{
          margin 0
-
-
       }
    }
 }
 
 .component-table{
+   .table  {
+      margin: 0;
+   }
+
    .table{
       tbody tr:last-child td {
          border-bottom none
@@ -132,6 +135,10 @@
       tbody tr:first-child td{
          border-top none
       }
+   }
+
+   .table-responsive {
+      overflow inherit
    }
 }
 
@@ -184,3 +191,54 @@
    }
 }
 
+.sortable-column {
+   color inherit
+   position relative
+
+   &:before {
+      content ''
+      opacity .5
+      position absolute
+      top 100%
+      left 0
+      right 0
+      border-bottom 1px dotted
+   }
+
+   &:after {
+      content ''
+      opacity 0
+      transition opacity .3s ease
+      position absolute
+      padding-left .25ex
+   }
+
+   &.is-asc:after {
+      content '▲'
+   }
+
+   &.is-desc:after {
+      content '▼'
+   }
+
+   &.is-asc,
+   &.is-desc {
+      &:before {
+         display none
+      }
+
+      &:after {
+         opacity 1
+      }
+   }
+
+   &:hover,
+   &:active,
+   &:focus {
+      text-decoration none
+
+      &:before {
+         display none
+      }
+   }
+}

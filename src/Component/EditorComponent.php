@@ -2,7 +2,7 @@
 
 namespace Creonit\AdminBundle\Component;
 
-use Creonit\AdminBundle\Component\Pattern\EditorPattern;
+use Creonit\AdminBundle\Component\Event\DecorateEditorComponentEvent;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Response\ComponentResponse;
 
@@ -10,26 +10,26 @@ abstract class EditorComponent extends Component
 {
     protected function prepareSchema()
     {
-        $this->setHandler('send_data', function (ComponentRequest $request, ComponentResponse $response){
-            
+        $this->setHandler('send_data', function (ComponentRequest $request, ComponentResponse $response) {
+
             $this->saveData($request, $response);
             $response->flushError();
             $this->loadData($request, $response);
         });
 
-        $this->setHandler('reload_data', function (ComponentRequest $request, ComponentResponse $response){
+        $this->setHandler('reload_data', function (ComponentRequest $request, ComponentResponse $response) {
 
             $entity = $this->retrieveEntity($request, $response);
 
-            foreach ($this->fields as $field){
+            foreach ($this->fields as $field) {
                 $field->save($entity, $field->extract($request));
             }
 
-            foreach ($this->fields as $field){
+            foreach ($this->fields as $field) {
                 $response->data->set($field->getName(), $field->supportEntity($entity) ? $field->load($entity) : $field->decorate($request->data->get($field->getName())));
             }
 
-            $this->decorate($request, $response, $entity);
+            $this->decorateData($request, $response, $entity);
         });
     }
 
@@ -37,27 +37,33 @@ abstract class EditorComponent extends Component
     {
         $entity = $this->retrieveEntity($request, $response);
 
-        foreach ($this->fields as $field){
-            if($field->parameters->has('load')){
-                
-            }
+        foreach ($this->fields as $field) {
             $response->data->set($field->getName(), $field->load($entity) ?: $field->decorate($response->data->get($field->getName())));
         }
-        
-        $this->decorate($request, $response, $entity);
+
+        $this->decorateData($request, $response, $entity);
     }
 
     public function decorate(ComponentRequest $request, ComponentResponse $response, $entity)
     {
     }
 
+    private function decorateData(ComponentRequest $request, ComponentResponse $response, $entity)
+    {
+        $this->decorate($request, $response, $entity);
+
+        $this->container->get('event_dispatcher')->dispatch(
+            new DecorateEditorComponentEvent($this->module, $this, $request, $response, $entity)
+        );
+    }
 
 
-    protected function retrieveEntity(ComponentRequest $request, ComponentResponse $response){
+    protected function retrieveEntity(ComponentRequest $request, ComponentResponse $response)
+    {
         $key = $request->query->get('key');
-        if($key){
+        if ($key) {
             $entity = $this->createQuery()->findPk($key) or $response->flushError('Элемент не найден');
-        }else{
+        } else {
             $entity = $this->createEntity();
         }
         return $entity;
@@ -68,24 +74,24 @@ abstract class EditorComponent extends Component
         $entity = $this->retrieveEntity($request, $response);
 
         $dataMap = [];
-        foreach ($this->fields as $field){
+        foreach ($this->fields as $field) {
             $dataMap[$field->getName()] = $data = $field->extract($request);
-            foreach($field->validate($data) as $error){
+            foreach ($field->validate($data) as $error) {
                 $response->error($error->getMessage(), $field->getName());
             }
         }
 
-        if($response->hasError()){
+        if ($response->hasError()) {
             return;
         }
 
         $this->validate($request, $response, $entity);
 
-        if($response->hasError()){
+        if ($response->hasError()) {
             return;
         }
 
-        foreach ($this->fields as $field){
+        foreach ($this->fields as $field) {
             $field->save($entity, $dataMap[$field->getName()]);
         }
 
@@ -108,22 +114,15 @@ abstract class EditorComponent extends Component
      * @param ComponentResponse $response
      * @param $entity
      */
-    public function validate(ComponentRequest $request, ComponentResponse $response, $entity){}
-
-    public function preSave(ComponentRequest $request, ComponentResponse $response, $entity){}
-
-    public function postSave(ComponentRequest $request, ComponentResponse $response, $entity){}
-
-/*
-    public function dump()
+    public function validate(ComponentRequest $request, ComponentResponse $response, $entity)
     {
-        $fields = [];
-        foreach ($this->fields as $field) {
-            $fields[$field->getName()] = $field->dump();
-        }
-        return array_merge(parent::dump(), ['fields' => $fields]);
     }
-*/
 
+    public function preSave(ComponentRequest $request, ComponentResponse $response, $entity)
+    {
+    }
 
+    public function postSave(ComponentRequest $request, ComponentResponse $response, $entity)
+    {
+    }
 }

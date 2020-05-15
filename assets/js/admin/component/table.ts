@@ -1,6 +1,9 @@
 module Creonit.Admin.Component{
     export class Table extends Component{
 
+        static SORTABLE_COLUMN_NAME_QUERY:string = '_sortable_column_name';
+        static SORTABLE_COLUMN_DIRECTION_QUERY:string = '_sortable_column_direction';
+
         protected expanded:any = {};
         protected pagination:any = {};
 
@@ -104,7 +107,7 @@ module Creonit.Admin.Component{
             this.node.find('[js-component-action]').on('click', (e) => {
                 e.preventDefault();
                 let $action = $(e.currentTarget);
-                this.action($action.data('name'), $action.data('options'));
+                this.action($action.data('name'), $action.data('options'), e);
             });
 
 
@@ -117,7 +120,80 @@ module Creonit.Admin.Component{
             var sortData,
                 $table = this.node.find('table');
 
+            var $sortableColumns = $table.find('[js-sortable-column]');
+            if ($sortableColumns.length) {
+                var sortableColumnTimer;
 
+                $sortableColumns.on('click.sortable-column', (e) => {
+                    e.preventDefault();
+
+                    var $sortableColumn = $(e.currentTarget);
+                    var columnName = $sortableColumn.data('sortable-column-name');
+                    var columnDirection = $sortableColumn.data('sortable-column-direction');
+                    var columnDirectionMode = $sortableColumn.data('sortable-column-direction-mode');
+                    var currentDirection = $sortableColumn.hasClass('is-asc') ? 'asc' : ($sortableColumn.hasClass('is-desc') ? 'desc' : null);
+                    var direction = null;
+
+                    if (columnDirectionMode === 'strict') {
+                        if (!currentDirection) {
+                            direction = columnDirection;
+                        }
+
+                    } else if (columnDirectionMode === 'default') {
+                        if (!currentDirection) {
+                            direction = columnDirection;
+                        } else if (currentDirection === 'asc' && columnDirection === 'asc') {
+                            direction = 'desc';
+                        } else if (currentDirection === 'desc' && columnDirection === 'desc') {
+                            direction = 'asc';
+                        }
+
+                    } else {
+                        return;
+                    }
+
+                    $sortableColumns.trigger('state.sortable-column', null);
+
+                    if (direction) {
+                        $sortableColumn.trigger('state.sortable-column', direction);
+
+                        this.query[Table.SORTABLE_COLUMN_NAME_QUERY] = columnName;
+                        this.query[Table.SORTABLE_COLUMN_DIRECTION_QUERY] = direction;
+
+                    } else {
+                        delete this.query[Table.SORTABLE_COLUMN_NAME_QUERY];
+                        delete this.query[Table.SORTABLE_COLUMN_DIRECTION_QUERY];
+
+                        var $defaultColumn = $sortableColumns.filter('[data-sortable-column-default="1"]').eq(0);
+                        if ($defaultColumn.length) {
+                            $defaultColumn.click();
+                            return;
+                        }
+                    }
+
+                    clearTimeout(sortableColumnTimer);
+                    sortableColumnTimer = setTimeout(() => this.loadData(), 200);
+
+                });
+
+                $sortableColumns.on('state.sortable-column', function (e, direction) {
+                    var $sortableColumn = $(e.currentTarget);
+
+                    $sortableColumn.removeClass('is-asc is-desc');
+
+                    if (direction) {
+                        $sortableColumn.addClass(`is-${direction}`);
+                    }
+                });
+
+                if (this.query[Table.SORTABLE_COLUMN_NAME_QUERY]) {
+                    var $sortableColumn = $sortableColumns.filter(`[data-sortable-column-name="${this.query[Table.SORTABLE_COLUMN_NAME_QUERY]}"]`);
+
+                    $sortableColumn.trigger('state.sortable-column', this.query[Table.SORTABLE_COLUMN_DIRECTION_QUERY]);
+
+                    $table.find('.list-controls-sort').remove();
+                }
+            }
 
             $table.find('.list-controls-flex.has-children').on('click', (e) => {
                 var $row = $(e.currentTarget).closest('tr'),
@@ -140,9 +216,14 @@ module Creonit.Admin.Component{
 
             $table.find('.list-pagination li:not(.active) span').on('click', (e) => {
                 var $button = $(e.currentTarget),
-                    $row = $button.closest('tr');
+                    $row = $button.closest('tr'),
+                    page = $button.data('page');
 
-                this.pagination[$row.data('mask')] = $button.data('page');
+                if(!page){
+                    return;
+                }
+
+                this.pagination[$row.data('mask')] = page;
                 this.loadData();
             });
 
@@ -273,14 +354,42 @@ module Creonit.Admin.Component{
 
             if(this.data.pagination && this.data.pagination[mask]){
                 let pagination = this.data.pagination[mask];
-                if(pagination.last_page > 1){
-                    let paginationNumbers = '';
-                    for(let i = 1; i <= pagination.last_page; i++){
-                        paginationNumbers += `<li ${i == pagination.page ? 'class="active"' : ''}><span data-page="${i}">${i}</span></li>`;
+
+                const pagesLimit = 20;
+                const halfPagesLimit = Math.floor(pagesLimit / 2);
+                let startPage = pagination.page - halfPagesLimit + 1 - pagesLimit % 2;
+                let endPage = pagination.page + halfPagesLimit;
+
+                if (startPage <= 0) {
+                    startPage = 1;
+                    endPage = pagesLimit;
+                }
+                if (endPage > pagination.last_page) {
+                    startPage = pagination.last_page - pagesLimit + 1;
+                    endPage = pagination.last_page;
+                }
+
+
+                if (pagination.last_page > 1) {
+                    const paginationNumbers = [];
+                    for (let i = 1; i <= pagination.last_page; i++) {
+                        if (i !== 1 && i !== pagination.last_page && (i < startPage || i > endPage)) {
+                            continue;
+                        }
+
+                        if (i === pagination.last_page && i > endPage + 1) {
+                            paginationNumbers.push(`<li><span data-page="${Math.floor((pagination.last_page + endPage) / 2)}">...</span></li>`);
+                        }
+
+                        paginationNumbers.push(`<li ${i == pagination.page ? 'class="active"' : ''}><span data-page="${i}">${i}</span></li>`);
+
+                        if (i === 1 && i < startPage - 1) {
+                            paginationNumbers.push(`<li><span data-page="${Math.floor((1 + startPage) / 2)}">...</span></li>`);
+                        }
                     }
 
                     this.node.find('tbody').append(
-                        $(`<tr class="list-pagination" data-mask="${mask}"><td colspan="15">${(new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'))}<ul class="pagination pagination-info">${paginationNumbers}</ul></td></tr>`)
+                        $(`<tr class="list-pagination" data-mask="${mask}"><td colspan="15">${(new Array(level + 1).join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'))}<ul class="pagination pagination-info">${paginationNumbers.join('')}</ul></td></tr>`)
                     );
                 }
             }

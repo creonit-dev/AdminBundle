@@ -96,6 +96,26 @@
    }
 }
 
+.modal-dialog {
+   width 1550px !important
+
+   @media (max-width 1600px) {
+      width 1350px !important
+   }
+
+   @media (max-width 1400px) {
+      width 1150px !important
+   }
+
+   @media (max-width 1200px) {
+      width 950px !important
+   }
+
+   @media (max-width 1000px) {
+      width 800px !important
+   }
+}
+
 sel = '.arcticmodal-container'
 for num in (2..10) {
    sel = sel + ' + .arcticmodal-overlay + .arcticmodal-container'

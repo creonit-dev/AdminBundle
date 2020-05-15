@@ -33,7 +33,9 @@ module Creonit.Admin.Component{
 
                 this.node.find('.modal-content').append(`<div class="modal-footer">${Helpers.submit('Сохранить и закрыть', {className: 'editor-save-and-close'})} ${Helpers.submit('Сохранить')} ${Helpers.button('Закрыть')}</div>`);
 
-                this.node.find('.modal-footer button[type=button], .modal-header .close').on('click', () => {
+                this.node.find('.modal-footer button[type=button], .modal-header .close').on('click', (e) => {
+                    e.preventDefault();
+
                     this.close();
                 });
             }
@@ -72,10 +74,10 @@ module Creonit.Admin.Component{
 
             });
 
-            this.node.find('.text-editor').tinymce({
+            this.node.find('.text-editor').tinymce($.extend({}, {
                 doctype: 'html5',
                 element_format: 'html',
-                plugins: ['anchor autolink code colorpicker contextmenu image fullscreen hr link lists media paste nonbreaking  visualblocks table searchreplace charmap'],
+                plugins: ['anchor autolink code advcode colorpicker contextmenu image fullscreen hr link lists media paste nonbreaking  visualblocks table searchreplace charmap typograf'],
                 resize: true,
                 height: 150,
                 visualblocks_default_state: true,
@@ -86,7 +88,7 @@ module Creonit.Admin.Component{
                 language: 'ru',
                 statusbar: true,
                 branding: false,
-                toolbar: 'formatselect | bold italic removeformat | link unlink | bullist numlist | image media | code fullscreen',
+                toolbar: 'formatselect | bold italic removeformat | link unlink | bullist numlist | image media | typograf | code fullscreen',
                 image_advtab: true,
                 menubar: 'edit insert view format table tools',
                 browser_spellcheck: true,
@@ -113,8 +115,8 @@ module Creonit.Admin.Component{
                             }
                         }
                     });
-                }
-            });
+                },
+            }, 'getTinyMceConfig' in Creonit.Admin.Component.Utils ? Creonit.Admin.Component.Utils['getTinyMceConfig'](this) : {}));
 
 
             this.node.find('input')
@@ -141,7 +143,7 @@ module Creonit.Admin.Component{
             this.node.find('[js-component-action]').on('click', (e) => {
                 e.preventDefault();
                 let $action = $(e.currentTarget);
-                this.action($action.data('name'), $action.data('options'));
+                this.action($action.data('name'), $action.data('options'), e);
             });
 
             $form.on('submit', (e) => {

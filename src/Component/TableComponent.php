@@ -2,15 +2,15 @@
 
 namespace Creonit\AdminBundle\Component;
 
-use AppBundle\Model\Base\ProductCategory;
+use Creonit\AdminBundle\Component\Column\SortableColumn;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Response\ComponentResponse;
-use Creonit\AdminBundle\Component\Scope\ListRowScopeRelation;
 use Creonit\AdminBundle\Component\Scope\TableRowScope;
-use Propel\Runtime\Map\TableMap;
 
 abstract class TableComponent extends ListComponent
 {
+    const SORTABLE_COLUMN_NAME_QUERY = '_sortable_column_name';
+    const SORTABLE_COLUMN_DIRECTION_QUERY = '_sortable_column_direction';
 
     protected $scopesType = TableRowScope::class;
     protected $columns = [];
@@ -21,18 +21,30 @@ abstract class TableComponent extends ListComponent
      */
     public function setColumns($columns)
     {
-        if(preg_match_all('/\s*([\'\"].+?[\'\"]|.+?)\s*(?:,|$)/usi', $columns, $matches, PREG_SET_ORDER)){
+        if (preg_match_all('/\s*(?:{(?<sort_name>[\w_]+)(?<sort_default>\!)? *(?:(?<sort_direction_mode>[:$])(?<sort_direction>asc|desc))?})?\s*(?|\'(?<value>[^\']*?)\'|\"(?<value>[^\"]*?)\"|(?<value>.+?))\s*(?:,|$)/usi', $columns, $matches, PREG_SET_ORDER)) {
             $columns = [];
-            foreach ($matches as $match){
-                $width = 'auto';
-                $value = $match[1];
 
-                if($value[0] == '.'){
+            foreach ($matches as $match) {
+                $width = 'auto';
+                $value = trim($match['value']);
+
+                if ($value and $value[0] === '.') {
                     $width = '1%';
                     $value = ltrim($value, '.');
                 }
 
-                $columns[] = ['value' => trim($value, "'\""), 'width' => $width];
+                $column = ['value' => $value, 'width' => $width];
+
+                if ($match['sort_name']) {
+                    $column += [
+                        'sortable_column_name' => $match['sort_name'],
+                        'sortable_column_default' => (bool)$match['sort_default'],
+                        'sortable_column_direction' => $match['sort_direction'] ? strtolower($match['sort_direction']) : 'asc',
+                        'sortable_column_direction_mode' => $match['sort_direction_mode'] ? ($match['sort_direction_mode'] === '$' ? 'strict' : 'default') : 'default',
+                    ];
+                }
+
+                $columns[] = $column;
             }
             $this->columns = $columns;
         }
@@ -49,92 +61,15 @@ abstract class TableComponent extends ListComponent
 
     public function prepareTemplate()
     {
-        if(!$this->template){
-            $this->setTemplate($this->container->get('templating')->render('CreonitAdminBundle:Components:table.html.twig', ['component' => $this]));
+        if (!$this->template) {
+            $this->setTemplate($this->container->get('twig')->render('@CreonitAdmin/Components/table.html.twig', ['component' => $this]));
         }
         return parent::prepareTemplate();
     }
 
-    protected function prepareSchema()
-    {
-        $this->initializeRelations();
-        $this->addHandler('_delete', function (ComponentRequest $request, ComponentResponse $response){
-            $query = $request->query;
-            if($query->has('key') and $query->has('scope') and $this->hasScope($query->get('scope'))){
-                $scope = $this->getScope($query->get('scope'));
-
-                if($entity = $scope->createQuery()->findPk($query->get('key'))){
-                    $entity->delete();
-                    $response->data->set('success', true);
-
-                }else{
-                    $response->flushError('Элемент не найден');
-                }
-
-            }else{
-                $response->flushError('Ошибка при выполнения запроса');
-            }
-        });
-
-
-        $this->addHandler('_visible', function (ComponentRequest $request, ComponentResponse $response){
-            $query = $request->query;
-            if(
-                $request->data->has('visible')
-                and $query->get('key')
-                and $scope = $query->get('scope')
-                and $this->hasScope($scope)
-            ){
-                $scope = $this->getScope($scope);
-
-                if($entity = $scope->createQuery()->findPk($query->get('key'))){
-                    $visible = $request->data->getBoolean('visible');
-                    $visibleField = $this->createField('visible');
-                    $visibleField->save($entity, $visible);
-                    $entity->save();
-
-                    $response->data->set('success', true);
-                    $response->data->set('visible', $visibleField->load($entity));
-
-                }else{
-                    $response->flushError('Элемент не найден');
-                }
-
-            }else{
-                $response->flushError('Ошибка при выполнения запроса');
-            }
-        });
-
-        $this->addHandler('_sort', function (ComponentRequest $request, ComponentResponse $response){
-            $query = $request->query;
-            if($query->has('key') and $query->has('scope') and $this->hasScope($query->get('scope'))){
-                $scope = $this->getScope($query->get('scope'));
-
-                if($entity = $scope->createQuery()->findPk($query->get('key'))){
-                    if($request->data->get('prev') and $prev = $scope->createQuery()->findPk($request->data->get('prev'))){
-                        $entity->moveToRank($entity->getRank() > $prev->getRank() ? $prev->getRank()+1 : $prev->getRank());
-                        $entity->moveToRank($entity->getRank() > $prev->getRank() ? $prev->getRank()+1 : $prev->getRank());
-                    }else{
-                        $entity->moveToTop();
-                    }
-
-                    $response->data->set('success', true);
-
-                }else{
-                    $response->flushError('Элемент не найден');
-                }
-
-            }else{
-                $response->flushError('Ошибка при выполнения запроса');
-            }
-        });
-
-    }
-
-
     public function applySchemaAnnotation($annotation)
     {
-        switch($annotation['key']){
+        switch ($annotation['key']) {
             case 'cols':
             case 'columns':
                 $this->setColumns($annotation['value']);
@@ -144,12 +79,86 @@ abstract class TableComponent extends ListComponent
         }
     }
 
+    protected function hasSortableColumns()
+    {
+        foreach ($this->columns as $column) {
+            if (isset($column['sortable_column_name'])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return SortableColumn|null
+     */
+    protected function getDefaultSortableColumn()
+    {
+        foreach ($this->columns as $column) {
+            if (isset($column['sortable_column_default']) and $column['sortable_column_default'] === true) {
+                return $this->convertSortableColumn($column);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param ComponentRequest $request
+     * @return SortableColumn|null
+     */
+    protected function extractSortableColumn(ComponentRequest $request)
+    {
+        $sortableColumnName = $request->query->get(static::SORTABLE_COLUMN_NAME_QUERY);
+        $sortableColumnDirection = $request->query->get(static::SORTABLE_COLUMN_DIRECTION_QUERY);
+
+        if (!$sortableColumnName or !$sortableColumnDirection) {
+            return null;
+        }
+
+        foreach ($this->columns as $column) {
+            if (isset($column['sortable_column_name']) and $column['sortable_column_name'] === $sortableColumnName) {
+                return $this->convertSortableColumn($column)->setDirection($sortableColumnDirection);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array $column
+     * @return SortableColumn
+     */
+    protected function convertSortableColumn($column)
+    {
+        $sortableColumn = new SortableColumn();
+        $sortableColumn->setName($column['sortable_column_name']);
+        $sortableColumn->setDirection($column['sortable_column_direction']);
+
+        return $sortableColumn;
+    }
+
+    protected function loadData(ComponentRequest $request, ComponentResponse $response)
+    {
+        if ($this->hasSortableColumns()) {
+            if (!$request->query->has(static::SORTABLE_COLUMN_NAME_QUERY)) {
+                if ($defaultSortableColumn = $this->getDefaultSortableColumn()) {
+                    $request->query->set(static::SORTABLE_COLUMN_NAME_QUERY, $defaultSortableColumn->getName());
+                    $request->query->set(static::SORTABLE_COLUMN_DIRECTION_QUERY, $defaultSortableColumn->getDirection());
+                    $response->query->set(static::SORTABLE_COLUMN_NAME_QUERY, $defaultSortableColumn->getName());
+                    $response->query->set(static::SORTABLE_COLUMN_DIRECTION_QUERY, $defaultSortableColumn->getDirection());
+                }
+            }
+        }
+
+        parent::loadData($request, $response);
+    }
+
     public function dump()
     {
         return array_replace(parent::dump(), [
             'columns' => $this->columns
         ]);
     }
-
-
 }

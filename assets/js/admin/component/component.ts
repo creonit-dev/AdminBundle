@@ -1,6 +1,6 @@
 declare var CreonitAdminActiveModule:string;
 module Creonit.Admin.Component {
-    
+
 
     export class Component extends Scope{
         protected title:string;
@@ -52,9 +52,24 @@ module Creonit.Admin.Component {
             return this.node;
         }
 
-        action(name, options) {
+        action(name, options, event) {
             if (this.actions[name]) {
-                return this.actions[name].apply(this, options);
+                const functionArgs = Utils.functionArguments(this.actions[name]);
+                let args = [];
+
+                if (event && functionArgs.indexOf('$event') >= 0) {
+                    for (let i = 0; i < functionArgs.length - 1; i++) {
+                        args.push(options[i]);
+                    }
+
+                    args.push(event);
+
+                } else {
+                    args = options;
+                }
+
+                return this.actions[name].apply(this, args);
+
             } else {
                 throw new Error(`Undefined method ${name} in component ${this.name}`);
             }
@@ -77,6 +92,7 @@ module Creonit.Admin.Component {
             this.request(Request.TYPE_LOAD_SCHEMA, this.getQuery(), null, (response) => {
                 if(this.checkResponse(response, this.options.modal)){
                     this.applyResponse(response);
+                    this.node.trigger('component-schema-loaded', this);
                 }else{
                     if(this.options.modal){
                         this.close();
@@ -88,6 +104,8 @@ module Creonit.Admin.Component {
         }
 
         loadData() {
+            this.node.find('[data-toggle="tooltip"]').tooltip('destroy');
+
             if(this.parameters.reloadSchema){
                 this.loadSchema();
             }else{
@@ -118,7 +136,7 @@ module Creonit.Admin.Component {
             if(response.query){
                 $.extend(this.query, response.query);
             }
-            
+
             this.data = response.data || {};
             this.trigger('load', {});
             this.render();
@@ -194,7 +212,6 @@ module Creonit.Admin.Component {
 
         openComponent(name:string, query:any = {}, options:any = {}) {
             options.modal = true;
-            var interval;
             var $modal = $(`
                 <div class="modal-dialog modal-lg">
                     ${Helpers.component(name, query, options)}
@@ -203,44 +220,18 @@ module Creonit.Admin.Component {
             );
 
             $modal.arcticmodal({
-                beforeOpen: (modal, $modal) => {
+                closeOnOverlayClick: false,
+                closeOnEsc: false,
+                beforeOpen: () => {
                     Utils.initializeComponents($modal, this);
-                },
-                afterOpen: (modal, $modal) => {
-                    var $container = $modal.closest('.arcticmodal-container');
 
-                    interval = setInterval(function(){
-                        var $footer = $modal.find('.modal-footer');
-
-                        if(!$footer.length){
-                            return;
-                        }
-
-                        clearInterval(interval);
-
-                        var fix = () => {
-                            $footer.offset({top: $container.height() + $(window).scrollTop() - $footer.outerHeight()});
-                            if(parseInt($footer.css('top')) > 0){
-                                $footer.removeAttr('style');
-                            }
-                        };
-
-                        interval = setInterval(fix, 1000);
-
-                        fix();
-                        $container.on('scroll', fix);
-
-                    }, 10);
-
-
+                    $modal.find('[js-component]').one('component-schema-loaded', function(e, component){
+                        component.trigger('open', {});
+                    });
                 },
                 beforeClose: () => {
                     $modal.find('[js-component]').data('creonit-component').trigger('close', {});
                 },
-                afterClose: () => {
-                    clearInterval(interval);
-                }
-
             });
         }
 

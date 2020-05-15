@@ -9,6 +9,7 @@ class ListRowScope extends Scope
 {
 
     protected $independent = true;
+    protected $forceIndependent;
     protected $recursive = false;
     protected $sortable = false;
     protected $collapsed = false;
@@ -16,7 +17,7 @@ class ListRowScope extends Scope
     protected $data = null;
 
     public $relations = [];
-    
+
     /** @var ListComponent */
     protected $parentScope;
 
@@ -45,6 +46,9 @@ class ListRowScope extends Scope
                     $this->relations[] = ['_relation', $match[1], isset($match[2]) ? $match[2] : '_key'];
                 }
                 break;
+            case 'independent':
+                $this->forceIndependent = true;
+                break;
             default:
                 parent::applySchemaAnnotation($annotation);
         }
@@ -57,6 +61,10 @@ class ListRowScope extends Scope
             $this->independent = false;
         }else{
             $this->recursive = true;
+        }
+
+        if ($this->forceIndependent) {
+            $this->independent = true;
         }
 
         return $this;

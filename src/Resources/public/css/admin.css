@@ -69,6 +69,29 @@
 .modal-footer[style] {
   box-shadow: 0 -3px 10px rgba(0,0,0,0.1);
 }
+.modal-dialog {
+  width: 1550px !important;
+}
+@media (max-width: 1600px) {
+  .modal-dialog {
+    width: 1350px !important;
+  }
+}
+@media (max-width: 1400px) {
+  .modal-dialog {
+    width: 1150px !important;
+  }
+}
+@media (max-width: 1200px) {
+  .modal-dialog {
+    width: 950px !important;
+  }
+}
+@media (max-width: 1000px) {
+  .modal-dialog {
+    width: 800px !important;
+  }
+}
 .arcticmodal-container + .arcticmodal-overlay + .arcticmodal-container .modal-dialog {
   padding: 0 15px;
   margin-top: 70px;
@@ -241,6 +264,9 @@
 .table:not(.sorting) tr:hover .list-controls-options {
   visibility: visible;
 }
+.media-heading > .list-controls {
+  display: inline-flex;
+}
 .table tbody tr.nodrop,
 .table tbody tr.deactive {
   opacity: 0.3;
@@ -280,11 +306,17 @@
 .component-table .modal-body .panel-body .table {
   margin: 0;
 }
+.component-table .table {
+  margin: 0;
+}
 .component-table .table tbody tr:last-child td {
   border-bottom: none;
 }
 .component-table .table tbody tr:first-child td {
   border-top: none;
+}
+.component-table .table-responsive {
+  overflow: inherit;
 }
 .loading {
   padding: 15px;
@@ -323,6 +355,50 @@
   margin-right: 10px;
 }
 .loading.is-error:after {
+  display: none;
+}
+.sortable-column {
+  color: inherit;
+  position: relative;
+}
+.sortable-column:before {
+  content: '';
+  opacity: 0.5;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  border-bottom: 1px dotted;
+}
+.sortable-column:after {
+  content: '';
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  position: absolute;
+  padding-left: 0.25ex;
+}
+.sortable-column.is-asc:after {
+  content: '▲';
+}
+.sortable-column.is-desc:after {
+  content: '▼';
+}
+.sortable-column.is-asc:before,
+.sortable-column.is-desc:before {
+  display: none;
+}
+.sortable-column.is-asc:after,
+.sortable-column.is-desc:after {
+  opacity: 1;
+}
+.sortable-column:hover,
+.sortable-column:active,
+.sortable-column:focus {
+  text-decoration: none;
+}
+.sortable-column:hover:before,
+.sortable-column:active:before,
+.sortable-column:focus:before {
   display: none;
 }
 .page-wrapper {

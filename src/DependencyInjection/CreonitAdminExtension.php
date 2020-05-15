@@ -28,7 +28,5 @@ class CreonitAdminExtension extends Extension
         if(isset($config['modules']) and is_array($config['modules'])){
             $manager->addMethodCall('setModulesConfig', [$config['modules']]);
         }
-        
-        
     }
 }

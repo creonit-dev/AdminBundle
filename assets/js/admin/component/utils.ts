@@ -54,4 +54,14 @@ module Creonit.Admin.Component.Utils{
     export function generateId(){
         return ++increment;
     }
+
+    export function functionArguments(func) {
+        return (func + '')
+            .replace(/[/][/].*$/mg,'')
+            .replace(/\s+/g, '')
+            .replace(/[/][*][^/*]*[*][/]/g, '')
+            .split('){', 1)[0].replace(/^[^(]*[(]/, '')
+            .replace(/=[^,]+/g, '')
+            .split(',').filter(Boolean);
+    }
 }

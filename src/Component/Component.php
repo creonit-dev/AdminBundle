@@ -2,6 +2,9 @@
 
 namespace Creonit\AdminBundle\Component;
 
+use Creonit\AdminBundle\Component\Event\AfterComponentHandleEvent;
+use Creonit\AdminBundle\Component\Event\BeforeComponentHandleEvent;
+use Creonit\AdminBundle\Component\Event\BuildComponentSchemaEvent;
 use Creonit\AdminBundle\Component\Request\ComponentRequest;
 use Creonit\AdminBundle\Component\Response\ComponentResponse;
 use Creonit\AdminBundle\Component\Scope\Scope;
@@ -9,6 +12,7 @@ use Creonit\AdminBundle\Exception\ConfigurationException;
 use Creonit\AdminBundle\Exception\HandleException;
 use Creonit\AdminBundle\Module;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 abstract class Component extends Scope
 {
@@ -29,26 +33,33 @@ abstract class Component extends Scope
     /** @var callable[] */
     protected $handlers = [];
 
-    public function getName(){
-        if(preg_match('/\\\\(\w+)$/', get_class($this), $keyMatch)){
+    public function getName()
+    {
+        if (preg_match('/\\\\(\w+)$/', get_class($this), $keyMatch)) {
             return $keyMatch[1];
 
-        }else{
+        } else {
             throw new ConfigurationException(sprintf('Invalid module name %s', get_class($this)));
         }
     }
 
 
-    public function initialize(){
-        if(true === $this->initialized){
+    public function initialize()
+    {
+        if (true === $this->initialized) {
             return;
         }
 
-        if(null !== $schema = $this->parseSchemaAnnotations()){
+        $eventDispatcher = $this->container->get('event_dispatcher');
+
+        if (null !== $schema = $this->parseSchemaAnnotations()) {
             $this->applySchemaAnnotations($schema['__']);
         }
         $this->prepareSchema();
         $this->schema();
+
+        $eventDispatcher->dispatch(new BuildComponentSchemaEvent($this->module, $this));
+
         $this->prepareTemplate();
         $this->initialized = true;
     }
@@ -57,60 +68,61 @@ abstract class Component extends Scope
      * @param ComponentRequest $request
      * @return ComponentResponse
      */
-    public function handleRequest(ComponentRequest $request){
+    public function handleRequest(ComponentRequest $request)
+    {
         $response = new ComponentResponse();
 
-        try{
-            if($request->getType() == ComponentRequest::TYPE_LOAD_SCHEMA) {
+        try {
+            if ($request->getType() == ComponentRequest::TYPE_LOAD_SCHEMA) {
                 $response->setSchema($this->dump());
-
-                /*
-                foreach ($this->patterns as $pattern) {
-                    $pattern->getData($request, $response);
-                }
-
-                */
-
                 $this->loadData($request, $response);
 
-
-            }else if($request->getType() == ComponentRequest::TYPE_LOAD_DATA){
-
+            } else if ($request->getType() == ComponentRequest::TYPE_LOAD_DATA) {
                 $this->loadData($request, $response);
 
-                /*
-                foreach ($this->patterns as $pattern) {
-                    $pattern->getData($request, $response);
-                }
-                */
-
-            }else{
+            } else {
                 $this->handle($request->getType(), $request, $response);
             }
 
-        } catch (HandleException $e){
-            
+        } catch (HandleException $e) {
+
         }
 
         return $response;
     }
-    
-    public function handle($handler, ComponentRequest $request, ComponentResponse $response){
-        if(!array_key_exists($handler, $this->handlers)){
-            $response->flushError(sprintf('Обработчик %s не найден', $handler));
+
+    public function handle($handlerName, ComponentRequest $request, ComponentResponse $response)
+    {
+        $eventDispatcher = $this->container->get('event_dispatcher');
+
+        $handler = array_key_exists($handlerName, $this->handlers) ? $this->handlers[$handlerName] : null;
+
+        $beforeEvent = new BeforeComponentHandleEvent($this->module, $this, $request, $response, $handlerName, $handler);
+        $eventDispatcher->dispatch($beforeEvent);
+
+        $handler = $beforeEvent->getHandler();
+
+        if (!$handler or !is_callable($handler)) {
+            $response->flushError(sprintf('Обработчик %s не найден', $handlerName));
         }
 
-        $handler = $this->handlers[$handler];
-        $handler($request, $response);
+        try {
+            $handler($request, $response);
+
+        } finally {
+            $eventDispatcher->dispatch(
+                new AfterComponentHandleEvent($this->module, $this, $request, $response, $handlerName, $handler)
+            );
+        }
     }
 
     /**
      * @param $handler
      * @param callable $callable
      * @return Component
-     * @deprecated Используйте addHandler вместо этого метода
      */
-    public function setHandler($handler, callable $callable){
+    public function setHandler($handler, callable $callable)
+    {
         return $this->addHandler($handler, $callable);
     }
 
@@ -119,31 +131,41 @@ abstract class Component extends Scope
      * @param callable $callable
      * @return $this
      */
-    public function addHandler($handler, callable $callable){
+    public function addHandler($handler, callable $callable)
+    {
         $this->handlers[$handler] = $callable;
         return $this;
     }
 
-    public function removeHandler($handler){
-        if($this->hasHandler($handler)){
+    public function removeHandler($handler)
+    {
+        if ($this->hasHandler($handler)) {
             unset($this->handlers[$handler]);
         }
         return $this;
     }
 
-    public function hasHandler($handler){
+    public function hasHandler($handler)
+    {
         return isset($this->handlers[$handler]);
     }
 
     /**
      * @param bool $value
      */
-    public function setReloadSchema($value){
+    public function setReloadSchema($value)
+    {
         $this->reloadSchema = $value;
     }
 
-    public function parseSchemaAnnotations(){
-        if(!$docComment = (new \ReflectionClass($this))->getMethod('schema')->getDocComment()){
+    public function parseSchemaAnnotations()
+    {
+        return $this->parseClassSchemaAnnotations($this);
+    }
+
+    public function parseClassSchemaAnnotations($class)
+    {
+        if (!$docComment = (new \ReflectionClass($class))->getMethod('schema')->getDocComment()) {
             return null;
         }
 
@@ -156,11 +178,11 @@ abstract class Component extends Scope
         $scopeName = '\\';
         $parameter = null;
 
-        foreach($lines as $line) {
+        foreach ($lines as $line) {
             if (!$line = trim($line)) continue;
 
             if (preg_match('#^((?:\\\\\w*)+) *$#', $line, $match)) {
-                if($parameter && $parameter['key'] != '#'){
+                if ($parameter && $parameter['key'] != '#') {
                     $scope[] = $parameter;
                     $parameter = null;
                 }
@@ -170,29 +192,29 @@ abstract class Component extends Scope
                 $scopeName = $match[1] ?: 'root';
 
             } else if (preg_match('#^(\#?)\@(\w+)\s*(.*)$#', $line, $match)) {
-                if($parameter && $parameter['key'] != '#'){
+                if ($parameter && $parameter['key'] != '#') {
                     $scope[] = $parameter;
                 }
 
                 $parameter = ['key' => $match[1] ?: $match[2], 'value' => $match[3]];
 
             } else {
-                if($parameter){
+                if ($parameter) {
                     $parameter['value'] .= "\n" . $line;
                 }
             }
         }
 
-        if($parameter && $parameter['key'] != '#'){
+        if ($parameter && $parameter['key'] != '#') {
             $scope[] = $parameter;
         }
         $schema[$scopeName] = $scope;
 
-        $accessor = $this->container->get('property_accessor');
+        $accessor = PropertyAccess::createPropertyAccessor();
 
         $result = [];
 
-        foreach($schema as $path => $parameters){
+        foreach ($schema as $path => $parameters) {
             $path = preg_replace('/^\\\\$/', '[\]', $path);
             $path = preg_replace('/^\\\\/', '[\]\\', $path);
             $path = preg_replace('/\\\\([\w_-]+)/', '[scopes][$1]', $path);
@@ -203,18 +225,19 @@ abstract class Component extends Scope
         return $result;
     }
 
-    public function applySchemaAnnotation($annotation){
-        switch($annotation['key']){
+    public function applySchemaAnnotation($annotation)
+    {
+        switch ($annotation['key']) {
             case 'reloadSchema':
                 $this->setReloadSchema($annotation['key']);
                 break;
             case 'action':
-                if(preg_match('/^([\w_-]+)\s*?(\(.*?\)\s*\{.*\}\s*)$/usi', $annotation['value'], $match)){
+                if (preg_match('/^([\w_-]+)\s*?(\(.*?\)\s*\{.*\}\s*)$/usi', $annotation['value'], $match)) {
                     $this->setAction($match[1], 'function' . $match[2]);
                 }
                 break;
             case 'event':
-                if(preg_match('/^([\w_-]+)\s*?(\(.*?\)\s*\{.*\}\s*)$/usi', $annotation['value'], $match)){
+                if (preg_match('/^([\w_-]+)\s*?(\(.*?\)\s*\{.*\}\s*)$/usi', $annotation['value'], $match)) {
                     $this->setEvent($match[1], 'function' . $match[2]);
                 }
                 break;
@@ -226,10 +249,11 @@ abstract class Component extends Scope
         }
     }
 
-
     abstract public function schema();
 
-    protected function prepareSchema(){}
+    protected function prepareSchema()
+    {
+    }
 
 
     public function setTitle($title)
@@ -243,7 +267,6 @@ abstract class Component extends Scope
         return $this->title;
     }
 
-
     /**
      * @param Module $module
      * @return Component
@@ -253,8 +276,6 @@ abstract class Component extends Scope
         $this->module = $module;
         return $this;
     }
-
-
 
     public function setEvent($name, $script)
     {
@@ -272,16 +293,13 @@ abstract class Component extends Scope
     {
     }
 
-
     public function dump()
     {
-        return  array_merge(parent::dump(), [
+        return array_merge(parent::dump(), [
             'title' => $this->title,
             'actions' => $this->actions,
             'events' => $this->events,
-            'reloadSchema' => (bool) $this->reloadSchema,
+            'reloadSchema' => (bool)$this->reloadSchema,
         ]);
     }
-
-
 }

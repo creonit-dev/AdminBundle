@@ -8,15 +8,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 class LayoutController extends Controller
 {
-
     public function sidebarAction(){
-        return $this->render('CreonitAdminBundle:Layout:sidebar.html.twig', ['admin' => $this->get('creonit_admin')]);
+        return $this->render('@CreonitAdmin/Layout/sidebar.html.twig', ['admin' => $this->get('creonit_admin')]);
     }
 
     public function headerAction(){
         $admin = $this->get('creonit_admin');
         $module = $admin->getActiveModule();
-        return $this->render('CreonitAdminBundle:Layout:header.html.twig', ['module' => $module, 'admin' => $admin]);
+        return $this->render('@CreonitAdmin/Layout/header.html.twig', ['module' => $module, 'admin' => $admin]);
     }
-
 }

@@ -8,7 +8,6 @@ use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends Controller
 {
-
     /**
      * @Route("/", name="creonit_admin_index")
      */
@@ -43,7 +42,7 @@ class DefaultController extends Controller
         $admin = $this->get('creonit_admin');
 
         $module = ucfirst($module);
-        
+
         if(!$admin->hasModule($module)){
             throw $this->createNotFoundException();
         }
@@ -56,9 +55,6 @@ class DefaultController extends Controller
 
         $admin->setActiveModule($module);
 
-        return $this->render('CreonitAdminBundle:Default:module.html.twig', ['admin' => $admin, 'module' => $module]);
+        return $this->render('@CreonitAdmin/Default/module.html.twig', ['admin' => $admin, 'module' => $module]);
     }
-
-
-
 }
