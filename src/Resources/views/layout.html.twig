@@ -11,17 +11,17 @@
         <link rel="stylesheet" href="{{ asset('bundles/creonitadmin/css/vendor.css') }}">
         <link rel="stylesheet" href="{{ asset('bundles/creonitadmin/css/bootstrap.css') }}">
         <link rel="stylesheet" href="{{ asset('bundles/creonitadmin/css/admin.css') }}">
-        {{ render(controller('CreonitAdminBundle:Plugin:stylesheets')) }}
+        {{ render(controller('Creonit\\AdminBundle\\Controller\\PluginController:stylesheetsAction')) }}
     {% endblock %}
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{{ asset('bundles/creonitadmin/css/font-awesome.min.css') }}">
 
-    {{ render(controller('CreonitAdminBundle:Plugin:injection', {block: 'head'})) }}
+    {{ render(controller('Creonit\\AdminBundle\\Controller\\PluginController:injectionAction', {block: 'head'})) }}
 
     <script>
 	    var baseUrl = '{{ path('creonit_admin_index') }}';
-        {{ render(controller('CreonitAdminBundle:Plugin:injection', {block: 'head_script'})) }}
+        {{ render(controller('Creonit\\AdminBundle\\Controller\\PluginController:injectionAction', {block: 'head_script'})) }}
     </script>
 
 </head>
@@ -29,7 +29,7 @@
 
     <div class="page-wrapper">
         <div class="page-sidebar">
-            {{ render(controller('CreonitAdminBundle:Layout:sidebar')) }}
+            {{ render(controller('Creonit\\AdminBundle\\Controller\\LayoutController:sidebarAction')) }}
         </div>
         <div class="page-content">
             <div class="page-content-module">
@@ -45,7 +45,7 @@
     <script src="{{ asset('bundles/creonitadmin/js/tinymce/jquery.tinymce.js') }}"></script>
     <script src="{{ asset('bundles/creonitadmin/js/admin.js') }}"></script>
     <script src="{{ asset('bundles/creonitadmin/js/common.js') }}"></script>
-    {{ render(controller('CreonitAdminBundle:Plugin:javascripts')) }}
+    {{ render(controller('Creonit\\AdminBundle\\Controller\\PluginController:javascriptsAction')) }}
 {% endblock %}
 
 </body>

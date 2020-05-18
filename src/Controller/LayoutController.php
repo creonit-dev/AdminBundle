@@ -2,18 +2,20 @@
 
 namespace Creonit\AdminBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Creonit\AdminBundle\Manager;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
-class LayoutController extends Controller
+class LayoutController extends AbstractController
 {
-    public function sidebarAction(){
-        return $this->render('@CreonitAdmin/Layout/sidebar.html.twig', ['admin' => $this->get('creonit_admin')]);
+    public function sidebarAction(Manager $admin)
+    {
+        return $this->render('@CreonitAdmin/Layout/sidebar.html.twig', ['admin' => $admin]);
     }
 
-    public function headerAction(){
-        $admin = $this->get('creonit_admin');
+    public function headerAction(Manager $admin)
+    {
         $module = $admin->getActiveModule();
         return $this->render('@CreonitAdmin/Layout/header.html.twig', ['module' => $module, 'admin' => $admin]);
     }

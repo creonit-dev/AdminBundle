@@ -7,12 +7,12 @@
             {% else %}
                 <i class="fa fa-home"></i>
             {% endif %}
-            
+
             <span>{{ admin.title | raw }}</span>
         </a>
     </li>
 
-    {{ render(controller('CreonitAdminBundle:Plugin:injection', {block: 'sidebar_before_menu'})) }}
+    {{ render(controller('Creonit\\AdminBundle\\Controller\\PluginController:injectionAction', {block: 'sidebar_before_menu'})) }}
 
     {% for module in admin.getModules %}
         {% if module.isVisible and module.checkPermission(app.user) %}
@@ -26,6 +26,6 @@
 
     {% endfor %}
 
-    {{ render(controller('CreonitAdminBundle:Plugin:injection', {block: 'sidebar_after_menu'})) }}
+    {{ render(controller('Creonit\\AdminBundle\\Controller\\PluginController:injectionAction', {block: 'sidebar_after_menu'})) }}
 
 </ul>
