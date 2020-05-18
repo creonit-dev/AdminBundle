@@ -19,4 +19,4 @@ class ModulePass implements CompilerPassInterface
             $container->getDefinition('creonit_admin')->addMethodCall('addModule', [new Reference((string) $moduleId)]);
         }
     }
-} 
+}

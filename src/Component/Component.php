@@ -73,6 +73,8 @@ abstract class Component extends Scope
         $response = new ComponentResponse();
 
         try {
+            $this->modifySchema($request, $response);
+
             if ($request->getType() == ComponentRequest::TYPE_LOAD_SCHEMA) {
                 $response->setSchema($this->dump());
                 $this->loadData($request, $response);
@@ -250,6 +252,10 @@ abstract class Component extends Scope
     }
 
     abstract public function schema();
+
+    protected function modifySchema(ComponentRequest $request, ComponentResponse $response)
+    {
+    }
 
     protected function prepareSchema()
     {

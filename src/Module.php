@@ -12,7 +12,7 @@ abstract class Module
 
     /** @var Component[] */
     protected $components = [];
-    
+
     /** @var  Manager */
     protected $manager;
 
@@ -29,62 +29,74 @@ abstract class Module
     /** @var  ContainerInterface */
     protected $container;
 
-
-    public function __construct(){
+    protected function configure()
+    {
     }
 
-    protected function configure(){
-    }
-
-    public function join(Manager $manager){
+    public function join(Manager $manager)
+    {
         $this->configure();
     }
 
     abstract public function initialize();
 
-    public function getTitle(){
+    public function getTitle()
+    {
         return $this->title;
     }
 
-    public function getIcon(){
+    public function getIcon()
+    {
         return $this->icon;
     }
 
-    public function getName(){
-        if($this->name){
+    public function getName()
+    {
+        if ($this->name) {
             return $this->name;
 
-        }else if(preg_match('/\\\\(\w+)Module$/', get_class($this), $keyMatch)){
+        } else if (preg_match('/\\\\(\w+)Module$/', get_class($this), $keyMatch)) {
             return $keyMatch[1];
 
-        }else{
+        } else {
             throw new ConfigurationException(sprintf('Invalid module name %s', get_class($this)));
         }
     }
-    
-    public function setName($name){
+
+    public function setName($name)
+    {
         $this->name = $name;
         return $this;
     }
 
-    public function getUri(){
+    public function getUri()
+    {
         return lcfirst($this->getName());
     }
 
-    public function addComponent(Component $component){
+    public function addComponent(Component $component)
+    {
         $this->components[$component->getName()] = $component->setModule($this)->setContainer($this->container);
         return $this;
     }
-    
-    public function getComponent($name){
+
+    public function addComponentAsService(string $componentClassName)
+    {
+        return $this->addComponent($this->container->get($componentClassName));
+    }
+
+    public function getComponent($name)
+    {
         return $this->components[$name];
     }
-    
-    public function hasComponent($name){
+
+    public function hasComponent($name)
+    {
         return isset($this->components[$name]);
     }
 
-    public function getTemplate(){
+    public function getTemplate()
+    {
         return $this->template;
     }
 
@@ -118,7 +130,8 @@ abstract class Module
         return $this;
     }
 
-    public function isActive(){
+    public function isActive()
+    {
         return true === $this->active;
     }
 
@@ -166,7 +179,7 @@ abstract class Module
      */
     public function setTemplate($template)
     {
-        if(preg_match('/^((?:\w+\.)?\w+)$/i', $template, $match)){
+        if (preg_match('/^((?:\w+\.)?\w+)$/i', $template, $match)) {
             $template = "<div js-component=\"{$match[1]}\"></div>";
         }
 
@@ -179,14 +192,15 @@ abstract class Module
         $this->permission = $permission;
         return $this;
     }
-    
+
     public function getPermission()
     {
         return $this->permission;
     }
 
-    public function checkPermission($user){
-        if($this->permission){
+    public function checkPermission($user)
+    {
+        if ($this->permission) {
             return $this->container->get('security.authorization_checker')->isGranted($this->permission);
         }
         return true;
@@ -209,6 +223,4 @@ abstract class Module
     {
         return $this->sort;
     }
-
-
 }
