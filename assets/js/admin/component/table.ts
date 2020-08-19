@@ -146,6 +146,8 @@ module Creonit.Admin.Component{
                 this.loadData();
             });
 
+            const $pagination = $table.find('.list-pagination');
+
             $table.tableDnD({
                 onDragClass: 'move',
                 onDrop: (_, row) => {
@@ -171,6 +173,7 @@ module Creonit.Admin.Component{
                         $table.removeClass('sorting');
                     }
 
+                    $pagination.removeClass('nodrop');
                 },
                 onDragStart: (_, row) => {
                     var item = $(row).closest('tr'),
@@ -182,6 +185,7 @@ module Creonit.Admin.Component{
                     item.addClass('sorting');
 
 
+                    $pagination.addClass('nodrop');
                     $('> thead > tr', this.node.find('table')).addClass('nodrop');
                     $('> tbody > tr:not([data-mask="'+mask+'"])', this.node.find('table')).addClass('nodrop');
                 },
