@@ -111,10 +111,21 @@ abstract class TableComponent extends ListComponent
                 $scope = $this->getScope($query->get('scope'));
 
                 if($entity = $scope->createQuery()->findPk($query->get('key'))){
-                    if($request->data->get('prev') and $prev = $scope->createQuery()->findPk($request->data->get('prev'))){
-                        $entity->moveToRank($entity->getRank() > $prev->getRank() ? $prev->getRank()+1 : $prev->getRank());
-                        $entity->moveToRank($entity->getRank() > $prev->getRank() ? $prev->getRank()+1 : $prev->getRank());
-                    }else{
+                    if ($request->data->get('prev') and $prev = $scope->createQuery()->findPk($request->data->get('prev'))) {
+                        $rank = !$request->data->getInt('next') ? $prev->getRank() + 1 : $prev->getRank();
+
+                        if ($rank > $scope->createQuery()->getMaxRankArray()) {
+                            $rank = $prev->getRank();
+                        }
+
+                        $entity->moveToRank($entity->getRank() > $prev->getRank() ? $prev->getRank() + 1 : $rank);
+
+                    } else if ($request->data->get('next') and $next = $scope->createQuery()->findPk($request->data->get('next'))) {
+                        $rank = $next->getRank() - 1 > 0 ? $next->getRank() - 1 : $next->getRank();
+
+                        $entity->moveToRank($rank);
+
+                    } else {
                         $entity->moveToTop();
                     }
 
