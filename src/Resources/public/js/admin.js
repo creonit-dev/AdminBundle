@@ -1128,6 +1128,7 @@ var Creonit;
                         _this.pagination[$row.data('mask')] = $button.data('page');
                         _this.loadData();
                     });
+                    var $pagination = $table.find('.list-pagination');
                     $table.tableDnD({
                         onDragClass: 'move',
                         onDrop: function (_, row) {
@@ -1141,12 +1142,14 @@ var Creonit;
                                 $('> tbody > tr', _this.node.find('table')).removeClass('nodrop');
                                 $table.removeClass('sorting');
                             }
+                            $pagination.removeClass('nodrop');
                         },
                         onDragStart: function (_, row) {
                             var item = $(row).closest('tr'), mask = item.data('mask');
                             sortData = $.tableDnD.serialize();
                             $table.addClass('sorting');
                             item.addClass('sorting');
+                            $pagination.addClass('nodrop');
                             $('> thead > tr', _this.node.find('table')).addClass('nodrop');
                             $('> tbody > tr:not([data-mask="' + mask + '"])', _this.node.find('table')).addClass('nodrop');
                         },
