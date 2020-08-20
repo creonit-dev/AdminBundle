@@ -119,12 +119,10 @@ abstract class TableComponent extends ListComponent
                         }
 
                         $entity->moveToRank($entity->getRank() > $prev->getRank() ? $prev->getRank() + 1 : $rank);
-                        $entity->moveToRank($entity->getRank() > $prev->getRank() ? $prev->getRank() + 1 : $rank);
 
                     } else if ($request->data->get('next') and $next = $scope->createQuery()->findPk($request->data->get('next'))) {
                         $rank = $next->getRank() - 1 > 0 ? $next->getRank() - 1 : $next->getRank();
 
-                        $entity->moveToRank($rank);
                         $entity->moveToRank($rank);
 
                     } else {
